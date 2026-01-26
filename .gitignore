@@ -16,3 +16,6 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Datos crudos (encuestas / sensibles)
+data/raw/
