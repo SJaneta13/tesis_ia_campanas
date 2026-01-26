@@ -1,0 +1,2 @@
+﻿run_id,model,target,n_train,n_test,test_accuracy,test_f1_macro,test_f1_weighted,test_mae_ordinal,test_kappa_qw
+20260118_183230,baseline_majority,confianza_3,106,27,0.37037037037037035,0.1801801801801802,0.20020020020020018,0.9259259259259259,0.0

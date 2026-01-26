@@ -1,0 +1,4 @@
+Mejor modelo global (criterio: f1_weighted, luego kappa_qw, luego accuracy)
+run: run_20260122_222135
+
+{'run_id': '20260122_222135', 'model': 'ordinal_logit', 'variant': 'ordinal_logit_5niveles', 'n_classes': 5, 'accuracy': 0.4871794871794871, 'f1_weighted': 0.4559735136658213, 'f1_macro': 0.2898351648351648, 'mae_ordinal': 0.717948717948718, 'kappa_qw': 0.2334152334152334, 'notes': 'single split (seed=42)', 'family': 'statsmodels'}

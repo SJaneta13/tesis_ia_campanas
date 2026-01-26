@@ -1,0 +1,40 @@
+[
+  {
+    "model": "random_forest",
+    "n_train": 106,
+    "n_test": 27,
+    "test_accuracy": 0.37037037037037035,
+    "test_f1_macro": 0.23986663491307453,
+    "test_f1_weighted": 0.35955650816331935,
+    "test_mae_ordinal": 0.9629629629629629,
+    "test_kappa_qw": -0.03539823008849563,
+    "cv_test_accuracy_mean": 0.3385281385281385,
+    "cv_test_f1_macro_mean": 0.2059798515897587,
+    "cv_test_f1_weighted_mean": 0.30664579813850046,
+    "cv_test_accuracy_std": 0.1249395948574715,
+    "cv_test_f1_macro_std": 0.07856543529394677,
+    "cv_test_f1_weighted_std": 0.11044601916385173,
+    "report_path": "outputs\\tables\\report_random_forest_20260118_163330.txt",
+    "cm_path": "outputs\\figures\\cm_random_forest_20260118_163330.png",
+    "model_path": "outputs\\models\\random_forest_20260118_163330.joblib"
+  },
+  {
+    "model": "svm_rbf",
+    "n_train": 106,
+    "n_test": 27,
+    "test_accuracy": 0.3333333333333333,
+    "test_f1_macro": 0.22738095238095238,
+    "test_f1_weighted": 0.33487654320987653,
+    "test_mae_ordinal": 1.037037037037037,
+    "test_kappa_qw": -0.02352941176470602,
+    "cv_test_accuracy_mean": 0.4329004329004329,
+    "cv_test_f1_macro_mean": 0.31297213897213905,
+    "cv_test_f1_weighted_mean": 0.41031973798207566,
+    "cv_test_accuracy_std": 0.17034508269763873,
+    "cv_test_f1_macro_std": 0.09233062250329674,
+    "cv_test_f1_weighted_std": 0.1623445271400437,
+    "report_path": "outputs\\tables\\report_svm_rbf_20260118_163330.txt",
+    "cm_path": "outputs\\figures\\cm_svm_rbf_20260118_163330.png",
+    "model_path": "outputs\\models\\svm_rbf_20260118_163330.joblib"
+  }
+]

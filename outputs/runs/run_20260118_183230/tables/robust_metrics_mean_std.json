@@ -1,0 +1,92 @@
+[
+  {
+    "model": "baseline_majority",
+    "metric": "accuracy",
+    "mean": 0.37037037037037035,
+    "std": 0.0
+  },
+  {
+    "model": "baseline_majority",
+    "metric": "f1_macro",
+    "mean": 0.18018018018018017,
+    "std": 2.925694557147251e-17
+  },
+  {
+    "model": "baseline_majority",
+    "metric": "f1_weighted",
+    "mean": 0.20020020020020018,
+    "std": 0.0
+  },
+  {
+    "model": "baseline_majority",
+    "metric": "mae_ordinal",
+    "mean": 0.9259259259259259,
+    "std": 0.0
+  },
+  {
+    "model": "baseline_majority",
+    "metric": "kappa_qw",
+    "mean": 0.0,
+    "std": 0.0
+  },
+  {
+    "model": "random_forest",
+    "metric": "accuracy",
+    "mean": 0.4222222222222222,
+    "std": 0.08226336419238361
+  },
+  {
+    "model": "random_forest",
+    "metric": "f1_macro",
+    "mean": 0.4109609681584375,
+    "std": 0.08008655888424375
+  },
+  {
+    "model": "random_forest",
+    "metric": "f1_weighted",
+    "mean": 0.4134317987320485,
+    "std": 0.08079272824672715
+  },
+  {
+    "model": "random_forest",
+    "metric": "mae_ordinal",
+    "mean": 0.7407407407407407,
+    "std": 0.13636248169366985
+  },
+  {
+    "model": "random_forest",
+    "metric": "kappa_qw",
+    "mean": 0.20119239971430308,
+    "std": 0.19923305934522378
+  },
+  {
+    "model": "svm_rbf",
+    "metric": "accuracy",
+    "mean": 0.4111111111111111,
+    "std": 0.044341444434735734
+  },
+  {
+    "model": "svm_rbf",
+    "metric": "f1_macro",
+    "mean": 0.39612425284790337,
+    "std": 0.0412773885005996
+  },
+  {
+    "model": "svm_rbf",
+    "metric": "f1_weighted",
+    "mean": 0.3989614376241109,
+    "std": 0.04358585643805327
+  },
+  {
+    "model": "svm_rbf",
+    "metric": "mae_ordinal",
+    "mean": 0.7518518518518518,
+    "std": 0.07417688338666568
+  },
+  {
+    "model": "svm_rbf",
+    "metric": "kappa_qw",
+    "mean": 0.19416124547019611,
+    "std": 0.12695333350653695
+  }
+]
