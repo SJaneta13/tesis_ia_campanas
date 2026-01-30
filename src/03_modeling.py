@@ -31,7 +31,7 @@ from sklearn.svm import SVC
 # =========================
 # CONFIG
 # =========================
-INPUT_PATH = "data/processed/model_ready.csv"
+INPUT_PATH = "data/processed/encuestas/model_ready.csv"
 
 TARGET_5 = "confianza_idx_round"   # 1..5
 USE_TARGET_3 = True                # True => 3 clases (1=baja,2=media,3=alta); False => 5 clases

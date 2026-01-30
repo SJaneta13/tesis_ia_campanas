@@ -3,9 +3,17 @@ import re
 from pathlib import Path
 
 RAW_PATH = Path("data/raw/respuestas_forms.xlsx")
-PROCESSED_PATH = Path("data/processed/respuestas_limpias.csv")
+PROCESSED_DIR = Path("data/processed/encuestas")
+PROCESSED_PATH = PROCESSED_DIR / "respuestas_limpias.csv"
 
+# Crear carpeta de salida si no existe
+PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
+
+
+# Leer archivo raw
 df = pd.read_excel(RAW_PATH)
+
+# Función para arreglar texto corrupto
 
 def fix_text(x):
     if isinstance(x, str):

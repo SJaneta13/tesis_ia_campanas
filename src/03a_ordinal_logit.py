@@ -14,7 +14,11 @@ from statsmodels.miscmodels.ordinal_model import OrderedModel
 # OUTPUTS: usar el último run de sklearn
 # =========================
 RUNS_DIR = Path("outputs") / "runs"
-last_run = sorted(RUNS_DIR.glob("run_*"))[-1].name
+runs = sorted(RUNS_DIR.glob("run_*"))
+if not runs:
+    raise FileNotFoundError("No hay runs en outputs/runs. Primero ejecuta src/03_modeling.py")
+last_run = runs[-1].name
+
 
 OUT_DIR = RUNS_DIR / last_run / "ordinal"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -29,7 +33,8 @@ print("Guardando figuras ordinal en:", FIG_DIR)
 # =========================
 # CONFIG
 # =========================
-INPUT_PATH = "data/processed/model_ready.csv"
+INPUT_PATH = "data/processed/encuestas/model_ready.csv"
+
 TARGET_5 = "confianza_idx_round"   # 1..5
 TEST_SIZE = 0.20
 SEED = 42

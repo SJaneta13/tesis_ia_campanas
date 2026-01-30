@@ -22,3 +22,15 @@ Thumbs.db
 
 # Datos crudos (encuestas / sensibles)
 data/raw/
+
+# Outputs crudos de scraping (no versionar)
+data/external/
+
+# Cookies / credenciales 
+cookies_*.json
+.env
+.env.*
+
+# Outputs generados 
+outputs/
+artifacts/

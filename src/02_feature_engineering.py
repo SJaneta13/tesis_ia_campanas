@@ -1,9 +1,19 @@
 import pandas as pd
 import numpy as np
+from pathlib import Path
 
-INPUT_PATH = "data/processed/respuestas_limpias.csv"
-OUTPUT_PATH = "data/processed/model_ready.csv"
+# RUTAS (encuestas)
+# ==========
+INPUT_PATH = Path("data/processed/encuestas/respuestas_limpias.csv")
+OUTPUT_DIR = Path("data/processed/encuestas")
+OUTPUT_PATH = OUTPUT_DIR / "model_ready.csv"
 
+
+# Crear carpeta de salida si no existe
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+# ============================
+# Leer datos procesados
 df = pd.read_csv(INPUT_PATH, encoding="utf-8-sig")
 df.columns = df.columns.str.strip()
 
