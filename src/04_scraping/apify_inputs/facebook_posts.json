@@ -1,0 +1,10 @@
+{
+  "startUrls": [
+    { "url": "https://www.facebook.com/ladefensaec" },
+    { "url": "https://www.facebook.com/ecuadoravisos" }
+  ],
+  "resultsLimit": 100,
+  "onlyPostsNewerThan": "2025-01-01",
+  "onlyPostsOlderThan": "2025-04-30",
+  "captionText": false
+}

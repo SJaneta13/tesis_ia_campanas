@@ -222,13 +222,15 @@ preprocess = ColumnTransformer(
 # =========================
 models = {
     "baseline_majority": {
-        "estimator": DummyClassifier(strategy="most_frequent"),
+        "estimator": DummyClassifier(strategy="most_frequent", random_state=0),
         "param_grid": {}
     },
     "random_forest": {
         "estimator": RandomForestClassifier(
             class_weight="balanced",
-            random_state=0
+            random_state=0,
+            min_samples_leaf=1,
+            max_features="sqrt"
         ),
         "param_grid": {
             "clf__n_estimators": [300, 600],
@@ -240,6 +242,8 @@ models = {
     "svm_rbf": {
         "estimator": SVC(
             kernel="rbf",
+            C=1.0,
+            gamma="scale",
             class_weight="balanced",
             random_state=0
         ),
@@ -254,7 +258,7 @@ models = {
 # =========================
 # EVALUATION HELPERS
 # =========================
-def evaluate_predictions(y_true, y_pred, labels, use_target_3):
+def evaluate_predictions(y_true, y_pred, use_target_3):
     acc = accuracy_score(y_true, y_pred)
     f1m = f1_score(y_true, y_pred, average="macro", zero_division=0)
     f1w = f1_score(y_true, y_pred, average="weighted", zero_division=0)
@@ -314,7 +318,7 @@ for model_name, cfg in models.items():
         pipe = Pipeline(steps=[
             ("prep", preprocess),
             ("clf", cfg["estimator"])
-        ])
+        ], memory=None)
 
         # Baseline no requiere grid
         if model_name == "baseline_majority":
@@ -339,7 +343,7 @@ for model_name, cfg in models.items():
 
         # Test
         y_pred = best_model.predict(X_test)
-        metrics = evaluate_predictions(y_test, y_pred, labels=labels, use_target_3=USE_TARGET_3)
+        metrics = evaluate_predictions(y_test, y_pred, use_target_3=USE_TARGET_3)
 
         # Guardar por seed
         rows_seed_level.append({
