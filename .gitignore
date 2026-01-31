@@ -2,6 +2,7 @@
 .venv/
 .venv_scraping/
 venv/
+venv_scraping/
 
 # Caché de Python
 __pycache__/
