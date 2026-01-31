@@ -38,4 +38,7 @@ artifacts/
 
 # Datos procesados (generados por scripts)
 data/processed/
-data/processed/**
+
+
+# Modelos entrenados
+backend/
