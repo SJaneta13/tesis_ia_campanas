@@ -34,3 +34,8 @@ cookies_*.json
 # Outputs generados 
 outputs/
 artifacts/
+
+
+# Datos procesados (generados por scripts)
+data/processed/
+data/processed/**
