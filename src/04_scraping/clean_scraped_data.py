@@ -76,17 +76,37 @@ def _ensure_required_cols(df: pd.DataFrame) -> pd.DataFrame:
 	return df
 
 
+def _extract_nested_fields(df: pd.DataFrame) -> pd.DataFrame:
+	"""Extrae campos anidados como 'author.unique_id' si existen."""
+	if "author" in df.columns and (df["user"].isna() | (df["user"] == "")).any():
+		authors = df["author"].map(_safe_parse)
+		df["user"] = df["user"].mask(
+			df["user"] == "",
+			authors.map(lambda x: x.get("username") or x.get("uniqueId") or x.get("unique_id") or "")
+		)
+	if "authorMeta" in df.columns and (df["user"].isna() | (df["user"] == "")).any():
+		meta = df["authorMeta"].map(_safe_parse)
+		df["user"] = df["user"].mask(
+			df["user"] == "",
+			meta.map(lambda x: x.get("name") or x.get("uniqueId") or "")
+		)
+	return df
+
+
 def normalize_df(df: pd.DataFrame, platform: str) -> pd.DataFrame:
 	col_map = {
 		"date": "date",
 		"created_time": "date",
 		"timestamp": "date",
 		"createTime": "date",
+		"create_time": "date",
 		"createdAt": "date",
+		"createTimeISO": "date",
 		"user": "user",
 		"username": "user",
 		"authorUsername": "user",
 		"authorName": "user",
+		"authorMeta.name": "user",
 		"unique_id": "user",
 		"uniqueId": "user",
 		"pageName": "user",
@@ -96,20 +116,26 @@ def normalize_df(df: pd.DataFrame, platform: str) -> pd.DataFrame:
 		"text": "content",
 		"caption": "content",
 		"desc": "content",
+		"title": "content",
 		"likes": "likes",
 		"likesCount": "likes",
 		"reactionsCount": "likes",
 		"diggCount": "likes",
+		"digg_count": "likes",
 		"shares": "shares",
 		"retweets": "shares",
 		"sharesCount": "shares",
 		"shareCount": "shares",
+		"share_count": "shares",
 		"commentsCount": "comments",
 		"commentCount": "comments",
+		"comment_count": "comments",
 		"source_url": "source_url",
 		"permalink_url": "source_url",
 		"url": "source_url",
 		"postUrl": "source_url",
+		"play": "source_url",
+		"webVideoUrl": "source_url",
 	}
 
 	df = df.rename(columns=col_map)
@@ -119,8 +145,13 @@ def normalize_df(df: pd.DataFrame, platform: str) -> pd.DataFrame:
 	df = _fill_numeric_cols(df)
 	df = _update_stats_from_dict(df)
 	df = _ensure_required_cols(df)
+	df = _extract_nested_fields(df)
 
 	df["content"] = df["content"].map(clean_text)
+	
+	# Filtrar si después de limpiar no queda nada de texto
+	df = df[df["content"].str.len() > 0]
+	
 	df = df.drop_duplicates(subset=["content", "date", "user"])
 
 	keep_cols = [
