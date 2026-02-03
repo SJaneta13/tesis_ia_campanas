@@ -2,6 +2,14 @@ import os
 from datetime import datetime
 import snscrape.modules.twitter as sntwitter
 import pandas as pd
+from pathlib import Path
+
+
+# CONFIG
+# =========================
+RUN_ID = os.getenv("RUN_ID") or datetime.now().strftime("%Y%m%d_%H%M")
+OUTDIR = Path("data/external/social") / f"run_{RUN_ID}"
+OUTDIR.mkdir(parents=True, exist_ok=True)
 
 
 QUERY = os.getenv(
@@ -31,9 +39,9 @@ def main():
         )
 
     df = pd.DataFrame(tweets)
-    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-    out_path = f"data/raw/x_campaign_{ts}.csv"
+    out_path = OUTDIR / "x_raw.csv" 
     df.to_csv(out_path, index=False, encoding="utf-8-sig")
+    
     print(f"Guardado: {out_path} | Filas: {len(df)}")
 
 
