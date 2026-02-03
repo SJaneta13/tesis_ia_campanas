@@ -9,10 +9,12 @@ import pandas as pd
 from datetime import datetime
 from pathlib import Path
 
+import matplotlib
+matplotlib.use("Agg")  # Backend no interactivo para evitar errores de tkinter en multithreading
 import matplotlib.pyplot as plt
 
 from sklearn.model_selection import (
-    train_test_split, StratifiedKFold, GridSearchCV, cross_val_score
+    train_test_split, StratifiedKFold, GridSearchCV
 )
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
@@ -20,12 +22,14 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.impute import SimpleImputer
 
 from sklearn.metrics import (
-    accuracy_score, f1_score, classification_report, confusion_matrix
+    accuracy_score, f1_score, classification_report, confusion_matrix, make_scorer
 )
+from sklearn.preprocessing import StandardScaler
 
 from sklearn.dummy import DummyClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
+
 
 
 # =========================
@@ -202,11 +206,13 @@ print("Ejemplo columnas:", X.columns.tolist()[:8])
 # =========================
 # PREPROCESS
 # =========================
-# Nota: Mantiene números (si existieran) y OHE para categóricas.
+# Nota: StandardScaler es crucial para SVM (sensible a escala).
+# RF no se ve afectado por escalado, así que es seguro aplicarlo a ambos.
 preprocess = ColumnTransformer(
     transformers=[
         ("num", Pipeline(steps=[
-            ("imputer", SimpleImputer(strategy="median"))
+            ("imputer", SimpleImputer(strategy="median")),
+            ("scaler", StandardScaler())  # Mejora convergencia SVM
         ]), num_cols),
         ("cat", Pipeline(steps=[
             ("imputer", SimpleImputer(strategy="most_frequent")),
@@ -220,36 +226,42 @@ preprocess = ColumnTransformer(
 # =========================
 # MODELS + GRIDS
 # =========================
+# Para dataset pequeño (~1k encuestas): grids conservadores pero informativos
 models = {
+    # Baseline: estrategia "most_frequent" y "stratified" para comparación realista
     "baseline_majority": {
         "estimator": DummyClassifier(strategy="most_frequent", random_state=0),
         "param_grid": {}
     },
+    "baseline_stratified": {
+        "estimator": DummyClassifier(strategy="stratified", random_state=0),
+        "param_grid": {}
+    },
+    # Random Forest: class_weight en grid para probar balance
     "random_forest": {
         "estimator": RandomForestClassifier(
-            class_weight="balanced",
             random_state=0,
-            min_samples_leaf=1,
-            max_features="sqrt"
+            max_features="sqrt",
+            n_jobs=-1
         ),
         "param_grid": {
-            "clf__n_estimators": [300, 600],
-            "clf__max_depth": [None, 10, 20],
-            "clf__min_samples_split": [2, 5],
-            "clf__min_samples_leaf": [1, 2],
+            "clf__n_estimators": [200, 400],
+            "clf__max_depth": [None, 8, 15],
+            "clf__min_samples_split": [2, 5, 10],
+            "clf__min_samples_leaf": [1, 2, 4],
+            "clf__class_weight": ["balanced", "balanced_subsample"],
         }
     },
+    # SVM-RBF: grid en escala log para C, gamma más fino
     "svm_rbf": {
         "estimator": SVC(
             kernel="rbf",
-            C=1.0,
-            gamma="scale",
             class_weight="balanced",
             random_state=0
         ),
         "param_grid": {
-            "clf__C": [0.5, 1, 3, 10],
-            "clf__gamma": ["scale", 0.1, 0.01]
+            "clf__C": [0.1, 1, 10, 100],
+            "clf__gamma": ["scale", "auto", 0.1, 0.01, 0.001]
         }
     }
 }
@@ -290,6 +302,18 @@ def aggregate_seed_metrics(seed_metrics_list):
 
 
 # =========================
+# MULTI-SCORING PARA GRIDSEARCHCV
+# =========================
+# Usar múltiples métricas evita optimizar solo una y da visión completa
+SCORING_DICT = {
+    "f1_weighted": "f1_weighted",
+    "f1_macro": "f1_macro",
+    "accuracy": "accuracy",
+}
+REFIT_METRIC = "f1_weighted"  # Métrica principal para seleccionar mejor modelo
+
+
+# =========================
 # MAIN LOOP
 # =========================
 rows_run_level = []          # 1 fila por modelo (promedio+std en seeds)
@@ -321,25 +345,30 @@ for model_name, cfg in models.items():
         ], memory=None)
 
         # Baseline no requiere grid
-        if model_name == "baseline_majority":
+        if model_name.startswith("baseline"):
             best_model = pipe.fit(X_train, y_train)
             best_params = {}
+            cv_f1w_mean = 0.0
+            cv_f1w_std = 0.0
         else:
+            # Multi-métrica: evalúa f1_weighted, f1_macro, accuracy simultáneamente
             grid = GridSearchCV(
                 estimator=pipe,
                 param_grid=cfg["param_grid"],
-                scoring="f1_weighted",
+                scoring=SCORING_DICT,
+                refit=REFIT_METRIC,  # Selecciona modelo por f1_weighted
                 cv=cv,
-                n_jobs=N_JOBS
+                n_jobs=N_JOBS,
+                return_train_score=True  # Para diagnóstico de overfitting
             )
             grid.fit(X_train, y_train)
             best_model = grid.best_estimator_
             best_params = grid.best_params_
 
-        # CV score (en train)
-        cv_scores = cross_val_score(best_model, X_train, y_train, cv=cv, scoring="f1_weighted")
-        cv_f1w_mean = float(np.mean(cv_scores))
-        cv_f1w_std = float(np.std(cv_scores, ddof=0))
+            # Extraer CV scores del GridSearchCV (evita redundancia de cross_val_score)
+            best_idx = grid.best_index_
+            cv_f1w_mean = float(grid.cv_results_[f"mean_test_{REFIT_METRIC}"][best_idx])
+            cv_f1w_std = float(grid.cv_results_[f"std_test_{REFIT_METRIC}"][best_idx])
 
         # Test
         y_pred = best_model.predict(X_test)
@@ -361,8 +390,8 @@ for model_name, cfg in models.items():
 
         per_seed_metrics.append(metrics)
 
-        # Guardar artefactos SOLO para seed=SEEDS[0] (para no crear muchos archivos)
-        # Si prefieres guardar por cada seed, se puede, pero ensucia.
+        # Guardar artefactos SOLO para seed=SEEDS[0] (evita proliferación de archivos)
+        # Nota: Para análisis de percepción ciudadana con ~1k encuestas, un modelo por tipo es suficiente
         if seed == SEEDS[0]:
             # Reporte y CM
             report = classification_report(y_test, y_pred, zero_division=0)
