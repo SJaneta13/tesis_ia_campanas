@@ -1,4 +1,3 @@
-# src/05_text_analysis/sentiment_analysis.py
 from __future__ import annotations
 
 import argparse
@@ -39,12 +38,25 @@ def map_label_to_es(x: str) -> str:
 def infer_text_col(df: pd.DataFrame, text_col: Optional[str]) -> str:
     if text_col and text_col in df.columns:
         return text_col
-    # auto
     if "text" in df.columns:
         return "text"      # news pipeline
     if "content" in df.columns:
         return "content"   # social pipeline
     raise KeyError("No encuentro columna de texto. Esperaba 'text' (news) o 'content' (social).")
+
+
+def _pick_best_pred(pred):
+    """
+    Algunos pipelines pueden devolver:
+    - dict: {"label": "...", "score": ...}
+    - list[dict]: [{"label": "...", "score": ...}, ...]
+    Aquí normalizamos a un dict.
+    """
+    if isinstance(pred, list) and pred:
+        return max(pred, key=lambda x: float(x.get("score", 0.0)))
+    if isinstance(pred, dict):
+        return pred
+    return {"label": "UNKNOWN", "score": 0.0}
 
 
 def main():
@@ -93,6 +105,9 @@ def main():
         model=args.model,
         tokenizer=args.model,
         truncation=True,
+        max_length=512,
+        padding=True,
+        top_k=None,  # permite compatibilidad si devuelve lista de labels
     )
 
     labels_raw = []
@@ -102,10 +117,10 @@ def main():
     for i in tqdm(range(0, len(texts), args.batch), desc=f"Sentiment ({args.prefix})"):
         batch = texts[i : i + args.batch]
         preds = clf(batch)
-        # preds esperado: lista de dicts [{label, score}, ...]
         for pred in preds:
-            labels_raw.append(pred.get("label", "UNKNOWN"))
-            scores_raw.append(float(pred.get("score", 0.0)))
+            best = _pick_best_pred(pred)
+            labels_raw.append(best.get("label", "UNKNOWN"))
+            scores_raw.append(float(best.get("score", 0.0)))
 
     df["sentiment_raw_label"] = labels_raw
     df["sentiment_raw_score"] = scores_raw
