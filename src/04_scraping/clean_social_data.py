@@ -6,7 +6,7 @@ import pandas as pd
 
 
 RAW_DIR = Path("data/raw")
-OUT_PATH = Path("data/processed/social_clean.csv")
+OUT_PATH = Path("data/processed/social/social_clean.csv")
 
 
 def clean_text(text: str) -> str:
