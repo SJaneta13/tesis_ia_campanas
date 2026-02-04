@@ -9,6 +9,7 @@ DATA_SENTIMENT = ROOT / "data" / "processed" / "social_sentiment.csv"
 DATA_SURVEY = ROOT / "data" / "processed" / "model_ready.csv"
 KEYWORDS_REPORT = ROOT / "outputs" / "latest" / "tables" / "resumen_sentimiento_keywords.md"
 METRICS_DIR = ROOT / "outputs" / "latest" / "tables"
+CONFIDENCE_LEVEL = "Nivel de Confianza"
 
 
 st.set_page_config(
@@ -231,10 +232,10 @@ with survey_tab:
 
             # Confianza Electoral
             conf_df = survey_df["confianza_idx_round"].value_counts().reset_index()
-            conf_df.columns = ["Nivel de Confianza", "Cantidad"]
-            conf_df = conf_df.sort_values("Nivel de Confianza")
-            fig_conf = px.bar(conf_df, x="Nivel de Confianza", y="Cantidad", 
-                             title="Nivel de Confianza en el Proceso Electoral (1-5)")
+            conf_df.columns = [CONFIDENCE_LEVEL, "Cantidad"]
+            conf_df = conf_df.sort_values(CONFIDENCE_LEVEL)
+            fig_conf = px.bar(conf_df, x=CONFIDENCE_LEVEL, y="Cantidad",
+            title=f"{CONFIDENCE_LEVEL} en el Proceso Electoral (1-5)")
             st.plotly_chart(fig_conf, width="stretch")
 
         st.subheader("Resumen de Percepciones sobre IA")

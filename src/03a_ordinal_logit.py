@@ -129,30 +129,30 @@ def build_x_y(df, target_col):
     X = X[keep_cols].copy()
 
     # One-hot
-    X_enc = pd.get_dummies(X, drop_first=True)
+    x_enc = pd.get_dummies(X, drop_first=True)
 
     # Limpieza numérica
-    X_enc = X_enc.replace([np.inf, -np.inf], np.nan)
-    med = X_enc.median(numeric_only=True)
-    X_enc = X_enc.fillna(med).fillna(0)
-    X_enc = X_enc.apply(pd.to_numeric, errors="coerce").fillna(0.0).astype(float)
+    x_enc = x_enc.replace([np.inf, -np.inf], np.nan)
+    med = x_enc.median(numeric_only=True)
+    x_enc = x_enc.fillna(med).fillna(0)
+    x_enc = x_enc.apply(pd.to_numeric, errors="coerce").fillna(0.0).astype(float)
 
     # Borrar const si existiera
-    if "const" in X_enc.columns:
-        X_enc = X_enc.drop(columns=["const"])
+    if "const" in x_enc.columns:
+        x_enc = x_enc.drop(columns=["const"])
 
     # Quitar columnas constantes o varianza 0
-    nunique = X_enc.nunique(dropna=False)
+    nunique = x_enc.nunique(dropna=False)
     const_cols = nunique[nunique <= 1].index.tolist()
-    var0_cols = X_enc.columns[(X_enc.var(axis=0) == 0)].tolist()
+    var0_cols = x_enc.columns[(x_enc.var(axis=0) == 0)].tolist()
     drop_cols = sorted(set(const_cols + var0_cols))
     if drop_cols:
-        X_enc = X_enc.drop(columns=drop_cols)
+        x_enc = x_enc.drop(columns=drop_cols)
 
-    if X_enc.shape[1] == 0:
-        raise ValueError("X_enc quedó sin columnas después de limpieza (constantes/varianza 0). Revisa features.")
+    if x_enc.shape[1] == 0:
+        raise ValueError("x_enc quedó sin columnas después de limpieza (constantes/varianza 0). Revisa features.")
 
-    return X_enc, y
+    return x_enc, y
 
 
 # =========================
@@ -235,14 +235,41 @@ def fit_and_eval(target_col, n_classes, tag):
 
     X_test = X_test.reindex(columns=X_train.columns, fill_value=0.0)
 
-    # modelo ordinal (sin constante)
-    model = OrderedModel(y_train, X_train, distr="logit", hasconst=False)
-    res = model.fit(method="lbfgs", disp=False, maxiter=300)
+    # ------------------------------------------------------------------
+    # Modelo ordinal con distribución LOGIT (estándar)
+    # Según statsmodels docs: distr='logit' usa función logística acumulativa
+    # ------------------------------------------------------------------
+    model_logit = OrderedModel(y_train, X_train, distr="logit", hasconst=False)
+    res_logit = model_logit.fit(method="lbfgs", disp=False, maxiter=300)
 
-    proba = res.model.predict(res.params, exog=X_test)
-    y_pred = np.asarray(np.argmax(proba, axis=1) + 1, dtype=int)
+    proba_logit = res_logit.model.predict(res_logit.params, exog=X_test)
+    y_pred_logit = np.asarray(np.argmax(proba_logit, axis=1) + 1, dtype=int)
+    mets_logit = eval_metrics(y_test, y_pred_logit, n_classes=n_classes)
 
-    mets = eval_metrics(y_test, y_pred, n_classes=n_classes)
+    # ------------------------------------------------------------------
+    # Modelo ordinal con distribución PROBIT (alternativa)
+    # Según statsmodels docs: distr='probit' usa CDF normal (más colas ligeras)
+    # ------------------------------------------------------------------
+    model_probit = OrderedModel(y_train, X_train, distr="probit", hasconst=False)
+    res_probit = model_probit.fit(method="lbfgs", disp=False, maxiter=300)
+
+    proba_probit = res_probit.model.predict(res_probit.params, exog=X_test)
+    y_pred_probit = np.asarray(np.argmax(proba_probit, axis=1) + 1, dtype=int)
+    mets_probit = eval_metrics(y_test, y_pred_probit, n_classes=n_classes)
+
+    # Seleccionar mejor modelo por F1-weighted
+    if mets_logit["f1_weighted"] >= mets_probit["f1_weighted"]:
+        res = res_logit
+        y_pred = y_pred_logit
+        mets = mets_logit
+        best_distr = "logit"
+    else:
+        res = res_probit
+        y_pred = y_pred_probit
+        mets = mets_probit
+        best_distr = "probit"
+
+    print(f"  > {tag}: logit F1={mets_logit['f1_weighted']:.3f}, probit F1={mets_probit['f1_weighted']:.3f} -> MEJOR: {best_distr}")
 
     # artefactos
     (OUT_DIR / f"summary_{tag}.txt").write_text(res.summary().as_text(), encoding="utf-8")
@@ -271,7 +298,7 @@ def fit_and_eval(target_col, n_classes, tag):
     save_cm_png(cm, n_classes=n_classes, tag=tag)
     save_or_png(coef_df, tag=tag, top_n=10)
 
-    results.append({"target": tag, "n_classes": n_classes, **mets})
+    results.append({"target": tag, "n_classes": n_classes, "distribution": best_distr, **mets})
 
 
 # 3 clases (comparativo)

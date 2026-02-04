@@ -237,7 +237,8 @@ models = {
         "estimator": DummyClassifier(strategy="stratified", random_state=0),
         "param_grid": {}
     },
-    # Random Forest: class_weight en grid para probar balance
+    # Random Forest: class_weight y criterion en grid para análisis completo
+    # Según scikit-learn docs: criterion="gini" o "entropy" afecta splits
     "random_forest": {
         "estimator": RandomForestClassifier(
             random_state=0,
@@ -245,19 +246,22 @@ models = {
             n_jobs=-1
         ),
         "param_grid": {
-            "clf__n_estimators": [200, 400],
+            "clf__n_estimators": [100, 200, 400],
             "clf__max_depth": [None, 8, 15],
             "clf__min_samples_split": [2, 5, 10],
             "clf__min_samples_leaf": [1, 2, 4],
             "clf__class_weight": ["balanced", "balanced_subsample"],
+            "clf__criterion": ["gini", "entropy"],  # Añadido según doc oficial
         }
     },
     # SVM-RBF: grid en escala log para C, gamma más fino
+    # Según scikit-learn docs: C controla regularización, gamma controla radio de influencia
     "svm_rbf": {
         "estimator": SVC(
             kernel="rbf",
             class_weight="balanced",
-            random_state=0
+            random_state=0,
+            probability=True  # Añadido para obtener probabilidades si se necesita
         ),
         "param_grid": {
             "clf__C": [0.1, 1, 10, 100],
