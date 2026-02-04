@@ -97,7 +97,7 @@ def to_3_classes(x):
 # =========================
 # Feature building
 # =========================
-def build_X_y(df, target_col):
+def build_x_y(df, target_col):
     DROP_COLS = [
         "confianza_idx", "confianza_idx_round",
         "limpieza_num", "fraude_num", "fraude_rev",
@@ -221,7 +221,7 @@ results = []
 
 
 def fit_and_eval(target_col, n_classes, tag):
-    X_enc, y = build_X_y(df, target_col)
+    X_enc, y = build_x_y(df, target_col)
 
     X_train, X_test, y_train, y_test = train_test_split(
         X_enc, y, test_size=TEST_SIZE, random_state=SEED, stratify=y

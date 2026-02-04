@@ -178,7 +178,19 @@ def main():
 		df = pd.read_csv(path, encoding="utf-8-sig")
 		all_frames.append(normalize_df(df, "facebook"))
 
+	for path in RAW_DIR.glob("dataset_facebook-posts-scraper_*.csv"):
+		df = pd.read_csv(path, encoding="utf-8-sig")
+		all_frames.append(normalize_df(df, "facebook"))
+
+	for path in RAW_DIR.glob("dataset_facebook-search-scraper_*.csv"):
+		df = pd.read_csv(path, encoding="utf-8-sig")
+		all_frames.append(normalize_df(df, "facebook"))
+
 	for path in RAW_DIR.glob("tiktok_*.csv"):
+		df = pd.read_csv(path, encoding="utf-8-sig")
+		all_frames.append(normalize_df(df, "tiktok"))
+
+	for path in RAW_DIR.glob("dataset_tiktok-scraper_*.csv"):
 		df = pd.read_csv(path, encoding="utf-8-sig")
 		all_frames.append(normalize_df(df, "tiktok"))
 
@@ -197,6 +209,7 @@ def main():
 		raise FileNotFoundError("No se encontraron CSVs en data/raw.")
 
 	merged = pd.concat(all_frames, ignore_index=True)
+	merged = merged.drop_duplicates(subset=["content", "date", "user"])
 	OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
 	merged.to_csv(OUT_PATH, index=False, encoding="utf-8-sig")
 	print(f"Limpieza completa: {OUT_PATH} | Filas: {len(merged)}")

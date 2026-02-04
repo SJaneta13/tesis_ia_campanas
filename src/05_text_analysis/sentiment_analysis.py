@@ -23,13 +23,15 @@ def main():
 		model=MODEL_NAME,
 		tokenizer=MODEL_NAME,
 		truncation=True,
+		max_length=512,
+		padding=True,
 		top_k=None,
 	)
 
 	results = []
 	for i in tqdm(range(0, len(texts), BATCH_SIZE), desc="Analizando sentimiento"):
 		batch = texts[i:i + BATCH_SIZE]
-		preds_batch = sentiment(batch)
+		preds_batch = sentiment(batch, truncation=True, max_length=512)
 		for preds in preds_batch:
 			if isinstance(preds, list) and preds:
 				best = max(preds, key=lambda x: x.get("score", 0))
