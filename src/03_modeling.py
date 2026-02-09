@@ -3,15 +3,24 @@ import os
 import json
 import shutil
 import joblib
+import warnings
 import numpy as np
 import pandas as pd
+
+# Estabilidad: evitar problemas de joblib en Windows/OneDrive
+os.environ["LOKY_MAX_CPU_COUNT"] = "1"
 
 from datetime import datetime
 from pathlib import Path
 
 import matplotlib
-matplotlib.use("Agg")  # Backend no interactivo para evitar errores de tkinter en multithreading
+matplotlib.use("Agg")  # Backend no interactivo
 import matplotlib.pyplot as plt
+
+# Suprimir warnings agresivamente (SimpleImputer en columnas vacías, sklearn FutureWarning)
+warnings.filterwarnings("ignore", category=UserWarning)
+warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 from sklearn.model_selection import (
     train_test_split, StratifiedKFold, GridSearchCV
@@ -22,9 +31,11 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.impute import SimpleImputer
 
 from sklearn.metrics import (
-    accuracy_score, f1_score, classification_report, confusion_matrix, make_scorer
+    accuracy_score, f1_score, classification_report, confusion_matrix,
+    make_scorer, roc_auc_score
 )
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, label_binarize
+import time
 
 from sklearn.dummy import DummyClassifier
 from sklearn.ensemble import RandomForestClassifier
@@ -40,9 +51,9 @@ INPUT_PATH = "data/processed/encuestas/model_ready.csv"
 TARGET_5 = "confianza_idx_round"   # 1..5
 USE_TARGET_3 = True                # True => 3 clases (1=baja,2=media,3=alta); False => 5 clases
 
-TEST_SIZE = 0.20
+TEST_SIZE = 0.30   # Tesis: 70% entrenamiento / 30% validación
 N_SPLITS = 5
-N_JOBS = -1
+N_JOBS = 1    # Usar 1 para estabilidad con SVM en Windows/OneDrive
 
 # Semillas para análisis más estable (puedes ajustar)
 SEEDS = [0, 7, 13, 21, 42]
@@ -189,6 +200,10 @@ TEXT_COL = "¿Qué recomendaciones haría para garantizar un uso responsable y t
 if TEXT_COL in df.columns:
     DROP_COLS.append(TEXT_COL)
 
+# Eliminar columnas vacías de Google Forms (Unnamed: 31, 32) que causan warnings en SimpleImputer
+for c in df.columns:
+    if c.startswith("Unnamed"):
+        DROP_COLS.append(c)
 
 X = df.drop(columns=[c for c in DROP_COLS if c in df.columns], errors="ignore")
 y = df[target_col].copy()
@@ -237,35 +252,36 @@ models = {
         "estimator": DummyClassifier(strategy="stratified", random_state=0),
         "param_grid": {}
     },
-    # Random Forest: class_weight y criterion en grid para análisis completo
+    # Random Forest: grid reducido pero informativo (evita 8k+ fits innecesarios)
     # Según scikit-learn docs: criterion="gini" o "entropy" afecta splits
+    # Grid: 3×3×2×2×2 = 72 combos × 5-fold × 5-seeds = 1800 fits (razonable)
     "random_forest": {
         "estimator": RandomForestClassifier(
             random_state=0,
             max_features="sqrt",
-            n_jobs=-1
+            n_jobs=1  # Estabilidad Windows/OneDrive
         ),
         "param_grid": {
             "clf__n_estimators": [100, 200, 400],
-            "clf__max_depth": [None, 8, 15],
-            "clf__min_samples_split": [2, 5, 10],
-            "clf__min_samples_leaf": [1, 2, 4],
+            "clf__max_depth": [None, 10, 20],
+            "clf__min_samples_split": [2, 5],
+            "clf__min_samples_leaf": [1, 2],
             "clf__class_weight": ["balanced", "balanced_subsample"],
-            "clf__criterion": ["gini", "entropy"],  # Añadido según doc oficial
         }
     },
-    # SVM-RBF: grid en escala log para C, gamma más fino
+    # SVM-RBF: grid en escala log para C, gamma
     # Según scikit-learn docs: C controla regularización, gamma controla radio de influencia
+    # probability=False para velocidad en GridSearchCV; AUC se calcula con decision_function
     "svm_rbf": {
         "estimator": SVC(
             kernel="rbf",
             class_weight="balanced",
             random_state=0,
-            probability=True  # Añadido para obtener probabilidades si se necesita
+            probability=False  # False para velocidad; decision_function basta para AUC
         ),
         "param_grid": {
             "clf__C": [0.1, 1, 10, 100],
-            "clf__gamma": ["scale", "auto", 0.1, 0.01, 0.001]
+            "clf__gamma": ["scale", "auto", 0.01, 0.001]
         }
     }
 }
@@ -274,21 +290,34 @@ models = {
 # =========================
 # EVALUATION HELPERS
 # =========================
-def evaluate_predictions(y_true, y_pred, use_target_3):
+def compute_auc_ovr(y_true, y_proba, n_classes):
+    """AUC One-vs-Rest para clasificación multiclase (tesis: métrica requerida)."""
+    try:
+        y_bin = label_binarize(y_true, classes=list(range(1, n_classes + 1)))
+        if y_bin.shape[1] == 1:
+            return float(roc_auc_score(y_bin, y_proba[:, :1]))
+        return float(
+            roc_auc_score(y_bin, y_proba, multi_class="ovr", average="weighted")
+        )
+    except Exception:
+        return float("nan")
+
+
+def evaluate_predictions(y_true, y_pred, use_target_3, y_proba=None):
     acc = accuracy_score(y_true, y_pred)
     f1m = f1_score(y_true, y_pred, average="macro", zero_division=0)
     f1w = f1_score(y_true, y_pred, average="weighted", zero_division=0)
     mae = mae_ordinal(y_true, y_pred)
-    if use_target_3:
-        qwk = quadratic_weighted_kappa(y_true, y_pred, min_rating=1, max_rating=3)
-    else:
-        qwk = quadratic_weighted_kappa(y_true, y_pred, min_rating=1, max_rating=5)
+    n_classes = 3 if use_target_3 else 5
+    qwk = quadratic_weighted_kappa(y_true, y_pred, min_rating=1, max_rating=n_classes)
+    auc = compute_auc_ovr(y_true, y_proba, n_classes) if y_proba is not None else float("nan")
     return {
         "accuracy": float(acc),
         "f1_macro": float(f1m),
         "f1_weighted": float(f1w),
         "mae_ordinal": float(mae),
-        "kappa_qw": float(qwk)
+        "kappa_qw": float(qwk),
+        "auc_ovr": auc,
     }
 
 
@@ -333,6 +362,8 @@ for model_name, cfg in models.items():
     per_seed_metrics = []
 
     for seed in SEEDS:
+        t_start = time.perf_counter()  # Tesis: medir tiempo de cómputo
+
         # Split estratificado por seed
         X_train, X_test, y_train, y_test = train_test_split(
             X, y,
@@ -376,7 +407,23 @@ for model_name, cfg in models.items():
 
         # Test
         y_pred = best_model.predict(X_test)
-        metrics = evaluate_predictions(y_test, y_pred, use_target_3=USE_TARGET_3)
+
+        # Obtener probabilidades para AUC (tesis: métrica requerida)
+        y_proba = None
+        try:
+            if hasattr(best_model, "predict_proba"):
+                y_proba = best_model.predict_proba(X_test)
+            elif hasattr(best_model, "decision_function"):
+                y_proba = best_model.decision_function(X_test)
+        except Exception:
+            pass
+
+        t_elapsed = time.perf_counter() - t_start  # Tiempo total (train+test)
+
+        metrics = evaluate_predictions(
+            y_test, y_pred, use_target_3=USE_TARGET_3, y_proba=y_proba
+        )
+        metrics["time_seconds"] = round(t_elapsed, 2)
 
         # Guardar por seed
         rows_seed_level.append({
@@ -462,6 +509,7 @@ for model_name, cfg in models.items():
         "n_total": int(len(df)),
         "n_features": int(X.shape[1]),
         "seeds": json.dumps(SEEDS),
+        "test_size": TEST_SIZE,
         "accuracy_mean": agg["accuracy"]["mean"],
         "accuracy_std": agg["accuracy"]["std"],
         "f1_macro_mean": agg["f1_macro"]["mean"],
@@ -472,6 +520,10 @@ for model_name, cfg in models.items():
         "mae_ordinal_std": agg["mae_ordinal"]["std"],
         "kappa_qw_mean": agg["kappa_qw"]["mean"],
         "kappa_qw_std": agg["kappa_qw"]["std"],
+        "auc_ovr_mean": agg["auc_ovr"]["mean"] if "auc_ovr" in agg else float("nan"),
+        "auc_ovr_std": agg["auc_ovr"]["std"] if "auc_ovr" in agg else float("nan"),
+        "time_seconds_mean": agg["time_seconds"]["mean"] if "time_seconds" in agg else float("nan"),
+        "time_seconds_std": agg["time_seconds"]["std"] if "time_seconds" in agg else float("nan"),
     })
 
 

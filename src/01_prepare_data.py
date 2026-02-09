@@ -2,7 +2,8 @@ import pandas as pd
 import re
 from pathlib import Path
 
-RAW_PATH = Path("data/raw/respuestas_forms.xlsx")
+RAW_PATH_XLSX = Path("data/raw/respuestas_forms.xlsx")
+RAW_PATH_CSV = Path("data/raw/Encuesta de tesisis.csv")
 PROCESSED_DIR = Path("data/processed/encuestas")
 PROCESSED_PATH = PROCESSED_DIR / "respuestas_limpias.csv"
 
@@ -10,8 +11,16 @@ PROCESSED_PATH = PROCESSED_DIR / "respuestas_limpias.csv"
 PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
 
 
-# Leer archivo raw
-df = pd.read_excel(RAW_PATH)
+# Leer archivo raw (prioriza CSV si existe)
+if RAW_PATH_CSV.exists():
+    df = pd.read_csv(RAW_PATH_CSV, encoding="utf-8-sig")
+elif RAW_PATH_XLSX.exists():
+    df = pd.read_excel(RAW_PATH_XLSX)
+else:
+    raise FileNotFoundError(
+        "No se encontró archivo de encuestas. Esperado CSV en data/raw/Encuesta de tesisis.csv "
+        "o XLSX en data/raw/respuestas_forms.xlsx"
+    )
 
 # Función para arreglar texto corrupto
 
