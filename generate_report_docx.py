@@ -10,15 +10,24 @@ from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.oxml.ns import qn
 
 # ── Paths ──
-RUN_DIR = Path("outputs/runs/run_20260205_183321")
-OUT_DOCX = Path("outputs") / "Resultados_Modelado_Tesis.docx"
+RUNS_DIR = Path("outputs/runs")
+runs = sorted(RUNS_DIR.glob("run_*"))
+if not runs:
+    raise FileNotFoundError("No hay runs en outputs/runs.")
+RUN_DIR = runs[-1]
+OUT_DOCX = Path("outputs") / "Resultados_Modelado_Tesis_v2.docx"
+
+print(f"Generando reporte para el run: {RUN_DIR.name}")
 
 # ── Data ──
 tesis = pd.read_csv(RUN_DIR / "tables" / "tabla_resumen_tesis.csv")
 compare = pd.read_csv(RUN_DIR / "tables" / "metrics_compare_all_models.csv")
 ordinal_metrics = pd.read_csv(RUN_DIR / "ordinal" / "metrics.csv")
 ordinal_by_seed = pd.read_csv(RUN_DIR / "ordinal" / "metrics_by_seed.csv")
-sklearn_by_seed = pd.read_csv(RUN_DIR / "tables" / "metrics_by_seed_20260205_183321.csv")
+
+# Buscar el archivo de métricas por seed de sklearn
+sk_seed_path = list((RUN_DIR / "tables").glob("metrics_by_seed_*.csv"))
+sklearn_by_seed = pd.read_csv(sk_seed_path[0]) if sk_seed_path else None
 
 # RF feature importance
 fi_path = list((RUN_DIR / "tables").glob("rf_feature_importance_*.csv"))
@@ -277,7 +286,8 @@ for model_name in ["random_forest", "svm_rbf"]:
             fmt(r.get("time_seconds", 0), 1),
         ])
     # Add mean row
-    run_csv = pd.read_csv(RUN_DIR / "tables" / "metrics_run_20260205_183321.csv")
+    run_csv_path = list((RUN_DIR / "tables").glob("metrics_run_*.csv"))[0]
+    run_csv = pd.read_csv(run_csv_path)
     run_row = run_csv[run_csv["model"] == model_name].iloc[0]
     seed_rows.append([
         "MEDIA",

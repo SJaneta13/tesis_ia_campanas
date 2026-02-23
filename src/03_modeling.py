@@ -23,12 +23,13 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 from sklearn.model_selection import (
-    train_test_split, StratifiedKFold, GridSearchCV
+    train_test_split, StratifiedKFold, GridSearchCV, RandomizedSearchCV
 )
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.impute import SimpleImputer
+from sklearn.feature_selection import SelectFromModel
 
 from sklearn.metrics import (
     accuracy_score, f1_score, classification_report, confusion_matrix,
@@ -38,7 +39,7 @@ from sklearn.preprocessing import StandardScaler, label_binarize
 import time
 
 from sklearn.dummy import DummyClassifier
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, HistGradientBoostingClassifier, VotingClassifier
 from sklearn.svm import SVC
 
 
@@ -231,7 +232,7 @@ preprocess = ColumnTransformer(
         ]), num_cols),
         ("cat", Pipeline(steps=[
             ("imputer", SimpleImputer(strategy="most_frequent")),
-            ("onehot", OneHotEncoder(handle_unknown="ignore"))
+            ("onehot", OneHotEncoder(handle_unknown="ignore", sparse_output=False))
         ]), cat_cols),
     ],
     remainder="drop"
@@ -254,7 +255,6 @@ models = {
     },
     # Random Forest: grid reducido pero informativo (evita 8k+ fits innecesarios)
     # Según scikit-learn docs: criterion="gini" o "entropy" afecta splits
-    # Grid: 3×3×2×2×2 = 72 combos × 5-fold × 5-seeds = 1800 fits (razonable)
     "random_forest": {
         "estimator": RandomForestClassifier(
             random_state=0,
@@ -262,10 +262,10 @@ models = {
             n_jobs=1  # Estabilidad Windows/OneDrive
         ),
         "param_grid": {
-            "clf__n_estimators": [100, 200, 400],
-            "clf__max_depth": [None, 10, 20],
-            "clf__min_samples_split": [2, 5],
-            "clf__min_samples_leaf": [1, 2],
+            "clf__n_estimators": [100, 200, 400, 500],
+            "clf__max_depth": [None, 10, 20, 30],
+            "clf__min_samples_split": [2, 5, 10],
+            "clf__min_samples_leaf": [1, 2, 4],
             "clf__class_weight": ["balanced", "balanced_subsample"],
         }
     },
@@ -280,8 +280,35 @@ models = {
             probability=False  # False para velocidad; decision_function basta para AUC
         ),
         "param_grid": {
-            "clf__C": [0.1, 1, 10, 100],
-            "clf__gamma": ["scale", "auto", 0.01, 0.001]
+            "clf__C": [0.1, 1, 10, 100, 1000],
+            "clf__gamma": ["scale", "auto", 0.01, 0.001, 0.0001]
+        }
+    },
+    # HistGradientBoostingClassifier: State-of-the-art para datos tabulares
+    "hist_gradient_boosting": {
+        "estimator": HistGradientBoostingClassifier(
+            random_state=0,
+            class_weight="balanced"
+        ),
+        "param_grid": {
+            "clf__learning_rate": [0.01, 0.05, 0.1, 0.2],
+            "clf__max_iter": [100, 200, 300],
+            "clf__max_depth": [None, 5, 10, 20],
+            "clf__min_samples_leaf": [10, 20, 30],
+            "clf__l2_regularization": [0.0, 0.1, 1.0]
+        }
+    },
+    # Voting Classifier (Ensemble de RF y HGB)
+    "voting_ensemble": {
+        "estimator": VotingClassifier(
+            estimators=[
+                ("rf", RandomForestClassifier(n_estimators=200, max_depth=20, class_weight="balanced", random_state=0, n_jobs=1)),
+                ("hgb", HistGradientBoostingClassifier(learning_rate=0.1, max_iter=200, class_weight="balanced", random_state=0))
+            ],
+            voting="soft"
+        ),
+        "param_grid": {
+            "clf__voting": ["soft"] # No tuneamos hiperparámetros internos aquí para ahorrar tiempo, solo usamos los mejores promedios
         }
     }
 }
@@ -376,6 +403,7 @@ for model_name, cfg in models.items():
 
         pipe = Pipeline(steps=[
             ("prep", preprocess),
+            ("feature_selection", SelectFromModel(RandomForestClassifier(n_estimators=100, random_state=seed, n_jobs=1), threshold="mean")),
             ("clf", cfg["estimator"])
         ], memory=None)
 
@@ -387,13 +415,15 @@ for model_name, cfg in models.items():
             cv_f1w_std = 0.0
         else:
             # Multi-métrica: evalúa f1_weighted, f1_macro, accuracy simultáneamente
-            grid = GridSearchCV(
+            grid = RandomizedSearchCV(
                 estimator=pipe,
-                param_grid=cfg["param_grid"],
+                param_distributions=cfg["param_grid"],
+                n_iter=100,  # Explorar 100 combinaciones aleatorias para exprimir rendimiento
                 scoring=SCORING_DICT,
                 refit=REFIT_METRIC,  # Selecciona modelo por f1_weighted
                 cv=cv,
                 n_jobs=N_JOBS,
+                random_state=seed,
                 return_train_score=True  # Para diagnóstico de overfitting
             )
             grid.fit(X_train, y_train)
@@ -477,6 +507,11 @@ for model_name, cfg in models.items():
                     ohe = best_model.named_steps["prep"].named_transformers_["cat"].named_steps["onehot"]
                     cat_feat = ohe.get_feature_names_out(cat_cols).tolist()
                     feat_names.extend(cat_feat)
+
+                    # Filtrar por SelectFromModel
+                    selector = best_model.named_steps["feature_selection"]
+                    support = selector.get_support()
+                    feat_names = [f for f, s in zip(feat_names, support) if s]
 
                     importances = best_model.named_steps["clf"].feature_importances_
                     fi_df = pd.DataFrame({

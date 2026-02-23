@@ -64,6 +64,15 @@ for c in likert_cols:
     )
 
 # ============================
+# Feature NLP: Longitud de respuesta abierta
+# ============================
+text_col = "¿Qué recomendaciones haría para garantizar un uso responsable y transparente de la inteligencia artificial en campañas políticas digitales en Ecuador, considerando la experiencia de la campaña entre Luisa González y Daniel Noboa?"
+if text_col in df.columns:
+    # Rellenar nulos con string vacío y contar caracteres
+    df["longitud_recomendacion"] = df[text_col].fillna("").astype(str).str.len()
+    print("Feature NLP creada: longitud_recomendacion")
+
+# ============================
 # Creacion del Modelo 
 #  ============================
 
