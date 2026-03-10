@@ -9,6 +9,10 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.oxml.ns import qn
 
+# ── Constants ──
+KAPPA_QW = "Kappa QW"
+RANDOM_FOREST = "Random Forest"
+
 # ── Paths ──
 RUNS_DIR = Path("outputs/runs")
 runs = sorted(RUNS_DIR.glob("run_*"))
@@ -44,7 +48,7 @@ def set_cell_shading(cell, color_hex):
     shading.append(shading_elm)
 
 
-def add_styled_table(doc, headers, rows, col_widths=None, highlight_best_col=None):
+def add_styled_table(doc, headers, rows, col_widths=None,):
     """Agrega una tabla con formato profesional."""
     table = doc.add_table(rows=1 + len(rows), cols=len(headers))
     table.style = "Table Grid"
@@ -160,7 +164,7 @@ for v in vars_list:
 
 doc.add_heading("1.3 Modelos Evaluados", level=2)
 models_desc = [
-    ("Random Forest", "Ensemble de árboles de decisión con GridSearchCV (72 combinaciones × 5 folds). "
+    (RANDOM_FOREST, "Ensemble de árboles de decisión con GridSearchCV (72 combinaciones × 5 folds). "
      "Busca patrones no lineales e interacciones entre variables."),
     ("SVM-RBF", "Máquina de Vectores de Soporte con kernel gaussiano (RBF). "
      "GridSearchCV con 16 combinaciones × 5 folds. Eficaz en espacios de alta dimensión."),
@@ -211,7 +215,7 @@ doc.add_heading("3. Resultados Comparativos", level=1)
 doc.add_heading("3.1 Tabla Resumen (3 clases)", level=2)
 
 model_labels = {
-    "random_forest": "Random Forest",
+    "random_forest": RANDOM_FOREST,
     "svm_rbf": "SVM-RBF",
     "ordinal_logit": "Reg. Logística Ordinal",
     "baseline_stratified": "Baseline Estratificado",
@@ -246,7 +250,7 @@ if not ord5.empty:
 
 add_styled_table(
     doc,
-    ["Modelo", "Accuracy", "F1-weighted", "Kappa QW", "AUC OvR", "Tiempo (s)"],
+    ["Modelo", "Accuracy", "F1-weighted", KAPPA_QW, "AUC OvR", "Tiempo (s)"],
     result_rows,
     col_widths=[5, 2, 2.5, 2, 2, 2.5],
 )
@@ -300,7 +304,7 @@ for model_name in ["random_forest", "svm_rbf"]:
 
     add_styled_table(
         doc,
-        ["Seed", "Accuracy", "F1-w", "Kappa QW", "AUC", "Tiempo (s)"],
+        ["Seed", "Accuracy", "F1-w", KAPPA_QW, "AUC", "Tiempo (s)"],
         seed_rows,
         col_widths=[2, 2.5, 2.5, 2.5, 2.5, 2.5],
     )
@@ -329,7 +333,7 @@ for _, r in ordinal_by_seed.iterrows():
 
 add_styled_table(
     doc,
-    ["Seed", "Clases", "Distr.", "Acc", "F1-w", "Kappa", "AUC", "Tiempo"],
+    ["Seed", "Clases", "Distr.", "Acc", "F1-w", KAPPA_QW, "AUC", "Tiempo"],
     ord_seed_rows,
     col_widths=[1.5, 1.5, 1.5, 2, 2, 2, 2, 2],
 )
@@ -348,10 +352,10 @@ doc.add_paragraph(
 delta_rows = [
     ["Random Forest", "Accuracy", "0.597", "0.531", "-0.066"],
     ["", "F1-weighted", "0.595", "0.529", "-0.066"],
-    ["", "Kappa QW", "0.431", "0.313", "-0.117"],
+    ["", KAPPA_QW, "0.431", "0.313", "-0.117"],
     ["SVM-RBF", "Accuracy", "0.578", "0.531", "-0.048"],
     ["", "F1-weighted", "0.571", "0.529", "-0.043"],
-    ["", "Kappa QW", "0.388", "0.320", "-0.068"],
+    ["", KAPPA_QW, "0.388", "0.320", "-0.068"],
 ]
 
 add_styled_table(

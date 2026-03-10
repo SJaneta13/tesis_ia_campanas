@@ -311,27 +311,27 @@ def fit_ordinal_single(X_train, y_train, X_test, distr="logit"):
     return y_pred, proba, res
 
 
-def cv_select_distribution(X_train, y_train, n_classes, seed):
+def cv_select_distribution(X_train, y_train, seed):
     """Validación cruzada k=5 interna para seleccionar logit vs probit."""
     skf = StratifiedKFold(n_splits=N_SPLITS, shuffle=True, random_state=seed)
     cv_scores = {"logit": [], "probit": []}
 
     for fold_idx, (train_idx, val_idx) in enumerate(skf.split(X_train, y_train)):
-        X_tr = X_train.iloc[train_idx]
+        x_tr = X_train.iloc[train_idx]
         y_tr = y_train.iloc[train_idx]
-        X_val = X_train.iloc[val_idx]
+        x_val = X_train.iloc[val_idx]
         y_val = y_train.iloc[val_idx]
 
         # Quitar columnas varianza 0 del fold
-        zero_var = X_tr.columns[(X_tr.var(axis=0) == 0)].tolist()
+        zero_var = x_tr.columns[(x_tr.var(axis=0) == 0)].tolist()
         if zero_var:
-            X_tr = X_tr.drop(columns=zero_var)
-            X_val = X_val.drop(columns=zero_var, errors="ignore")
-        X_val = X_val.reindex(columns=X_tr.columns, fill_value=0.0)
+            x_tr = x_tr.drop(columns=zero_var)
+            x_val = x_val.drop(columns=zero_var, errors="ignore")
+        x_val = x_val.reindex(columns=x_tr.columns, fill_value=0.0)
 
         for distr in ["logit", "probit"]:
             try:
-                y_pred, _, _ = fit_ordinal_single(X_tr, y_tr, X_val, distr=distr)
+                y_pred, _, _ = fit_ordinal_single(x_tr, y_tr, x_val, distr=distr)
                 f1 = f1_score(y_val, y_pred, average="weighted", zero_division=0)
                 cv_scores[distr].append(f1)
             except Exception:
@@ -357,144 +357,136 @@ rows_seed_level = []
 all_summaries = []
 
 
-def run_ordinal_multi_seed(target_col, n_classes, tag):
-    print(f"\n{'='*50}")
-    print(f"Ordinal Logit/Probit - {tag} ({n_classes} clases)")
-    print(f"{'='*50}")
+def _process_seed_iteration(seed, X_enc, y, n_classes, tag):
+    """Process a single seed iteration."""
+    print(f"\n  Seed {seed}:")
+    t_start = time.perf_counter()
 
-    X_enc, y = build_x_y(df, target_col)
-    per_seed_metrics = []
+    # Split 70/30 estratificado (mismo que sklearn models)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X_enc, y, test_size=TEST_SIZE, random_state=seed, stratify=y
+    )
 
-    for seed in SEEDS:
-        print(f"\n  Seed {seed}:")
-        t_start = time.perf_counter()
+    # Quitar columnas varianza 0 del TRAIN y alinear TEST
+    zero_var = X_train.columns[(X_train.var(axis=0) == 0)].tolist()
+    if zero_var:
+        X_train = X_train.drop(columns=zero_var)
+        X_test = X_test.drop(columns=zero_var, errors="ignore")
+    X_test = X_test.reindex(columns=X_train.columns, fill_value=0.0)
 
-        # Split 70/30 estratificado (mismo que sklearn models)
-        X_train, X_test, y_train, y_test = train_test_split(
-            X_enc, y, test_size=TEST_SIZE, random_state=seed, stratify=y
+    # CV interno: seleccionar mejor distribución (logit vs probit)
+    best_distr, cv_info = cv_select_distribution(X_train, y_train, seed)
+    print(
+        f"    CV interno: logit={cv_info['cv_f1_logit_mean']:.3f}, "
+        f"probit={cv_info['cv_f1_probit_mean']:.3f} -> {best_distr}"
+    )
+
+    # Entrenar modelo final en TODO el train, evaluar en test
+    y_pred, y_proba, res = fit_ordinal_single(
+        X_train, y_train, X_test, distr=best_distr
+    )
+
+    t_elapsed = time.perf_counter() - t_start
+
+    # Métricas
+    mets = eval_metrics(y_test, y_pred, y_proba, n_classes=n_classes)
+    mets["time_seconds"] = round(t_elapsed, 2)
+
+    print(
+        f"    Test: acc={mets['accuracy']:.3f}, f1w={mets['f1_weighted']:.3f}, "
+        f"kappa={mets['kappa_qw']:.3f}, auc={mets['auc_ovr']:.3f}, time={t_elapsed:.1f}s"
+    )
+
+    # Guardar por seed
+    seed_record = {
+        "run_id": last_run.replace("run_", ""),
+        "model": "ordinal_logit",
+        "seed": seed,
+        "target": tag,
+        "n_classes": n_classes,
+        "distribution": best_distr,
+        "n_train": int(len(y_train)),
+        "n_test": int(len(y_test)),
+        **mets,
+        **cv_info,
+    }
+
+    return y_pred, y_proba, res, y_test, mets, seed_record
+
+
+def _save_first_seed_artifacts(res, y_test, y_pred, n_classes, tag):
+    """Save model artifacts for first seed only."""
+    cm = confusion_matrix(y_test, y_pred, labels=list(range(1, n_classes + 1)))
+    pd.DataFrame(cm).to_csv(
+        OUT_DIR / f"confusion_matrix_{tag}.csv", index=False, encoding="utf-8-sig"
+    )
+    save_cm_png(cm, n_classes=n_classes, tag=tag)
+
+    report = classification_report(y_test, y_pred, zero_division=0)
+    (OUT_DIR / f"report_{tag}.txt").write_text(report, encoding="utf-8")
+
+    try:
+        (OUT_DIR / f"summary_{tag}.txt").write_text(
+            res.summary().as_text(), encoding="utf-8"
+        )
+    except Exception:
+        (OUT_DIR / f"summary_{tag}.txt").write_text(
+            "Summary unavailable (Hessian inversion failed)",
+            encoding="utf-8",
         )
 
-        # Quitar columnas varianza 0 del TRAIN y alinear TEST
-        zero_var = X_train.columns[(X_train.var(axis=0) == 0)].tolist()
-        if zero_var:
-            X_train = X_train.drop(columns=zero_var)
-            X_test = X_test.drop(columns=zero_var, errors="ignore")
-        X_test = X_test.reindex(columns=X_train.columns, fill_value=0.0)
+    _save_coefficients(res, tag)
+    _save_predictions(y_test, y_pred, tag)
 
-        # CV interno: seleccionar mejor distribución (logit vs probit)
-        best_distr, cv_info = cv_select_distribution(
-            X_train, y_train, n_classes, seed
-        )
-        print(
-            f"    CV interno: logit={cv_info['cv_f1_logit_mean']:.3f}, "
-            f"probit={cv_info['cv_f1_probit_mean']:.3f} -> "
-            f"{best_distr}"
-        )
 
-        # Entrenar modelo final en TODO el train, evaluar en test
-        y_pred, y_proba, res = fit_ordinal_single(
-            X_train, y_train, X_test, distr=best_distr
-        )
+def _save_coefficients(res, tag):
+    """Extract and save coefficient data."""
+    params = res.params
+    try:
+        conf = res.conf_int()
+    except Exception:
+        conf = None
 
-        t_elapsed = time.perf_counter() - t_start
+    # params puede ser ndarray si Hessian falla; manejar ambos casos
+    if hasattr(params, 'index'):
+        term_names = params.index.tolist()
+        param_vals = params.values
+    else:
+        term_names = [f"x{i}" for i in range(len(params))]
+        param_vals = np.asarray(params)
 
-        # Métricas
-        mets = eval_metrics(y_test, y_pred, y_proba, n_classes=n_classes)
-        mets["time_seconds"] = round(t_elapsed, 2)
-        per_seed_metrics.append(mets)
+    coef_dict = {
+        "term": term_names,
+        "coef": param_vals,
+        "odds_ratio": np.exp(param_vals),
+    }
+    if conf is not None:
+        if hasattr(conf, 'values'):
+            coef_dict["ci_low"] = conf.iloc[:, 0].values
+            coef_dict["ci_high"] = conf.iloc[:, 1].values
+        else:
+            coef_dict["ci_low"] = conf[:, 0]
+            coef_dict["ci_high"] = conf[:, 1]
+        coef_dict["or_ci_low"] = np.exp(coef_dict["ci_low"])
+        coef_dict["or_ci_high"] = np.exp(coef_dict["ci_high"])
 
-        print(
-            f"    Test: acc={mets['accuracy']:.3f}, f1w={mets['f1_weighted']:.3f}, "
-            f"kappa={mets['kappa_qw']:.3f}, auc={mets['auc_ovr']:.3f}, "
-            f"time={t_elapsed:.1f}s"
-        )
+    coef_df = pd.DataFrame(coef_dict)
+    coef_df.to_csv(
+        OUT_DIR / f"coefficients_{tag}.csv", index=False, encoding="utf-8-sig"
+    )
+    save_or_png(coef_df, tag=tag, top_n=10)
 
-        # Guardar por seed
-        rows_seed_level.append(
-            {
-                "run_id": last_run.replace("run_", ""),
-                "model": "ordinal_logit",
-                "seed": seed,
-                "target": tag,
-                "n_classes": n_classes,
-                "distribution": best_distr,
-                "n_train": int(len(y_train)),
-                "n_test": int(len(y_test)),
-                **mets,
-                **cv_info,
-            }
-        )
 
-        # Guardar artefactos SOLO para primer seed
-        if seed == SEEDS[0]:
-            cm = confusion_matrix(
-                y_test, y_pred, labels=list(range(1, n_classes + 1))
-            )
-            pd.DataFrame(cm).to_csv(
-                OUT_DIR / f"confusion_matrix_{tag}.csv",
-                index=False,
-                encoding="utf-8-sig",
-            )
-            save_cm_png(cm, n_classes=n_classes, tag=tag)
+def _save_predictions(y_test, y_pred, tag):
+    """Save predictions to CSV."""
+    pred_df = pd.DataFrame({"y_true": y_test.values, "y_pred": y_pred})
+    pred_df.to_csv(
+        OUT_DIR / f"predictions_{tag}.csv", index=False, encoding="utf-8-sig"
+    )
 
-            report = classification_report(y_test, y_pred, zero_division=0)
-            (OUT_DIR / f"report_{tag}.txt").write_text(report, encoding="utf-8")
 
-            try:
-                (OUT_DIR / f"summary_{tag}.txt").write_text(
-                    res.summary().as_text(), encoding="utf-8"
-                )
-            except Exception:
-                (OUT_DIR / f"summary_{tag}.txt").write_text(
-                    f"Summary unavailable (Hessian inversion failed)\nParams: {params}",
-                    encoding="utf-8",
-                )
-
-            params = res.params
-            try:
-                conf = res.conf_int()
-            except Exception:
-                conf = None
-
-            # params puede ser ndarray si Hessian falla; manejar ambos casos
-            if hasattr(params, 'index'):
-                term_names = params.index.tolist()
-                param_vals = params.values
-            else:
-                term_names = [f"x{i}" for i in range(len(params))]
-                param_vals = np.asarray(params)
-
-            coef_dict = {
-                "term": term_names,
-                "coef": param_vals,
-                "odds_ratio": np.exp(param_vals),
-            }
-            if conf is not None:
-                if hasattr(conf, 'values'):
-                    coef_dict["ci_low"] = conf.iloc[:, 0].values
-                    coef_dict["ci_high"] = conf.iloc[:, 1].values
-                else:
-                    coef_dict["ci_low"] = conf[:, 0]
-                    coef_dict["ci_high"] = conf[:, 1]
-                coef_dict["or_ci_low"] = np.exp(coef_dict["ci_low"])
-                coef_dict["or_ci_high"] = np.exp(coef_dict["ci_high"])
-
-            coef_df = pd.DataFrame(coef_dict)
-            coef_df.to_csv(
-                OUT_DIR / f"coefficients_{tag}.csv",
-                index=False,
-                encoding="utf-8-sig",
-            )
-            save_or_png(coef_df, tag=tag, top_n=10)
-
-            pred_df = pd.DataFrame({"y_true": y_test.values, "y_pred": y_pred})
-            pred_df.to_csv(
-                OUT_DIR / f"predictions_{tag}.csv",
-                index=False,
-                encoding="utf-8-sig",
-            )
-
-    # Agregar resumen (promedio + std sobre seeds)
+def _aggregate_seed_metrics(per_seed_metrics):
+    """Aggregate metrics across seeds."""
     metric_keys = [
         "accuracy",
         "f1_weighted",
@@ -510,6 +502,30 @@ def run_ordinal_multi_seed(target_col, n_classes, tag):
         clean = [v for v in vals if not np.isnan(v)]
         agg[f"{k}_mean"] = float(np.mean(clean)) if clean else float("nan")
         agg[f"{k}_std"] = float(np.std(clean, ddof=0)) if clean else float("nan")
+    return agg
+
+
+def run_ordinal_multi_seed(target_col, n_classes, tag):
+    print(f"\n{'='*50}")
+    print(f"Ordinal Logit/Probit - {tag} ({n_classes} clases)")
+    print(f"{'='*50}")
+
+    X_enc, y = build_x_y(df, target_col)
+    per_seed_metrics = []
+
+    for seed in SEEDS:
+        y_pred, _, res, y_test, mets, seed_record = _process_seed_iteration(
+            seed, X_enc, y, n_classes, tag
+        )
+        per_seed_metrics.append(mets)
+        rows_seed_level.append(seed_record)
+
+        # Guardar artefactos SOLO para primer seed
+        if seed == SEEDS[0]:
+            _save_first_seed_artifacts(res, y_test, y_pred, n_classes, tag)
+
+    # Agregar resumen (promedio + std sobre seeds)
+    agg = _aggregate_seed_metrics(per_seed_metrics)
 
     summary_row = {
         "run_id": last_run.replace("run_", ""),

@@ -50,7 +50,7 @@ from sklearn.svm import SVC
 INPUT_PATH = "data/processed/encuestas/model_ready.csv"
 
 TARGET_5 = "confianza_idx_round"   # 1..5
-USE_TARGET_3 = True                # True => 3 clases (1=baja,2=media,3=alta); False => 5 clases
+USE_TARGET_3 = True               # False => 5 clases (comparación directa con compañera)
 
 TEST_SIZE = 0.30   # Tesis: 70% entrenamiento / 30% validación
 N_SPLITS = 5
@@ -86,6 +86,8 @@ def quadratic_weighted_kappa(y_true, y_pred, min_rating=1, max_rating=5):
     """QWK para ordinal 1..K (implementación simple)."""
     y_true = np.asarray(y_true, dtype=int)
     y_pred = np.asarray(y_pred, dtype=int)
+
+
 
     K = max_rating - min_rating + 1
     O = np.zeros((K, K), dtype=float)
