@@ -1,0 +1,13 @@
+[theme]
+base = "light"
+primaryColor = "#0076BD"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F2F7FA"
+textColor = "#333333"
+
+[theme.sidebar]
+backgroundColor = "#F2F7FA"
+secondaryBackgroundColor = "#E6F0F7"
+
+[server]
+headless = true
