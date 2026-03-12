@@ -2,6 +2,7 @@
 .venv/
 .venv_scraping/
 venv/
+venv_scraping/
 
 # Caché de Python
 __pycache__/
@@ -22,3 +23,23 @@ Thumbs.db
 
 # Datos crudos (encuestas / sensibles)
 data/raw/
+
+# Outputs crudos de scraping (no versionar)
+data/external/
+
+# Cookies / credenciales 
+cookies_*.json
+.env
+.env.*
+
+# Outputs generados 
+outputs/
+artifacts/
+
+
+# Datos procesados (generados por scripts)
+data/processed/
+
+
+# Modelos entrenados
+backend/

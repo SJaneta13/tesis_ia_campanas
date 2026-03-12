@@ -1,9 +1,19 @@
 import pandas as pd
 import numpy as np
+from pathlib import Path
 
-INPUT_PATH = "data/processed/respuestas_limpias.csv"
-OUTPUT_PATH = "data/processed/model_ready.csv"
+# RUTAS (encuestas)
+# ==========
+INPUT_PATH = Path("data/processed/encuestas/respuestas_limpias.csv")
+OUTPUT_DIR = Path("data/processed/encuestas")
+OUTPUT_PATH = OUTPUT_DIR / "model_ready.csv"
 
+
+# Crear carpeta de salida si no existe
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+# ============================
+# Leer datos procesados
 df = pd.read_csv(INPUT_PATH, encoding="utf-8-sig")
 df.columns = df.columns.str.strip()
 
@@ -52,6 +62,15 @@ for c in likert_cols:
     df[c + "_num"] = (
         df[c].astype(str).str.strip().map(likert_map)
     )
+
+# ============================
+# Feature NLP: Longitud de respuesta abierta
+# ============================
+text_col = "¿Qué recomendaciones haría para garantizar un uso responsable y transparente de la inteligencia artificial en campañas políticas digitales en Ecuador, considerando la experiencia de la campaña entre Luisa González y Daniel Noboa?"
+if text_col in df.columns:
+    # Rellenar nulos con string vacío y contar caracteres
+    df["longitud_recomendacion"] = df[text_col].fillna("").astype(str).str.len()
+    print("Feature NLP creada: longitud_recomendacion")
 
 # ============================
 # Creacion del Modelo 

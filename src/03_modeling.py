@@ -3,42 +3,58 @@ import os
 import json
 import shutil
 import joblib
+import warnings
 import numpy as np
 import pandas as pd
+
+# Estabilidad: evitar problemas de joblib en Windows/OneDrive
+os.environ["LOKY_MAX_CPU_COUNT"] = "1"
 
 from datetime import datetime
 from pathlib import Path
 
+import matplotlib
+matplotlib.use("Agg")  # Backend no interactivo
 import matplotlib.pyplot as plt
 
+# Suprimir warnings agresivamente (SimpleImputer en columnas vacías, sklearn FutureWarning)
+warnings.filterwarnings("ignore", category=UserWarning)
+warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", category=RuntimeWarning)
+
 from sklearn.model_selection import (
-    train_test_split, StratifiedKFold, GridSearchCV, cross_val_score
+    train_test_split, StratifiedKFold, GridSearchCV, RandomizedSearchCV
 )
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.impute import SimpleImputer
+from sklearn.feature_selection import SelectFromModel
 
 from sklearn.metrics import (
-    accuracy_score, f1_score, classification_report, confusion_matrix
+    accuracy_score, f1_score, classification_report, confusion_matrix,
+    make_scorer, roc_auc_score
 )
+from sklearn.preprocessing import StandardScaler, label_binarize
+import time
 
 from sklearn.dummy import DummyClassifier
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, HistGradientBoostingClassifier, VotingClassifier
 from sklearn.svm import SVC
+
 
 
 # =========================
 # CONFIG
 # =========================
-INPUT_PATH = "data/processed/model_ready.csv"
+INPUT_PATH = "data/processed/encuestas/model_ready.csv"
 
 TARGET_5 = "confianza_idx_round"   # 1..5
-USE_TARGET_3 = True                # True => 3 clases (1=baja,2=media,3=alta); False => 5 clases
+USE_TARGET_3 = True               # False => 5 clases (comparación directa con compañera)
 
-TEST_SIZE = 0.20
+TEST_SIZE = 0.30   # Tesis: 70% entrenamiento / 30% validación
 N_SPLITS = 5
-N_JOBS = -1
+N_JOBS = 1    # Usar 1 para estabilidad con SVM en Windows/OneDrive
 
 # Semillas para análisis más estable (puedes ajustar)
 SEEDS = [0, 7, 13, 21, 42]
@@ -70,6 +86,8 @@ def quadratic_weighted_kappa(y_true, y_pred, min_rating=1, max_rating=5):
     """QWK para ordinal 1..K (implementación simple)."""
     y_true = np.asarray(y_true, dtype=int)
     y_pred = np.asarray(y_pred, dtype=int)
+
+
 
     K = max_rating - min_rating + 1
     O = np.zeros((K, K), dtype=float)
@@ -185,6 +203,10 @@ TEXT_COL = "¿Qué recomendaciones haría para garantizar un uso responsable y t
 if TEXT_COL in df.columns:
     DROP_COLS.append(TEXT_COL)
 
+# Eliminar columnas vacías de Google Forms (Unnamed: 31, 32) que causan warnings en SimpleImputer
+for c in df.columns:
+    if c.startswith("Unnamed"):
+        DROP_COLS.append(c)
 
 X = df.drop(columns=[c for c in DROP_COLS if c in df.columns], errors="ignore")
 y = df[target_col].copy()
@@ -202,15 +224,17 @@ print("Ejemplo columnas:", X.columns.tolist()[:8])
 # =========================
 # PREPROCESS
 # =========================
-# Nota: Mantiene números (si existieran) y OHE para categóricas.
+# Nota: StandardScaler es crucial para SVM (sensible a escala).
+# RF no se ve afectado por escalado, así que es seguro aplicarlo a ambos.
 preprocess = ColumnTransformer(
     transformers=[
         ("num", Pipeline(steps=[
-            ("imputer", SimpleImputer(strategy="median"))
+            ("imputer", SimpleImputer(strategy="median")),
+            ("scaler", StandardScaler())  # Mejora convergencia SVM
         ]), num_cols),
         ("cat", Pipeline(steps=[
             ("imputer", SimpleImputer(strategy="most_frequent")),
-            ("onehot", OneHotEncoder(handle_unknown="ignore"))
+            ("onehot", OneHotEncoder(handle_unknown="ignore", sparse_output=False))
         ]), cat_cols),
     ],
     remainder="drop"
@@ -220,36 +244,73 @@ preprocess = ColumnTransformer(
 # =========================
 # MODELS + GRIDS
 # =========================
+# Para dataset pequeño (~1k encuestas): grids conservadores pero informativos
 models = {
+    # Baseline: estrategia "most_frequent" y "stratified" para comparación realista
     "baseline_majority": {
         "estimator": DummyClassifier(strategy="most_frequent", random_state=0),
         "param_grid": {}
     },
+    "baseline_stratified": {
+        "estimator": DummyClassifier(strategy="stratified", random_state=0),
+        "param_grid": {}
+    },
+    # Random Forest: grid reducido pero informativo (evita 8k+ fits innecesarios)
+    # Según scikit-learn docs: criterion="gini" o "entropy" afecta splits
     "random_forest": {
         "estimator": RandomForestClassifier(
-            class_weight="balanced",
             random_state=0,
-            min_samples_leaf=1,
-            max_features="sqrt"
+            max_features="sqrt",
+            n_jobs=1  # Estabilidad Windows/OneDrive
         ),
         "param_grid": {
-            "clf__n_estimators": [300, 600],
-            "clf__max_depth": [None, 10, 20],
-            "clf__min_samples_split": [2, 5],
-            "clf__min_samples_leaf": [1, 2],
+            "clf__n_estimators": [100, 200, 400, 500],
+            "clf__max_depth": [None, 10, 20, 30],
+            "clf__min_samples_split": [2, 5, 10],
+            "clf__min_samples_leaf": [1, 2, 4],
+            "clf__class_weight": ["balanced", "balanced_subsample"],
         }
     },
+    # SVM-RBF: grid en escala log para C, gamma
+    # Según scikit-learn docs: C controla regularización, gamma controla radio de influencia
+    # probability=False para velocidad en GridSearchCV; AUC se calcula con decision_function
     "svm_rbf": {
         "estimator": SVC(
             kernel="rbf",
-            C=1.0,
-            gamma="scale",
             class_weight="balanced",
-            random_state=0
+            random_state=0,
+            probability=False  # False para velocidad; decision_function basta para AUC
         ),
         "param_grid": {
-            "clf__C": [0.5, 1, 3, 10],
-            "clf__gamma": ["scale", 0.1, 0.01]
+            "clf__C": [0.1, 1, 10, 100, 1000],
+            "clf__gamma": ["scale", "auto", 0.01, 0.001, 0.0001]
+        }
+    },
+    # HistGradientBoostingClassifier: State-of-the-art para datos tabulares
+    "hist_gradient_boosting": {
+        "estimator": HistGradientBoostingClassifier(
+            random_state=0,
+            class_weight="balanced"
+        ),
+        "param_grid": {
+            "clf__learning_rate": [0.01, 0.05, 0.1, 0.2],
+            "clf__max_iter": [100, 200, 300],
+            "clf__max_depth": [None, 5, 10, 20],
+            "clf__min_samples_leaf": [10, 20, 30],
+            "clf__l2_regularization": [0.0, 0.1, 1.0]
+        }
+    },
+    # Voting Classifier (Ensemble de RF y HGB)
+    "voting_ensemble": {
+        "estimator": VotingClassifier(
+            estimators=[
+                ("rf", RandomForestClassifier(n_estimators=200, max_depth=20, class_weight="balanced", random_state=0, n_jobs=1)),
+                ("hgb", HistGradientBoostingClassifier(learning_rate=0.1, max_iter=200, class_weight="balanced", random_state=0))
+            ],
+            voting="soft"
+        ),
+        "param_grid": {
+            "clf__voting": ["soft"] # No tuneamos hiperparámetros internos aquí para ahorrar tiempo, solo usamos los mejores promedios
         }
     }
 }
@@ -258,21 +319,34 @@ models = {
 # =========================
 # EVALUATION HELPERS
 # =========================
-def evaluate_predictions(y_true, y_pred, use_target_3):
+def compute_auc_ovr(y_true, y_proba, n_classes):
+    """AUC One-vs-Rest para clasificación multiclase (tesis: métrica requerida)."""
+    try:
+        y_bin = label_binarize(y_true, classes=list(range(1, n_classes + 1)))
+        if y_bin.shape[1] == 1:
+            return float(roc_auc_score(y_bin, y_proba[:, :1]))
+        return float(
+            roc_auc_score(y_bin, y_proba, multi_class="ovr", average="weighted")
+        )
+    except Exception:
+        return float("nan")
+
+
+def evaluate_predictions(y_true, y_pred, use_target_3, y_proba=None):
     acc = accuracy_score(y_true, y_pred)
     f1m = f1_score(y_true, y_pred, average="macro", zero_division=0)
     f1w = f1_score(y_true, y_pred, average="weighted", zero_division=0)
     mae = mae_ordinal(y_true, y_pred)
-    if use_target_3:
-        qwk = quadratic_weighted_kappa(y_true, y_pred, min_rating=1, max_rating=3)
-    else:
-        qwk = quadratic_weighted_kappa(y_true, y_pred, min_rating=1, max_rating=5)
+    n_classes = 3 if use_target_3 else 5
+    qwk = quadratic_weighted_kappa(y_true, y_pred, min_rating=1, max_rating=n_classes)
+    auc = compute_auc_ovr(y_true, y_proba, n_classes) if y_proba is not None else float("nan")
     return {
         "accuracy": float(acc),
         "f1_macro": float(f1m),
         "f1_weighted": float(f1w),
         "mae_ordinal": float(mae),
-        "kappa_qw": float(qwk)
+        "kappa_qw": float(qwk),
+        "auc_ovr": auc,
     }
 
 
@@ -287,6 +361,18 @@ def aggregate_seed_metrics(seed_metrics_list):
             "std": float(np.std(vals, ddof=0))
         }
     return out
+
+
+# =========================
+# MULTI-SCORING PARA GRIDSEARCHCV
+# =========================
+# Usar múltiples métricas evita optimizar solo una y da visión completa
+SCORING_DICT = {
+    "f1_weighted": "f1_weighted",
+    "f1_macro": "f1_macro",
+    "accuracy": "accuracy",
+}
+REFIT_METRIC = "f1_weighted"  # Métrica principal para seleccionar mejor modelo
 
 
 # =========================
@@ -305,6 +391,8 @@ for model_name, cfg in models.items():
     per_seed_metrics = []
 
     for seed in SEEDS:
+        t_start = time.perf_counter()  # Tesis: medir tiempo de cómputo
+
         # Split estratificado por seed
         X_train, X_test, y_train, y_test = train_test_split(
             X, y,
@@ -317,33 +405,57 @@ for model_name, cfg in models.items():
 
         pipe = Pipeline(steps=[
             ("prep", preprocess),
+            ("feature_selection", SelectFromModel(RandomForestClassifier(n_estimators=100, random_state=seed, n_jobs=1), threshold="mean")),
             ("clf", cfg["estimator"])
         ], memory=None)
 
         # Baseline no requiere grid
-        if model_name == "baseline_majority":
+        if model_name.startswith("baseline"):
             best_model = pipe.fit(X_train, y_train)
             best_params = {}
+            cv_f1w_mean = 0.0
+            cv_f1w_std = 0.0
         else:
-            grid = GridSearchCV(
+            # Multi-métrica: evalúa f1_weighted, f1_macro, accuracy simultáneamente
+            grid = RandomizedSearchCV(
                 estimator=pipe,
-                param_grid=cfg["param_grid"],
-                scoring="f1_weighted",
+                param_distributions=cfg["param_grid"],
+                n_iter=100,  # Explorar 100 combinaciones aleatorias para exprimir rendimiento
+                scoring=SCORING_DICT,
+                refit=REFIT_METRIC,  # Selecciona modelo por f1_weighted
                 cv=cv,
-                n_jobs=N_JOBS
+                n_jobs=N_JOBS,
+                random_state=seed,
+                return_train_score=True  # Para diagnóstico de overfitting
             )
             grid.fit(X_train, y_train)
             best_model = grid.best_estimator_
             best_params = grid.best_params_
 
-        # CV score (en train)
-        cv_scores = cross_val_score(best_model, X_train, y_train, cv=cv, scoring="f1_weighted")
-        cv_f1w_mean = float(np.mean(cv_scores))
-        cv_f1w_std = float(np.std(cv_scores, ddof=0))
+            # Extraer CV scores del GridSearchCV (evita redundancia de cross_val_score)
+            best_idx = grid.best_index_
+            cv_f1w_mean = float(grid.cv_results_[f"mean_test_{REFIT_METRIC}"][best_idx])
+            cv_f1w_std = float(grid.cv_results_[f"std_test_{REFIT_METRIC}"][best_idx])
 
         # Test
         y_pred = best_model.predict(X_test)
-        metrics = evaluate_predictions(y_test, y_pred, use_target_3=USE_TARGET_3)
+
+        # Obtener probabilidades para AUC (tesis: métrica requerida)
+        y_proba = None
+        try:
+            if hasattr(best_model, "predict_proba"):
+                y_proba = best_model.predict_proba(X_test)
+            elif hasattr(best_model, "decision_function"):
+                y_proba = best_model.decision_function(X_test)
+        except Exception:
+            pass
+
+        t_elapsed = time.perf_counter() - t_start  # Tiempo total (train+test)
+
+        metrics = evaluate_predictions(
+            y_test, y_pred, use_target_3=USE_TARGET_3, y_proba=y_proba
+        )
+        metrics["time_seconds"] = round(t_elapsed, 2)
 
         # Guardar por seed
         rows_seed_level.append({
@@ -361,8 +473,8 @@ for model_name, cfg in models.items():
 
         per_seed_metrics.append(metrics)
 
-        # Guardar artefactos SOLO para seed=SEEDS[0] (para no crear muchos archivos)
-        # Si prefieres guardar por cada seed, se puede, pero ensucia.
+        # Guardar artefactos SOLO para seed=SEEDS[0] (evita proliferación de archivos)
+        # Nota: Para análisis de percepción ciudadana con ~1k encuestas, un modelo por tipo es suficiente
         if seed == SEEDS[0]:
             # Reporte y CM
             report = classification_report(y_test, y_pred, zero_division=0)
@@ -398,6 +510,11 @@ for model_name, cfg in models.items():
                     cat_feat = ohe.get_feature_names_out(cat_cols).tolist()
                     feat_names.extend(cat_feat)
 
+                    # Filtrar por SelectFromModel
+                    selector = best_model.named_steps["feature_selection"]
+                    support = selector.get_support()
+                    feat_names = [f for f, s in zip(feat_names, support) if s]
+
                     importances = best_model.named_steps["clf"].feature_importances_
                     fi_df = pd.DataFrame({
                         "feature": feat_names,
@@ -429,6 +546,7 @@ for model_name, cfg in models.items():
         "n_total": int(len(df)),
         "n_features": int(X.shape[1]),
         "seeds": json.dumps(SEEDS),
+        "test_size": TEST_SIZE,
         "accuracy_mean": agg["accuracy"]["mean"],
         "accuracy_std": agg["accuracy"]["std"],
         "f1_macro_mean": agg["f1_macro"]["mean"],
@@ -439,6 +557,10 @@ for model_name, cfg in models.items():
         "mae_ordinal_std": agg["mae_ordinal"]["std"],
         "kappa_qw_mean": agg["kappa_qw"]["mean"],
         "kappa_qw_std": agg["kappa_qw"]["std"],
+        "auc_ovr_mean": agg["auc_ovr"]["mean"] if "auc_ovr" in agg else float("nan"),
+        "auc_ovr_std": agg["auc_ovr"]["std"] if "auc_ovr" in agg else float("nan"),
+        "time_seconds_mean": agg["time_seconds"]["mean"] if "time_seconds" in agg else float("nan"),
+        "time_seconds_std": agg["time_seconds"]["std"] if "time_seconds" in agg else float("nan"),
     })
 
 
