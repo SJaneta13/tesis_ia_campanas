@@ -57,6 +57,7 @@ def main():
             "time_seconds_mean","time_seconds_std",
         ]].copy()
 
+
     df_s2 = pick_cols(df_s)
     df_o2 = pick_cols(df_o)
 
@@ -80,20 +81,66 @@ def main():
         "svm_rbf": "Baja (caja negra)",
     }
 
+    uso_tesis = {
+    "ordinal_logit": "Interpretación",
+    "random_forest": "Principal",
+    "svm_rbf": "Comparación",
+    }
+
+ 
+    model_names = {
+    "ordinal_logit": "Regresión logística ordinal",
+    "random_forest": "Random Forest",
+    "svm_rbf": "SVM-RBF",
+    }
+
+    df_all["model_str"] = df_all["model"].astype(str)
+
     out = pd.DataFrame({
-        "Modelo": df_all["model"],
-        "Accuracy": [fmt(m,s) for m,s in zip(df_all["accuracy_mean"], df_all["accuracy_std"])],
-        "F1_weighted": [fmt(m,s) for m,s in zip(df_all["f1_weighted_mean"], df_all["f1_weighted_std"])],
-        "QWK": [fmt(m,s) for m,s in zip(df_all["kappa_qw_mean"], df_all["kappa_qw_std"])],
-        "MAE_ordinal": [fmt(m,s) for m,s in zip(df_all["mae_ordinal_mean"], df_all["mae_ordinal_std"])],
-        "AUC_OVR": [fmt(m,s) for m,s in zip(df_all["auc_ovr_mean"], df_all["auc_ovr_std"])],
-        "Tiempo(s)": [fmt(m,s, digits=1) for m,s in zip(df_all["time_seconds_mean"], df_all["time_seconds_std"])],
-        "Interpretabilidad": [interpret.get(x, "") for x in df_all["model"]],
+        "Modelo": df_all["model_str"].map(model_names),
+        "Exactitud": [
+            fmt(m, s) for m, s in zip(df_all["accuracy_mean"], df_all["accuracy_std"])
+        ],
+        "F1 ponderado": [
+            fmt(m, s) for m, s in zip(df_all["f1_weighted_mean"], df_all["f1_weighted_std"])
+        ],
+        "Kappa cuadrático ponderado": [
+            fmt(m, s) for m, s in zip(df_all["kappa_qw_mean"], df_all["kappa_qw_std"])
+        ],
+        "MAE ordinal": [
+            fmt(m, s) for m, s in zip(df_all["mae_ordinal_mean"], df_all["mae_ordinal_std"])
+        ],
+        "AUC OvR": [
+            fmt(m, s) for m, s in zip(df_all["auc_ovr_mean"], df_all["auc_ovr_std"])
+        ],
+        "Tiempo de ejecución (s)": [
+            fmt(m, s, digits=1) for m, s in zip(df_all["time_seconds_mean"], df_all["time_seconds_std"])
+        ],
+        "Interpretabilidad": [
+            interpret.get(x, "") for x in df_all["model_str"]
+        ],
+        "Uso en tesis": [
+            uso_tesis.get(x, "") for x in df_all["model_str"]
+        ],
     })
 
-    out_path = tables_dir / f"model_comparison_{target_sklearn}.csv"
+    out_path = tables_dir / f"tabla_modelos_tesis_{target_sklearn}.csv"
     out.to_csv(out_path, index=False, encoding="utf-8-sig")
+    md_path = tables_dir / f"tabla_modelos_tesis_{target_sklearn}.md"
+    out.to_markdown(md_path, index=False)
     print("Tabla comparativa guardada en:", out_path)
+
+    resumen_path = tables_dir / f"resumen_modelos_tesis_{target_sklearn}.txt"
+
+    resumen_path.write_text(
+        "La tabla compara los tres modelos principales utilizados en la investigación: "
+        "regresión logística ordinal, Random Forest y SVM-RBF. "
+        "Se reportan métricas clásicas y métricas ordinales, considerando que la variable "
+        "dependiente corresponde a niveles de confianza electoral. "
+        "Random Forest se interpreta como modelo predictivo principal, SVM-RBF como modelo "
+        "comparativo no lineal y la regresión logística ordinal como modelo interpretativo.\n",
+        encoding="utf-8"
+    )
 
     # También imprime en consola
     print(out)

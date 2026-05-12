@@ -202,5 +202,8 @@ def main():
         print(f"Tema {r['topic']}: {r['top_terms']}")
 
 
+
+
 if __name__ == "__main__":
     main()
+

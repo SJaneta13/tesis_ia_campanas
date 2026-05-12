@@ -83,19 +83,28 @@ def main():
         title = str(row.get("title", "")).strip()
 
         txt = None
+        fetch_success = False
+
         if url and url.startswith("http"):
             txt = fetch_url_text(url)
+            fetch_success = bool(txt)
 
         # fallback: si no pudimos extraer, al menos título
         if not txt:
             txt = title
+            text_source = "title_fallback"
+        else:
+            text_source = "html"
 
         txt = (txt or "").strip()
+
         if args.max_chars and len(txt) > args.max_chars:
             txt = txt[: args.max_chars]
 
         row_out = row.to_dict()
         row_out["text"] = txt
+        row_out["fetch_success"] = fetch_success
+        row_out["text_source"] = text_source
         enriched.append(row_out)
 
         if (len(enriched) % 25) == 0:

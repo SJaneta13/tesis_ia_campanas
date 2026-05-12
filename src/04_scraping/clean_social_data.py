@@ -136,6 +136,7 @@ def normalize_df(df: pd.DataFrame, platform: str) -> pd.DataFrame:
     df = df.rename(columns=col_map)
     df = df.loc[:, ~df.columns.duplicated()]
     df["platform"] = platform
+    df["source_type"] = "social_media"
 
     df = _fill_numeric_cols(df)
     df = _update_stats_from_dict(df)
@@ -150,7 +151,10 @@ def normalize_df(df: pd.DataFrame, platform: str) -> pd.DataFrame:
 
     df = df.drop_duplicates(subset=["content", "date", "user"])
 
-    keep_cols = ["platform", "date", "user", "content", "likes", "shares", "comments", "source_url"]
+    keep_cols = [
+    "source_type", "platform", "date", "user", "content",
+    "likes", "shares", "comments", "source_url"
+    ]
     return df[keep_cols]
 
 

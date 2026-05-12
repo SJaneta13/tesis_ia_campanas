@@ -1,7 +1,6 @@
 """
 src/04_report_word.py
-Genera un Word limpio y robusto con resultados del modelado (sklearn + ordinal),
-alineado con tu lógica:
+
 
 - Target principal: detecta automáticamente si el run sklearn fue 3 clases (confianza_3) o 5 niveles.
 - Modelos principales: Random Forest, SVM-RBF, Ordinal (logit/probit por QWK).
@@ -25,6 +24,7 @@ from docx.shared import Inches, Pt, Cm, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.oxml.ns import qn
+from src.plotting_style import prettify_and_shorten
 
 
 # =========================
@@ -67,7 +67,7 @@ def add_styled_table(doc, headers, rows, col_widths_cm=None):
         run.font.size = Pt(9)
         run.font.color.rgb = RGBColor(255, 255, 255)
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        set_cell_shading(cell, "2E75B6")
+        set_cell_shading(cell, "595959")
 
     # Data rows
     for i, row in enumerate(rows):
@@ -79,7 +79,7 @@ def add_styled_table(doc, headers, rows, col_widths_cm=None):
             run.font.size = Pt(9)
             p.alignment = WD_ALIGN_PARAGRAPH.CENTER
             if i % 2 == 0:
-                set_cell_shading(cell, "D6E4F0")
+                set_cell_shading(cell, "F2F2F2")
 
     # Column widths
     if col_widths_cm:
@@ -150,12 +150,9 @@ po_files = sorted(ORD_DIR.glob("po_check_*.csv"))
 po_check_path = po_files[-1] if po_files else None
 po_df = safe_read_csv(po_check_path) if po_check_path else None
 
-
-po_df = safe_read_csv(po_check_path) if po_check_path.exists() else None
-
 # Model comparison (optional; if exists we will use it)
-mc_path_3 = TABLES_DIR / "model_comparison_confianza_3.csv"
-mc_path_5 = TABLES_DIR / "model_comparison_confianza_idx_round.csv"
+mc_path_3 = TABLES_DIR / "tabla_modelos_tesis_confianza_3.csv"
+mc_path_5 = TABLES_DIR / "tabla_modelos_tesis_confianza_idx_round.csv"
 
 mc_df = safe_read_csv(mc_path_3)
 if mc_df is None or mc_df.empty:
@@ -328,12 +325,19 @@ title = doc.add_paragraph()
 title.alignment = WD_ALIGN_PARAGRAPH.CENTER
 t = title.add_run("RESULTADOS DEL MODELADO PREDICTIVO")
 t.bold = True
-t.font.size = Pt(18)
-t.font.color.rgb = RGBColor(0x2E, 0x75, 0xB6)
+t.font.size = Pt(16)
+t.font.color.rgb = RGBColor(0, 0, 0)
 
 sub = doc.add_paragraph()
 sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
 s = sub.add_run("Percepción ciudadana: confianza y uso de IA en campañas políticas digitales")
+nota = doc.add_paragraph()
+nota.alignment = WD_ALIGN_PARAGRAPH.CENTER
+run = nota.add_run(
+    "Documento generado automáticamente como anexo técnico del pipeline de análisis reproducible."
+)
+run.italic = True
+run.font.size = Pt(10)
 s.font.size = Pt(13)
 s.font.color.rgb = RGBColor(0x59, 0x56, 0x59)
 
@@ -373,8 +377,7 @@ p.add_run("modelo no lineal en alta dimensión; fuerte capacidad predictiva pero
 p = doc.add_paragraph()
 p.add_run("Regresión Logística Ordinal: ").bold = True
 p.add_run(
-    "modelo cumulative link. En entrenamiento, CV interna (k=5) selecciona logit/probit "
-    "por mejor Kappa QW (QWK) para alinearlo con escala Likert."
+    "modelo de enlace acumulativo. En entrenamiento, una validación cruzada interna (k=5) seleccionó la distribución logit o probit según el mayor valor de Kappa cuadrático ponderado (QWK), en coherencia con la naturaleza ordinal de la escala Likert."
 )
 doc.add_paragraph()
 
@@ -409,19 +412,20 @@ doc.add_paragraph(
 if df_main_models is not None and not df_main_models.empty:
     rows = []
     for _, r in df_main_models.iterrows():
+
         rows.append([
             r.get("Modelo", "—"),
-            r.get("Accuracy", "—"),
-            r.get("F1_weighted", "—"),
-            r.get("QWK", "—"),
-            r.get("MAE_ordinal", "—"),
-            r.get("AUC_OVR", "—"),
-            r.get("Tiempo(s)", "—"),
+            r.get("Exactitud", r.get("Accuracy", "—")),
+            r.get("F1 ponderado", r.get("F1_weighted", "—")),
+            r.get("Kappa cuadrático ponderado", r.get("QWK", "—")),
+            r.get("MAE ordinal", r.get("MAE_ordinal", "—")),
+            r.get("AUC OvR", r.get("AUC_OVR", "—")),
+            r.get("Tiempo de ejecución (s)", r.get("Tiempo(s)", "—")),
             r.get("Interpretabilidad", "—"),
         ])
     add_styled_table(
         doc,
-        ["Modelo", "Accuracy", "F1-w", "QWK", "MAE", "AUC", "Tiempo", "Interpretabilidad"],
+        ["Modelo", "Exactitud", "F1 ponderado", "QWK", "MAE ordinal", "AUC OvR", "Tiempo (s)", "Interpretabilidad"],
         rows,
         col_widths_cm=[4.2, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 3.2],
     )
@@ -531,7 +535,8 @@ else:
     # Show max_abs_diff + first thresholds (up to 3)
     show_thr = thr_cols[: min(3, len(thr_cols))]
     for _, r in top.iterrows():
-        row = [str(r.get("term", ""))[:55], fmt_num(r.get("max_abs_diff"), 3)]
+        term_pretty = prettify_and_shorten(r.get("term", ""), max_len=55)
+        row = [term_pretty, fmt_num(r.get("max_abs_diff"), 3)]
         for c in show_thr:
             row.append(fmt_num(r.get(c), 3))
         rows.append(row)
@@ -550,8 +555,7 @@ else:
     top = fi_df.sort_values("importance", ascending=False).head(15).copy()
     rows = []
     for i, (_, r) in enumerate(top.iterrows(), 1):
-        feat = str(r.get("feature", ""))
-        feat = feat if len(feat) <= 70 else feat[:70] + "…"
+        feat = prettify_and_shorten(r.get("feature", ""), max_len=65)
         rows.append([i, feat, fmt_num(r.get("importance"), 4)])
     add_styled_table(doc, ["#", "Variable", "Importancia"], rows, col_widths_cm=[1.0, 12.0, 3.0])
 
@@ -561,43 +565,61 @@ doc.add_page_break()
 doc.add_heading("7. Visualizaciones", level=1)
 
 # Confusion matrices from sklearn figs
-doc.add_heading("7.1 Matrices de Confusión (Sklearn)", level=2)
-cm_files = sorted(FIG_DIR.glob("cm_*.png"))
-if not cm_files:
-    doc.add_paragraph("No se encontraron cm_*.png.")
+doc.add_heading("7.1 Matriz de confusión del modelo principal", level=2)
+rf_cm = sorted(FIG_DIR.glob("cm_random_forest*.png"))
+if rf_cm:
+    doc.add_picture(str(rf_cm[-1]), width=Inches(4.4))
+    doc.add_paragraph(
+    "La matriz de confusión muestra que el modelo Random Forest concentra la mayor proporción de aciertos en las categorías intermedias, con menor precisión en las clases extremas."
+    )
+    doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
 else:
-    for cm in cm_files:
-        doc.add_paragraph(cm.stem.replace("cm_", "").replace("_", " "), style=None)
-        doc.add_picture(str(cm), width=Inches(4.6))
-        doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
+    doc.add_paragraph("No se encontró la matriz de confusión del modelo Random Forest.")
 
-# RF importance fig
-rf_fig = sorted(FIG_DIR.glob("rf_feature_importance_*.png"))
-if rf_fig:
-    doc.add_heading("7.2 Importancia de Variables (RF)", level=2)
-    doc.add_picture(str(rf_fig[0]), width=Inches(6.0))
+# Confusion matrices from ordinal figs
+doc.add_heading("7.2 Matriz de confusión del modelo ordinal", level=2)
+ord_cm = sorted(ORD_FIG_DIR.glob("cm_*.png"))
+if ord_cm:
+    doc.add_picture(str(ord_cm[-1]), width=Inches(4.4))
+    doc.add_paragraph(
+    "El modelo ordinal reproduce parcialmente la estructura ordenada de la variable dependiente, aunque conserva dificultades para discriminar completamente entre niveles adyacentes."
+    )
     doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
 
-# Ordinal figs
-doc.add_heading("7.3 Figuras del Modelo Ordinal", level=2)
-ord_figs = sorted(ORD_FIG_DIR.glob("*.png"))
-if not ord_figs:
-    doc.add_paragraph("No se encontraron figuras ordinales.")
+# RF importance fig
+rf_fig = sorted(FIG_DIR.glob("rf_feature_importance_top10_*.png"))
+if rf_fig:
+    doc.add_heading("7.3 Importancia de variables del modelo Random Forest", level=2)
+    doc.add_picture(str(rf_fig[-1]), width=Inches(6.2))
+    doc.add_paragraph(
+    "La figura resume las diez variables con mayor contribución al modelo Random Forest, útiles para identificar los factores más influyentes en la predicción de la confianza electoral."
+    )
+    doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
 else:
-    for f in ord_figs:
-        doc.add_paragraph(f.stem.replace("_", " "))
-        doc.add_picture(str(f), width=Inches(5.2))
-        doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
+    doc.add_paragraph("No se encontró la figura top 10 de importancia de variables.")
+
+
+# Ordinal figs
+or_fig = sorted(ORD_FIG_DIR.glob("or_top_*.png"))
+if or_fig:
+    doc.add_heading("7.4 Efectos principales del modelo ordinal", level=2)
+    doc.add_picture(str(or_fig[-1]), width=Inches(6.2))
+    doc.add_paragraph(
+    "El gráfico de odds ratios presenta los efectos principales estimados por el modelo ordinal junto con sus intervalos de confianza al 95%, facilitando la interpretación sustantiva de las asociaciones."
+    )
+    doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
+else:
+    doc.add_paragraph("No se encontraron figuras ordinales.")
 
 doc.add_page_break()
 
 # ---- Conclusions ----
-doc.add_heading("8. Conclusiones Preliminares", level=1)
+doc.add_heading("8. Síntesis técnica para anexos", level=1)
 concs = [
-    "Los modelos se evaluaron con split 70/30 estratificado y 5 semillas para estabilidad.",
-    "Se reportan métricas ordinales (QWK y MAE) para respetar la naturaleza Likert del target.",
-    "La regresión ordinal selecciona logit/probit por QWK mediante CV interna (k=5).",
-    "La interpretabilidad se prioriza reportando importancias (RF) y, en ordinal, OR + IC95% (si aplica).",
+    "El pipeline permite reproducir la limpieza, transformación, modelado y evaluación de los datos.",
+    "Los modelos fueron evaluados con partición estratificada 70/30 y cinco semillas para estimar estabilidad.",
+    "Las métricas QWK y MAE ordinal se incluyeron para respetar la naturaleza ordinal de la variable dependiente.",
+    "El reporte constituye un anexo técnico y no reemplaza la redacción analítica del capítulo de resultados.",
 ]
 for c in concs:
     doc.add_paragraph(c, style="List Bullet")

@@ -12,6 +12,7 @@ import sys
 from pathlib import Path
 
 from scipy.stats import loguniform
+from src.plotting_style import set_paper_style, save_figure, prettify_and_shorten
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -44,26 +45,24 @@ from sklearn.ensemble import RandomForestClassifier, HistGradientBoostingClassif
 from sklearn.svm import SVC
 from sklearn.linear_model import LogisticRegression
 from sklearn.base import clone
-from src.plotting_style import set_paper_style, save_figure
 import argparse
 
 
 # =========================
 # CONFIG
 # =========================
-INPUT_PATH = "data/processed/encuestas/model_ready.csv"
+parser = argparse.ArgumentParser()
+parser.add_argument("--target", choices=["5", "3"], default="5")
+parser.add_argument("--input", default="data/processed/encuestas/model_ready_no_text.csv")
+args = parser.parse_args()
+
+INPUT_PATH = args.input
+USE_TARGET_3 = (args.target == "3")
 
 #pruebas 
 FAST_DEBUG = False  # True = prueba rápida; False = corrida final tesis
 
 TARGET_5 = "confianza_idx_round"   # 1..5
-
-parser = argparse.ArgumentParser()
-parser.add_argument("--target", choices=["5", "3"], default="5")
-args = parser.parse_args()
-
-USE_TARGET_3 = (args.target == "3")
-
 
 TEST_SIZE = 0.30                   # 70/30
 N_SPLITS = 5 if not FAST_DEBUG else 3                   # CV interno
@@ -72,7 +71,7 @@ N_JOBS = 1                         # estabilidad Windows/OneDrive
 SEEDS = [0, 7, 13, 21, 42] if not FAST_DEBUG else [0]
 
 # Feature selection
-USE_FEATURE_SELECTION = True
+USE_FEATURE_SELECTION = False
 FS_THRESHOLD = "mean"
 
 
@@ -169,12 +168,11 @@ def plot_confusion_matrix_paper(cm, labels, title, out_path_base, normalize="tru
     if normalize == "true":
         row_sums = cm.sum(axis=1, keepdims=True)
         show = np.divide(cm, row_sums, out=np.zeros_like(cm), where=row_sums != 0)
-        fmt = lambda v: f"{v*100:.0f}%"
     else:
         show = cm
-        fmt = lambda v: f"{int(v)}"
 
-    fig, ax = plt.subplots(figsize=(4.2, 3.6), constrained_layout=True)
+
+    fig, ax = plt.subplots(figsize=(3.45, 3.2), constrained_layout=True)
     im = ax.imshow(show, interpolation="nearest", cmap="Blues")
 
     # ticks
@@ -191,7 +189,11 @@ def plot_confusion_matrix_paper(cm, labels, title, out_path_base, normalize="tru
     # anotaciones
     for i in range(show.shape[0]):
         for j in range(show.shape[1]):
-            ax.text(j, i, fmt(show[i, j]), ha="center", va="center", fontsize=8)
+            if normalize == "true":
+                txt = f"{show[i, j]*100:.0f}%\n(n={int(cm[i, j])})"
+            else:
+                txt = f"{int(show[i, j])}"    
+            ax.text(j, i, txt, ha="center", va="center", fontsize=7)
 
     # barra de color solo si normalizas (más interpretable)
     if normalize == "true":
@@ -205,21 +207,38 @@ def plot_confusion_matrix_paper(cm, labels, title, out_path_base, normalize="tru
 
 
 
-def plot_rf_importance(fi_df, top_n, title, out_path):
-    plt.figure(figsize=(14, 10))
+def plot_rf_importance(fi_df, top_n, title, out_path_base):
     top = fi_df.head(top_n).copy()
 
-    def shorten(s, n=90):
-        s = str(s)
-        return s if len(s) <= n else s[:n] + "…"
+    top["feature_short"] = top["feature"].apply(
+        lambda x: prettify_and_shorten(x, max_len=38 if top_n <= 10 else 44)
+    )
 
-    labels = [shorten(x) for x in top["feature"][::-1]]
-    plt.barh(labels, top["importance"][::-1])
-    plt.title(title)
-    plt.xlabel("Importancia")
-    plt.tight_layout()
-    plt.savefig(out_path, dpi=150, bbox_inches="tight")
-    plt.close()
+   
+    fig_height = 4.6 if top_n <= 10 else 7.0
+    fig_width = 6.8 if top_n <= 10 else 7.4
+
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+
+    ax.barh(top["feature_short"][::-1], top["importance"][::-1])
+    ax.set_xlabel("Importancia de Variable")
+    ax.set_ylabel("")
+    ax.set_title(title, pad=10)
+    ax.tick_params(axis="y", labelsize=8)
+    ax.tick_params(axis="x", labelsize=8)
+
+    plt.subplots_adjust(left=0.42, right=0.98, top=0.90, bottom=0.10)
+
+    save_figure(
+        fig,
+        Path(out_path_base),
+        dpi=600,
+        save_png=True,
+        save_pdf=True,
+        save_svg=False
+    )
+    plt.close(fig)
+
 
 
 # =========================
@@ -614,10 +633,24 @@ for model_name, cfg in models.items():
         if seed == SEEDS[0]:
             report = classification_report(y_test, y_pred, zero_division=0)
             cm = confusion_matrix(y_test, y_pred, labels=labels)
-            lab = class_labels(USE_TARGET_3)
 
+            row_sums = cm.sum(axis=1, keepdims=True)
+            recall_by_class = np.divide(
+                cm.diagonal(),
+                row_sums.flatten(),
+                out=np.zeros(len(labels), dtype=float),
+                where=row_sums.flatten() != 0
+            )
+
+            pd.DataFrame({
+                "class": labels,
+                "recall": recall_by_class
+            }).to_csv(DIR_TABLES / f"class_recall_{model_name}_{RUN_ID}.csv", index=False, encoding="utf-8-sig")
+            
+            
+            lab = class_labels(USE_TARGET_3)
             cm_path_base = str(DIR_FIGURES / f"cm_{model_name}_{RUN_ID}_norm")
-            short_title = f"Confusion matrix (row-normalized)"
+            short_title = f"Matriz de confusión normalizada"
             plot_confusion_matrix_paper(cm, labels=lab, title=short_title, out_path_base=cm_path_base, normalize="true")
 
 
@@ -625,6 +658,12 @@ for model_name, cfg in models.items():
 
             model_path = DIR_MODELS / f"{model_name}_{RUN_ID}.joblib"
             joblib.dump(best_model, model_path)
+
+            params_path = DIR_MODELS / f"{model_name}_{RUN_ID}_params.json"
+            params_path.write_text(
+                json.dumps(best_params, ensure_ascii=False, indent=2),
+                encoding="utf-8"
+            )
 
             # Importancia RF: solo si el clasificador final es RF
             if model_name == "random_forest":
@@ -648,8 +687,11 @@ for model_name, cfg in models.items():
                     fi_csv = DIR_TABLES / f"rf_feature_importance_{RUN_ID}.csv"
                     fi_df.to_csv(fi_csv, index=False, encoding="utf-8-sig")
 
-                    fi_png = DIR_FIGURES / f"rf_feature_importance_{RUN_ID}.png"
-                    plot_rf_importance(fi_df, top_n=20, title="Importancia de variables – Random Forest", out_path=str(fi_png))
+                    fi_png_10 = DIR_FIGURES / f"rf_feature_importance_top10_{RUN_ID}.png"
+                    plot_rf_importance(fi_df, top_n=10, title="Variables más influyentes (Random Forest)", out_path_base=fi_png_10)
+                    
+                    fi_png_20 = DIR_FIGURES / f"rf_feature_importance_top20_{RUN_ID}.png"
+                    plot_rf_importance(fi_df, top_n=20, title="Variables más influyentes (anexo)", out_path_base=fi_png_20)
 
                     rf_importance_saved = True
                     print("Importancia RF guardada:", fi_csv)
@@ -702,6 +744,33 @@ latest_dir = Path("outputs") / "latest"
 if latest_dir.exists():
     shutil.rmtree(latest_dir)
 shutil.copytree(RUN_DIR, latest_dir)
+
+# =========================
+# RESUMEN METODOLÓGICO
+# =========================
+
+methodology_summary = {
+    "configuracion": "principal_5_niveles" if not USE_TARGET_3 else "complementaria_3_clases",
+    "split": "70% entrenamiento / 30% validación",
+    "validacion": "Stratified K-Fold interno",
+    "n_splits": N_SPLITS,
+    "seeds": SEEDS,
+    "target": target_col,
+    "metricas": [
+        "accuracy",
+        "f1_macro",
+        "f1_weighted",
+        "mae_ordinal",
+        "kappa_qw",
+        "auc_ovr"
+    ],
+    "nota": "El modelado tiene carácter exploratorio y no causal. En la tesis se reportan principalmente Random Forest, SVM-RBF y regresión logística ordinal."
+}
+
+(DIR_LOGS / "methodology_summary.json").write_text(
+    json.dumps(methodology_summary, ensure_ascii=False, indent=2),
+    encoding="utf-8"
+)
 
 print("\n====================================")
 print("Listo. Archivos generados:")

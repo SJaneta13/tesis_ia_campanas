@@ -83,6 +83,17 @@ def main():
 
     outfile = outdir / args.outfile
     out_df.to_csv(outfile, index=False, encoding="utf-8-sig")
+
+    summary = pd.DataFrame([{
+    "input": args.input,
+    "text_col": args.text_col,
+    "lang": args.lang,
+    "n_docs": len(df),
+    "n_tokens": len(tokens),
+    "top_n": args.top
+    }])
+    summary.to_csv(outdir / "frequency_summary.csv", index=False, encoding="utf-8-sig")
+    
     print(f"[DONE] Frequency analysis saved to {outfile}")
 
 

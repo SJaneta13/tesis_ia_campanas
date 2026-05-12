@@ -66,6 +66,7 @@ def main():
     # 1) Sentimiento por caso (%)
     # =========================
     pct_case = pct_table(df, ["case_id"])
+    pct_case.to_csv(outdir / "sentiment_by_case.csv", index=False, encoding="utf-8-sig")
     fig1 = px.bar(
         pct_case, x="case_id", y="pct", color="sentiment_label",
         category_orders={"sentiment_label": ORDER},
@@ -80,6 +81,7 @@ def main():
     # =========================
     df["ai_group"] = df["is_ai_related"].map({True: "IA", False: "No IA"})
     pct_ai = pct_table(df, ["case_id", "ai_group"])
+    pct_ai.to_csv(outdir / "ai_vs_non_ai_by_case.csv", index=False, encoding="utf-8-sig")
     fig2 = px.bar(
         pct_ai, x="ai_group", y="pct", color="sentiment_label",
         facet_col="case_id",
@@ -103,6 +105,8 @@ def main():
     weekly = weekly.merge(tot, on=["case_id","week","ai_group"], how="left")
     weekly["pct"] = (weekly["count"] / weekly["total"] * 100).round(1)
     neg = weekly[weekly["sentiment_label"].str.lower() == "negativo"].copy()
+
+    neg.to_csv(outdir / "sentiment_timeseries_weekly.csv", index=False, encoding="utf-8-sig")
 
     fig3 = px.line(
         neg, x="week", y="pct", color="ai_group", facet_col="case_id",

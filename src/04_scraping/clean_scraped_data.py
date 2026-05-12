@@ -72,8 +72,10 @@ def main():
     df["run_id"] = run_id
     df["stage"] = "clean"
 
+
     out = df[
-        ["platform", "url", "published_at", "date", "domain", "language", "title", "text", "query", "is_ai_related"]
+    ["case_id", "run_id", "stage", "platform", "url", "published_at", "date",
+     "domain", "language", "title", "text", "query", "is_ai_related"]
     ].copy()
 
     outpath = Path(args.out)

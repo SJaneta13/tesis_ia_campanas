@@ -34,7 +34,7 @@ from sklearn.metrics import (
 )
 from statsmodels.miscmodels.ordinal_model import OrderedModel
 
-from src.plotting_style import set_paper_style, save_figure, prettify_feature_name, shorten
+from src.plotting_style import set_paper_style, save_figure, prettify_and_shorten
 
 
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -70,7 +70,13 @@ print("Guardando figuras ordinal en:", FIG_DIR)
 # =========================
 # CONFIG (alineado con 03_modeling.py y tesis)
 # =========================
-INPUT_PATH = "data/processed/encuestas/model_ready.csv"
+parser = argparse.ArgumentParser()
+parser.add_argument("--target", choices=["5", "3"], default="5")
+parser.add_argument("--input", default="data/processed/encuestas/model_ready_no_text.csv")
+args = parser.parse_args()
+
+INPUT_PATH = args.input
+RUN_TARGET = args.target
 
 TARGET_5 = "confianza_idx_round"  # 1..5
 TEST_SIZE = 0.30  # Tesis: 70% train / 30% validación
@@ -80,10 +86,6 @@ N_SPLITS = 5  # k-fold interno para comparación logit vs probit
 SEEDS = [0, 7, 13, 21, 42]
 
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--target", choices=["5", "3"], default="5")
-args = parser.parse_args()
-RUN_TARGET = args.target
 
 
 # =========================
@@ -185,6 +187,8 @@ def check_proportional_odds_exploratory(X_train, y_train, n_classes, out_path):
     coef_df = coef_df.sort_values("max_abs_diff", ascending=False)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     coef_df.to_csv(out_path, index=False, encoding="utf-8-sig")
+
+
     return coef_df
 
 
@@ -296,7 +300,10 @@ def plot_confusion_matrix_norm(
     else:
         raise ValueError("normalize must be 'true', 'pred', or None")
 
-    fig, ax = plt.subplots(figsize=(3.6, 3.2))
+
+    fig, ax = plt.subplots(figsize=(3.6, 3.3))
+    plt.subplots_adjust(left=0.18, right=0.95, top=0.88, bottom=0.14)
+
     im = ax.imshow(
         cm,
         interpolation="nearest",
@@ -305,7 +312,7 @@ def plot_confusion_matrix_norm(
         vmax=1 if do_norm else None,
     )
 
-    ax.set_xlabel("Prediccion")
+    ax.set_xlabel("Predicción")
     ax.set_ylabel("Real")
     ax.set_xticks(range(len(labels)))
     ax.set_yticks(range(len(labels)))
@@ -313,7 +320,7 @@ def plot_confusion_matrix_norm(
     ax.set_yticklabels(labels)
 
     cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
-    cbar.set_label("Proportion" if do_norm else "Count")
+    cbar.set_label("Proporción" if do_norm else "Conteo")
 
     for i in range(cm.shape[0]):
         for j in range(cm.shape[1]):
@@ -352,24 +359,32 @@ def plot_or_forest(coef_df: pd.DataFrame, out_base: Path, *, top_n=10):
     d = d.replace([np.inf, -np.inf], np.nan).dropna(subset=["odds_ratio", "or_ci_low", "or_ci_high"]).copy()
 
     # pretty labels
-    d["term_pretty"] = d["term"].apply(lambda s: shorten(prettify_feature_name(s), 52))
+    d["term_pretty"] = d["term"].apply(lambda s: prettify_and_shorten(s, max_len=42))
 
     d["rank_key"] = np.abs(np.log(d["odds_ratio"].clip(1e-9)))
     d = d.sort_values("rank_key", ascending=False).head(top_n).iloc[::-1]
 
-    fig, ax = plt.subplots(figsize=(6.8, 3.6))
+    fig, ax = plt.subplots(figsize=(7.2, 4.8))
+
     ax.errorbar(
         d["odds_ratio"],
         d["term_pretty"],
-        xerr=[d["odds_ratio"] - d["or_ci_low"], d["or_ci_high"] - d["odds_ratio"]],
+        xerr=[d["odds_ratio"] - d["or_ci_low"], 
+              d["or_ci_high"] - d["odds_ratio"]],
         fmt="o",
-        capsize=2,
+        capsize=3,
+        linewidth=1.2
     )
     ax.axvline(1.0, linestyle="--", linewidth=1)
     ax.set_xscale("log")
-    ax.set_xlabel("Odds Ratio (log scale)")
+    ax.set_xlabel("Odds Ratio (escala log)")
     ax.set_ylabel("")
-    ax.set_title("Top effects (OR with 95% CI)")
+    ax.set_title("Efectos principales del modelo ordinal", pad=10)
+    ax.tick_params(axis="y", labelsize=8)
+    ax.tick_params(axis="x", labelsize=8)
+
+    plt.subplots_adjust(left=0.44, right=0.97, top=0.88, bottom=0.14)
+
 
     save_figure(fig, out_base, dpi=600, save_png=True, save_pdf=True, save_svg=True)
     plt.close(fig)
@@ -522,6 +537,8 @@ def run_ordinal_multi_seed(target_col, n_classes, tag):
             {
                 "run_id": last_run.replace("run_", ""),
                 "model": "ordinal_logit",
+                "model_label": "Regresión logística ordinal",
+                "role_tesis": "Modelo interpretativo",
                 "seed": seed,
                 "target": tag,
                 "n_classes": n_classes,
@@ -600,6 +617,45 @@ def run_ordinal_multi_seed(target_col, n_classes, tag):
                 index=False,
                 encoding="utf-8-sig",
             )
+
+            coef_tesis = coef_df.copy()
+
+            coef_tesis = coef_tesis[
+                ~coef_tesis["term"].astype(str).str.contains(
+                    "cut|threshold", case=False, regex=True, na=False
+                )
+            ].copy()
+
+            coef_tesis["variable"] = coef_tesis["term"]
+            coef_tesis["coef"] = coef_tesis["coef"].round(4)
+            coef_tesis["odds_ratio"] = coef_tesis["odds_ratio"].round(4)
+
+            if "or_ci_low" in coef_tesis.columns and "or_ci_high" in coef_tesis.columns:
+                coef_tesis["or_ci_low"] = coef_tesis["or_ci_low"].round(4)
+                coef_tesis["or_ci_high"] = coef_tesis["or_ci_high"].round(4)
+
+            coef_tesis.to_csv(
+                OUT_DIR / f"tabla_odds_ratio_tesis_{tag}.csv",
+                index=False,
+                encoding="utf-8-sig"
+            )
+            
+
+            coef_top = coef_df.copy()
+            coef_top = coef_top[
+                ~coef_top["term"].astype(str).str.contains("cut|threshold", case=False, regex=True, na=False)
+            ].copy()
+
+            coef_top["abs_log_or"] = np.abs(np.log(coef_top["odds_ratio"].clip(lower=1e-9)))
+            coef_top = coef_top.sort_values("abs_log_or", ascending=False).head(10)
+
+            coef_top.to_csv(
+                OUT_DIR / f"coefficients_top10_{tag}.csv",
+                index=False,
+                encoding="utf-8-sig"
+            )
+
+
             or_base = FIG_DIR / f"or_top_{tag}"
             plot_or_forest(coef_df, out_base=or_base, top_n=10)
 
@@ -630,6 +686,8 @@ def run_ordinal_multi_seed(target_col, n_classes, tag):
     summary_row = {
         "run_id": last_run.replace("run_", ""),
         "model": "ordinal_logit",
+        "role_tesis": "Modelo interpretativo",
+        "interpretacion_tesis": "Modelo usado por la naturaleza ordinal de la variable dependiente; permite interpretar asociaciones mediante odds ratios.",
         "target": tag,
         "n_classes": n_classes,
         "n_total": int(len(df)),
@@ -678,6 +736,30 @@ df_run.to_csv(OUT_DIR / "metrics.csv", index=False, encoding="utf-8-sig")
 
 (OUT_DIR / "metrics.json").write_text(
     df_run.to_json(orient="records", force_ascii=False, indent=2), encoding="utf-8"
+)
+
+ordinal_methodology = {
+    "modelo": "Regresión logística ordinal",
+    "tipo": "Modelo interpretativo",
+    "libreria": "statsmodels OrderedModel",
+    "target": RUN_TARGET,
+    "split": "70% entrenamiento / 30% validación",
+    "validacion": "5 semillas y validación cruzada interna para seleccionar logit/probit",
+    "metricas": [
+        "accuracy",
+        "f1_weighted",
+        "f1_macro",
+        "mae_ordinal",
+        "kappa_qw",
+        "auc_ovr"
+    ],
+    "supuesto_evaluado": "Proportional odds mediante chequeo exploratorio por umbrales",
+    "nota": "El modelo ordinal se usa como modelo interpretativo y no como único criterio predictivo."
+}
+
+(OUT_DIR / "ordinal_methodology_summary.json").write_text(
+    json.dumps(ordinal_methodology, ensure_ascii=False, indent=2),
+    encoding="utf-8"
 )
 
 print("\n" + "=" * 50)

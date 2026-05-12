@@ -6,7 +6,7 @@
 #   3. Regresión Logística Ordinal
 #
 # Métricas: accuracy, f1_weighted, f1_macro, kappa_qw, AUC, MAE, tiempo
-# Ranking: f1_weighted → kappa_qw → accuracy (descendente)
+# Ranking: QWK → F1 ponderado → accuracy (descendente)
 # ============================================================================
 
 import numpy as np
@@ -18,6 +18,8 @@ import matplotlib.pyplot as plt
 
 from pathlib import Path
 
+from src.plotting_style import set_paper_style, save_figure
+set_paper_style()
 
 # =========================
 # Locate latest run
@@ -157,10 +159,29 @@ df_ord_out = df_ord_out[df_ord_out["variant"].astype(str) == PRIMARY_ORD].copy()
 # 3) Combine and rank
 # =========================
 df_all = pd.concat([df_sk_out, df_ord_out], ignore_index=True)
+keep_main = ["random_forest", "svm_rbf", "ordinal_logit"]
+df_all = df_all[df_all["model"].isin(keep_main)].copy()
+
+
+role_map = {
+    "random_forest": "Modelo predictivo principal",
+    "svm_rbf": "Modelo comparativo",
+    "ordinal_logit": "Modelo interpretativo"
+}
+df_all["rol_tesis"] = df_all["model"].map(role_map)
+
+model_names_tesis = {
+    "random_forest": "Random Forest",
+    "svm_rbf": "SVM-RBF",
+    "ordinal_logit": "Regresión logística ordinal"
+}
+
+df_all["modelo_tesis"] = df_all["model"].map(model_names_tesis)
+
 
 # Ranking: f1_weighted → kappa_qw → accuracy (descendente)
 df_all = df_all.sort_values(
-    ["f1_weighted", "kappa_qw", "accuracy"], ascending=False
+    ["kappa_qw", "f1_weighted", "accuracy"], ascending=False
 )
 
 # Guardar tabla consolidada
@@ -168,7 +189,7 @@ out_csv = OUT_DIR / "metrics_compare_all_models.csv"
 df_all.to_csv(out_csv, index=False, encoding="utf-8-sig")
 
 print("\nTabla consolidada guardada en:", out_csv)
-print("\nTop modelos (ordenado por f1_weighted, kappa_qw, accuracy):")
+print("\nTop modelos (ordenado por QWK, F1 ponderado, accuracy):")
 print(df_all.to_string(index=False))
 
 
@@ -179,7 +200,7 @@ best = df_all.iloc[0].to_dict()
 
 best_txt = OUT_DIR / "best_overall_model.txt"
 best_txt.write_text(
-    "Mejor modelo global (criterio: f1_weighted, luego kappa_qw, luego accuracy)\n"
+    "Mejor modelo global (criterio: QWK, luego F1 ponderado, luego accuracy)\n"
     f"run: {RUN_DIR.name}\n"
     f"split: 70/30, CV: k=5, seeds: [0,7,13,21,42]\n\n"
     f"{best}\n",
@@ -195,30 +216,43 @@ print("Guardado en:", best_txt)
 # 5) Plot comparativo F1-weighted
 # =========================
 def short_label(row):
-    if row["family"] == "sklearn":
-        return f'{row["model"]} ({row["n_classes"]}c)'
-    return f'ordinal_logit ({row["n_classes"]}c)'
+    model_map = {
+        "random_forest": "Random Forest",
+        "svm_rbf": "SVM-RBF",
+        "ordinal_logit": "Regresión ordinal",
+    }
+    base = model_map.get(row["model"], row["model"])
+    return f"{base} ({row['n_classes']} clases)"
 
 
 df_plot = df_all.copy()
 df_plot["label"] = df_plot.apply(short_label, axis=1)
 
-fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
-# Subplot 1: F1-weighted
-axes[0].barh(df_plot["label"][::-1], df_plot["f1_weighted"][::-1])
-axes[0].set_xlabel("F1-weighted")
-axes[0].set_title("Comparación de modelos (F1-weighted)")
+fig, ax = plt.subplots(figsize=(6.6, 3.8))
 
-# Subplot 2: Kappa QW
-axes[1].barh(df_plot["label"][::-1], df_plot["kappa_qw"][::-1], color="orange")
-axes[1].set_xlabel("Kappa QW")
-axes[1].set_title("Comparación de modelos (Kappa QW)")
 
-plt.tight_layout()
+ypos = np.arange(len(df_plot))
+
+ax.barh(ypos, df_plot["f1_weighted"], height=0.30, label="F1 ponderado")
+ax.barh(ypos + 0.36, df_plot["kappa_qw"], height=0.30, label="QWK")
+
+ax.set_yticks(ypos + 0.17)
+ax.set_yticklabels(df_plot["label"])
+ax.tick_params(axis="y", labelsize=8)
+ax.tick_params(axis="x", labelsize=8)
+ax.set_xlabel("Valor de la métrica")
+ax.set_ylabel("")
+ax.set_title("Comparación de desempeño entre modelos", pad=10)
+ax.legend(fontsize=8, frameon=True)
+
+plt.subplots_adjust(left=0.36, right=0.97, top=0.88, bottom=0.14)
+
 plot_path = RUN_DIR / "figures" / "compare_models.png"
-plt.savefig(plot_path, dpi=150, bbox_inches="tight")
+save_figure(fig, plot_path, dpi=600, save_png=True, save_pdf=True, save_svg=False)
+
 plt.close()
+
 print("Gráfico guardado en:", plot_path)
 
 
@@ -227,13 +261,17 @@ print("Gráfico guardado en:", plot_path)
 # =========================
 auc_vals = df_plot["auc_ovr"].dropna()
 if len(auc_vals) > 0 and not all(np.isnan(v) for v in auc_vals):
-    plt.figure(figsize=(9, 5))
-    plt.barh(df_plot["label"][::-1], df_plot["auc_ovr"].fillna(0)[::-1], color="green")
-    plt.xlabel("AUC (OvR weighted)")
-    plt.title("Comparación de modelos (AUC)")
-    plt.tight_layout()
+    fig, ax = plt.subplots(figsize=(6.2, 3.4))
+
+    ax.barh(df_plot["label"][::-1], df_plot["auc_ovr"].fillna(0)[::-1])
+    ax.set_xlabel("AUC OvR")
+    ax.set_ylabel("")
+    ax.set_title("Comparación de AUC entre modelos", pad=10)
+    ax.tick_params(axis="y", labelsize=8)
+    ax.tick_params(axis="x", labelsize=8)
     auc_path = RUN_DIR / "figures" / "compare_auc.png"
-    plt.savefig(auc_path, dpi=150, bbox_inches="tight")
+    save_figure(fig, auc_path, dpi=600, save_png=True, save_pdf=True, save_svg=False)
+
     plt.close()
     print("Gráfico AUC guardado en:", auc_path)
 
@@ -241,8 +279,20 @@ if len(auc_vals) > 0 and not all(np.isnan(v) for v in auc_vals):
 # =========================
 # 7) Tabla resumen para tesis (formato LaTeX-friendly)
 # =========================
-thesis_cols = ["model", "n_classes", "accuracy", "f1_weighted", "kappa_qw", "auc_ovr", "time_seconds"]
+thesis_cols = [
+    "modelo_tesis",
+    "rol_tesis",
+    "model",
+    "n_classes",
+    "accuracy",
+    "f1_weighted",
+    "f1_macro",
+    "kappa_qw",
+    "mae_ordinal",
+    "auc_ovr",
+    "time_seconds",
+]
 existing_cols = [c for c in thesis_cols if c in df_all.columns]
-df_thesis = df_all[existing_cols].copy()
+df_thesis = df_all[["modelo_tesis"] + existing_cols].copy()
 df_thesis.to_csv(OUT_DIR / "tabla_resumen_tesis.csv", index=False, encoding="utf-8-sig")
 print("\nTabla resumen tesis guardada en:", OUT_DIR / "tabla_resumen_tesis.csv")

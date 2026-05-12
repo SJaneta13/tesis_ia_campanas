@@ -16,7 +16,7 @@ def set_paper_style():
     """
     mpl.rcParams.update({
         "font.family": "DejaVu Sans",   # alternativa: "Arial" si la tienes instalada
-        "font.size": 9,
+        "font.size": 8,
         "axes.titlesize": 9,
         "axes.labelsize": 9,
         "xtick.labelsize": 8,
@@ -53,29 +53,116 @@ def save_figure(fig, out_base: Path, *,
         fig.savefig(str(out_base.with_suffix(".png")), bbox_inches="tight", dpi=dpi, transparent=transparent)
 
 # ---------- 3) Utilidades de texto ----------
-def shorten(text: str, max_len: int = 42) -> str:
+def shorten(text: str, max_len: int = 60) -> str:
     text = str(text)
-    return text if len(text) <= max_len else text[:max_len-1] + "…"
+    if max_len <= 1:
+        return text[:max_len]
+    return text if len(text) <= max_len else text[:max_len - 1].rstrip() + "…"
 
 def prettify_feature_name(name: str, mapping: dict[str, str] | None = None) -> str:
-    """
-    Convierte nombres feos a nombres de paper:
-    - aplica mapping manual si existe
-    - limpia prefijos de OneHot (col=valor)
-    - reemplaza '_' por espacios
-    """
+
     s = str(name)
 
     if mapping and s in mapping:
-        s = mapping[s]
+        return mapping[s]
 
-    # OneHotEncoder suele dar "col_val" o "col=val" según versión.
-    s = s.replace("=", ": ")
-    s = re.sub(r"\s+", " ", s).strip()
+    # Limpieza base
     s = s.replace("_", " ")
-
-    # Limpieza de tokens frecuentes
     s = s.replace("¿", "").replace("?", "")
-    s = s.replace("  ", " ")
+    s = re.sub(r"\s+", " ", s).strip()
+
+    # Casos comunes de variables cortas
+    direct_map = {
+        "edad": "Edad",
+        "genero": "Género",
+        "rol uce": "Rol en la UCE",
+        "conoce ia": "Conocimiento sobre IA",
+        "percibe automatizacion": "Percepción de automatización",
+        "identifica ia": "Identificación de contenido IA",
+        "longitud recomendacion": "Longitud de recomendación abierta",
+        "palabras recomendacion": "Número de palabras en recomendación",
+        "confianza idx round": "Confianza electoral (5 niveles)",
+        "confianza 3": "Confianza electoral (3 clases)",
+        "limpieza num": "Percepción de transparencia electoral",
+        "fraude rev": "Percepción inversa de fraude",
+    }
+
+
+    s_lower = s.lower()
+    if s_lower in direct_map:
+        return direct_map[s_lower]
+
+    # Preguntas largas resumidas
+    replacements = [
+        (
+            "Percepción sobre IA en campañas",
+            "Percepción IA campañas"
+        ),
+        (
+            "Cambio de confianza por bots/deepfakes",
+            "Cambio confianza bots/deepfakes"
+        ),
+        (
+            "Influencia de IA en decisión de voto",
+            "Influencia IA en voto"
+        ),
+        (
+            "Verificación de información antes de compartir",
+            "Verificación antes de compartir"
+        ),
+        (
+            "Conocimiento sobre regulación de IA",
+            "Conocimiento regulación IA"
+        ),
+        (
+            "Apoyo a regulación de IA en campañas",
+            "Apoyo regulación IA"
+        ),
+        (
+            "Dispositivo principal de acceso a internet",
+            "Dispositivo de acceso"
+        ),
+        (
+            "Exposición a contenido político falso o IA",
+            "Exposición a contenido falso/IA"
+        ),
+    ]
+
+    for old, new in replacements:
+        s = s.replace(old, new)
+
+    # Si viene codificado como "pregunta respuesta"
+    # intenta separar en "Pregunta: Respuesta"
+    option_tokens = [
+        "Sí", "No", "A veces", "Siempre", "Nunca", "Rara vez",
+        "No sé", "No sé/no aplica",
+        "Sí, lo he notado claramente",
+        "Tal vez, pero no estoy seguro/a",
+        "Sí, fácilmente",
+        "No estoy seguro/a",
+        "Sí, ahora confío menos",
+        "Sí, ahora confío más",
+        "Smartphone", "Computadora",
+        "Smartphone;Computadora",
+        "Estudiante de pregrado",
+        "Estudiante de posgrado",
+        "Personal administrativo",
+        "Docente",
+        "Daniel Noboa",
+        "Luisa González",
+        "No voté",
+        "Prefiero no responder"
+    ]
+
+    for tok in option_tokens:
+        if s.endswith(" " + tok):
+            base = s[: -len(tok)].strip(" :-")
+            return f"{base}: {tok}"
 
     return s
+
+
+
+def prettify_and_shorten(name: str, max_len: int = 40, mapping: dict[str, str] | None = None) -> str:    
+    s = prettify_feature_name(name, mapping=mapping)
+    return shorten(s, max_len=max_len)

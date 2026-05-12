@@ -15,6 +15,12 @@ def main():
 
     df = pd.read_csv(args.input)
 
+    required = ["is_ai_related", "sentiment_label"]
+    missing = [c for c in required if c not in df.columns]
+
+    if missing:
+        raise KeyError(f"Faltan columnas requeridas: {missing}")
+
     ai = df[df["is_ai_related"] == True]["sentiment_label"].value_counts()
     non_ai = df[df["is_ai_related"] == False]["sentiment_label"].value_counts()
 

@@ -22,10 +22,24 @@ csv_candidates = sorted(
 if csv_candidates:
     selected_csv = csv_candidates[0]
     df = pd.read_csv(selected_csv, encoding="utf-8-sig")
+
+    # ============================
+    # ELIMINAR DATOS PERSONALES (ANONIMIZACIÓN)
+    # ============================
+
+    PII_COLS = [
+        "Nombre de usuario",   # correo del formulario
+    ]
+
+    for col in PII_COLS:
+        if col in df.columns:
+            df = df.drop(columns=[col])
+            print(f"Columna eliminada por anonimización: {col}")
+
     print(f"Usando CSV detectado automáticamente: {selected_csv}")
 elif RAW_PATH_XLSX.exists():
-    df = pd.read_csv(RAW_PATH_XLSX, encoding="utf-8-sig")
-    print(f"Usando CSV legacy: {RAW_PATH_XLSX}")
+    df = pd.read_excel(RAW_PATH_XLSX)    
+    print(f"Usando XLSX legacy: {RAW_PATH_XLSX}")
 else:
     raise FileNotFoundError(
         "No se encontró archivo de encuestas. Esperado CSV en data/raw/Encuesta de tesisis*.csv "
@@ -76,13 +90,133 @@ rename_dict = {
 # Normaliza también las llaves del diccionario
 rename_dict = {clean_colname(k): v for k, v in rename_dict.items()}
 
+
 df = df.rename(columns=rename_dict)
+
+
+
+print("Filas antes de filtros:", len(df))
+
+filas_iniciales = len(df)
+filas_post_rol = None
+filas_post_quito = None
+filas_post_edad = None
+
+
+if "edad" in df.columns:
+    print("\nValores únicos de edad:")
+    print(df["edad"].astype(str).value_counts(dropna=False).head(20))
+
+if "reside_quito" in df.columns:
+    print("\nValores únicos de reside_quito:")
+    print(df["reside_quito"].astype(str).value_counts(dropna=False).head(20))
+
+if "rol_uce" in df.columns:
+    print("\nValores únicos de rol_uce:")
+    print(df["rol_uce"].astype(str).value_counts(dropna=False).head(20))
+
+
+# Rol UCE informado
+if "rol_uce" in df.columns:
+    df["rol_uce"] = df["rol_uce"].astype(str).str.strip()
+    df = df[df["rol_uce"].notna() & (df["rol_uce"] != "") & (df["rol_uce"].str.lower() != "nan")].copy()
+
+filas_post_rol = len(df)
+print("Filas después de filtro rol_uce:", filas_post_rol)
+
+
+# Reside en Quito: filtro flexible
+if "reside_quito" in df.columns:
+    rq = (
+        df["reside_quito"]
+        .astype(str)
+        .str.strip()
+        .str.lower()
+    )
+    df = df[rq.str.contains("sí|si|quito", na=False)].copy()
+
+filas_post_quito = len(df)
+print("Filas después de filtro reside_quito:", filas_post_quito)
+
+
+# ============================
+# Filtro de edad: 18 a 64 años
+# ============================
+
+
+valid_ranges = ["18-24", "25-34", "35-44", "45-54", "55-64"]
+
+if "edad" in df.columns:
+    # Normalizar formato (por si viene con espacios o guiones raros)
+    df["edad"] = (
+        df["edad"]
+        .astype(str)
+        .str.replace("–", "-", regex=False)
+        .str.replace("—", "-", regex=False)
+        .str.strip()
+    )
+
+    # Ver valores inválidos (auditoría)
+    invalid = df[~df["edad"].isin(valid_ranges)]
+    if len(invalid) > 0:
+        print("\n⚠ Edades fuera del catálogo detectadas:")
+        print(invalid["edad"].value_counts())
+
+    # Filtrar solo rangos válidos
+    df = df[df["edad"].isin(valid_ranges)].copy()
+
+filas_post_edad = len(df)
+print("Filas después de filtro edad (rangos válidos):", filas_post_edad)
+
 
 # Guardar
 df.to_csv(PROCESSED_PATH, index=False, encoding="utf-8-sig")
 
+criterios = pd.DataFrame([
+    {
+        "criterio": "Rol institucional",
+        "condicion": "Debe pertenecer a la comunidad universitaria UCE",
+        "aplicado_en": "rol_uce"
+    },
+    {
+        "criterio": "Residencia",
+        "condicion": "Debe residir actualmente en Quito",
+        "aplicado_en": "reside_quito"
+    },
+    {
+        "criterio": "Edad",
+        "condicion": "Debe estar entre 18 y 64 años",
+        "aplicado_en": "edad"
+    },
+    {
+        "criterio": "Anonimización",
+        "condicion": "Se elimina correo o nombre de usuario del formulario",
+        "aplicado_en": "Nombre de usuario"
+    },
+])
+
+criterios.to_csv(
+    PROCESSED_DIR / "criterios_limpieza_inclusion.csv",
+    index=False,
+    encoding="utf-8-sig"
+)
+
+# Auditoría de limpieza
+audit = pd.DataFrame([{
+    "filas_iniciales": int(filas_iniciales),
+    "filas_post_rol_uce": int(filas_post_rol),
+    "filas_post_reside_quito": int(filas_post_quito),
+    "filas_post_edad_18_64": int(filas_post_edad),
+    "filas_finales": int(df.shape[0]),
+    "columnas_finales": int(df.shape[1]),
+    "archivo_salida": str(PROCESSED_PATH),
+}])
+
+audit.to_csv(PROCESSED_DIR / "cleaning_audit.csv", index=False, encoding="utf-8-sig")
+
 # Verificación
 print("Dataset limpio guardado.")
+
 print("Dimensión:", df.shape)
 print("¿Existe confianza_limpieza?", "confianza_limpieza" in df.columns)
 print("¿Existe confianza_fraude?", "confianza_fraude" in df.columns)
