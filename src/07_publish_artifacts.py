@@ -5,6 +5,7 @@ import argparse
 import shutil
 from pathlib import Path
 from datetime import datetime
+import json
 
 def copy_file(src: Path, dst: Path) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
@@ -97,6 +98,18 @@ def main():
             f"Publicado: {ts}\nOrigen: {news_src}\nArchivos: {copied}\n",
             encoding="utf-8"
         )
+
+        (news_dst / "MANIFEST.json").write_text(
+        json.dumps({
+            "module": "news",
+            "published_at": ts,
+            "source": str(news_src),
+            "destination": str(news_dst),
+            "files": copied
+        }, ensure_ascii=False, indent=2),
+        encoding="utf-8"
+        )
+
         print(f"[DONE] Noticias publicadas en: {news_dst} | archivos: {copied}")
 
     # =========================
@@ -117,6 +130,18 @@ def main():
             f"Publicado: {ts}\nOrigen: {surveys_src}\nArchivos: {copied}\n",
             encoding="utf-8"
         )
+
+        (surveys_dst / "MANIFEST.json").write_text(
+        json.dumps({
+            "module": "surveys",
+            "published_at": ts,
+            "source": str(surveys_src),
+            "destination": str(surveys_dst),
+            "files": copied
+        }, ensure_ascii=False, indent=2),
+        encoding="utf-8"
+        )
+        
         print(f"[DONE] Encuestas publicadas en: {surveys_dst} | archivos: {copied}")
 
     print(f"[OK] Publicación terminada. Base: {backend_public}")
