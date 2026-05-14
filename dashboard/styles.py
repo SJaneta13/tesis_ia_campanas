@@ -1619,45 +1619,128 @@ div[data-testid="stElementContainer"]:has(.ed-section-gap) {
 }
 
 
-/* =====================================================
-   FIX MINIMO STREAMLIT CLOUD - NO CORTAR GRAFICOS
-   ===================================================== */
 
-[data-testid="stMainBlockContainer"] {
-    max-width: 1280px !important;
-    padding-left: 2rem !important;
-    padding-right: 2rem !important;
+
+
+                /* =========================================================
+   FIX FINAL - NO CORTAR GRAFICOS EN STREAMLIT CLOUD
+   Mantiene el diseño local y solo corrige clipping
+   ========================================================= */
+
+/* No permitir que las tarjetas corten gráficos, leyendas o labels */
+.st-key-card_perfil,
+.st-key-card_aceptacion,
+.st-key-card_confianza,
+.st-key-card_regulacion,
+
+.st-key-card_pm_edad,
+.st-key-card_pm_genero,
+.st-key-card_pm_rol,
+.st-key-card_pm_quito,
+.st-key-card_pm_facultad,
+
+.st-key-card_ia_escucho,
+.st-key-card_ia_reconocio,
+.st-key-card_ia_identifica,
+.st-key-card_ia_falso,
+.st-key-card_ia_interpretacion,
+
+.st-key-card_pc_matriz,
+.st-key-card_pc_aceptacion,
+.st-key-card_pc_manipulacion,
+.st-key-card_pc_desconfianza,
+.st-key-card_pc_regulacion,
+.st-key-card_pc_interpretacion,
+
+.st-key-card_ce_matriz,
+.st-key-card_ce_limpieza,
+.st-key-card_ce_fraude,
+.st-key-card_ce_influencia_voto,
+.st-key-card_ce_cambio_confianza,
+.st-key-card_ce_indice,
+.st-key-card_ce_interpretacion,
+
+.st-key-card_mp_metricas,
+.st-key-card_mp_importancia,
+.st-key-card_mp_estabilidad,
+.st-key-card_mp_clases,
+.st-key-card_mp_justificacion,
+.st-key-card_mp_interpretacion,
+
+.st-key-card_ed_fuentes,
+.st-key-card_ed_encuesta_exposicion,
+.st-key-card_ed_encuesta_automatizacion,
+.st-key-card_ed_encuesta_falso,
+.st-key-card_ed_encuesta_verificacion,
+.st-key-card_ed_gdelt_timeline,
+.st-key-card_ed_gdelt_tono,
+.st-key-card_ed_gdelt_fuentes,
+.st-key-card_ed_gdelt_keywords,
+.st-key-card_ed_triangulacion,
+.st-key-card_ed_interpretacion {
+    overflow: visible !important;
 }
 
-/* No cortar contenido de columnas ni gráficos */
+/* No cortar contenido interno de tarjetas */
+.st-key-card_perfil [data-testid="stElementContainer"],
+.st-key-card_aceptacion [data-testid="stElementContainer"],
+.st-key-card_confianza [data-testid="stElementContainer"],
+.st-key-card_regulacion [data-testid="stElementContainer"],
+
+.st-key-card_pm_edad [data-testid="stElementContainer"],
+.st-key-card_pm_genero [data-testid="stElementContainer"],
+.st-key-card_pm_rol [data-testid="stElementContainer"],
+.st-key-card_pm_quito [data-testid="stElementContainer"],
+.st-key-card_pm_facultad [data-testid="stElementContainer"],
+
+.st-key-card_ia_escucho [data-testid="stElementContainer"],
+.st-key-card_ia_reconocio [data-testid="stElementContainer"],
+.st-key-card_ia_identifica [data-testid="stElementContainer"],
+.st-key-card_ia_falso [data-testid="stElementContainer"],
+
+.st-key-card_pc_matriz [data-testid="stElementContainer"],
+.st-key-card_pc_aceptacion [data-testid="stElementContainer"],
+.st-key-card_pc_manipulacion [data-testid="stElementContainer"],
+.st-key-card_pc_desconfianza [data-testid="stElementContainer"],
+.st-key-card_pc_regulacion [data-testid="stElementContainer"],
+
+.st-key-card_ce_matriz [data-testid="stElementContainer"],
+.st-key-card_ce_limpieza [data-testid="stElementContainer"],
+.st-key-card_ce_fraude [data-testid="stElementContainer"],
+.st-key-card_ce_influencia_voto [data-testid="stElementContainer"],
+.st-key-card_ce_cambio_confianza [data-testid="stElementContainer"],
+.st-key-card_ce_indice [data-testid="stElementContainer"],
+
+.st-key-card_mp_importancia [data-testid="stElementContainer"],
+.st-key-card_mp_estabilidad [data-testid="stElementContainer"],
+
+.st-key-card_ed_fuentes [data-testid="stElementContainer"],
+.st-key-card_ed_gdelt_fuentes [data-testid="stElementContainer"],
+.st-key-card_ed_gdelt_keywords [data-testid="stElementContainer"] {
+    overflow: visible !important;
+}
+
+/* Plotly completo: leyendas, tooltips, porcentajes y etiquetas */
+[data-testid="stPlotlyChart"],
+.js-plotly-plot,
+.plot-container,
+.svg-container {
+    overflow: visible !important;
+}
+
+/* Evita que columnas corten gráficos en Cloud */
 [data-testid="column"] {
     overflow: visible !important;
 }
 
-[data-testid="stVerticalBlockBorderWrapper"] {
-    overflow: visible !important;
+/* Mantiene ancho parecido al localhost */
+.block-container {
+    max-width: 1320px !important;
+    padding-left: 1.6rem !important;
+    padding-right: 1.6rem !important;
 }
 
-/* Plotly debe usar todo el ancho disponible */
-.js-plotly-plot,
-.plot-container,
-.svg-container {
-    width: 100% !important;
-    max-width: 100% !important;
-}
-
-/* Evita que las tarjetas fuercen desbordamiento */
-.custom-card,
-.kpi-card,
-.method-card,
-.topbar,
-.alert-warning,
-.alert-danger,
-.empty-state {
-    max-width: 100%;
-}
-
-
+                
                 
 </style>
 """, unsafe_allow_html=True)
