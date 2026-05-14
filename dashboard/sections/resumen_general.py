@@ -55,24 +55,98 @@ def pretty_model_name(name: str) -> str:
 
 
 def get_best_model(metrics_df: pd.DataFrame):
-    if metrics_df.empty or "model" not in metrics_df.columns:
+    if metrics_df is None or metrics_df.empty:
         return "No disponible", None
 
-    possible_cols = [
+    def find_col(candidates):
+        normalized = {str(c).lower().strip(): c for c in metrics_df.columns}
+
+        for candidate in candidates:
+            key = candidate.lower().strip()
+            if key in normalized:
+                return normalized[key]
+
+        for col in metrics_df.columns:
+            col_l = str(col).lower().strip()
+            for candidate in candidates:
+                if candidate.lower().strip() in col_l:
+                    return col
+
+        return None
+
+    model_col = find_col([
+        "model",
+        "modelo",
+        "model_name",
+        "nombre_modelo",
+        "algoritmo",
+    ])
+
+    metric_col = find_col([
         "f1_weighted_mean",
         "f1_weighted",
+        "f1-w",
+        "f1_w",
+        "f1",
         "accuracy_mean",
         "accuracy",
-    ]
+        "exactitud",
+        "exactitud promedio",
+    ])
 
-    metric_col = next((c for c in possible_cols if c in metrics_df.columns), None)
+    selected_col = find_col([
+        "selected",
+        "seleccionado",
+        "modelo_seleccionado",
+    ])
 
-    if metric_col is None:
+    if model_col is None:
         return "No disponible", None
 
-    best = metrics_df.sort_values(metric_col, ascending=False).iloc[0]
+    df = metrics_df.copy()
 
-    return pretty_model_name(str(best["model"])), float(best[metric_col])
+    # 1. Si existe una columna de seleccionado, priorizarla
+    if selected_col is not None:
+        selected_mask = (
+            df[selected_col]
+            .astype(str)
+            .str.lower()
+            .str.contains("seleccionado|selected|true|1|sí|si", regex=True, na=False)
+        )
+
+        if selected_mask.any():
+            best = df[selected_mask].iloc[0]
+            score = None
+
+            if metric_col is not None:
+                score = pd.to_numeric(best[metric_col], errors="coerce")
+                score = None if pd.isna(score) else float(score)
+
+            return pretty_model_name(str(best[model_col])), score
+
+    # 2. Si existe métrica, escoger el mejor por esa métrica
+    if metric_col is not None:
+        df["_metric_tmp"] = pd.to_numeric(df[metric_col], errors="coerce")
+
+        if df["_metric_tmp"].notna().any():
+            best = df.sort_values("_metric_tmp", ascending=False).iloc[0]
+            return pretty_model_name(str(best[model_col])), float(best["_metric_tmp"])
+
+    # 3. Fallback: si aparece Random Forest, usarlo
+    rf_mask = (
+        df[model_col]
+        .astype(str)
+        .str.lower()
+        .str.contains("random_forest|random forest", regex=True, na=False)
+    )
+
+    if rf_mask.any():
+        best = df[rf_mask].iloc[0]
+        return "Random Forest", None
+
+    # 4. Último fallback
+    best = df.iloc[0]
+    return pretty_model_name(str(best[model_col])), None    
 
 
 def find_first_existing_column(df: pd.DataFrame, candidates: list[str]):

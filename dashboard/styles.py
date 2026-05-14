@@ -1618,49 +1618,24 @@ div[data-testid="stElementContainer"]:has(.ed-section-gap) {
     color: #b91c1c;
 }
 
-
 /* =========================================================
-   FIX DEFINITIVO STREAMLIT CLOUD
-   Mantiene tarjetas cerradas y gráficos completos
+   FIX LIMPIO STREAMLIT CLOUD
+   Mantiene tarjetas cerradas, evita cortes y no altera local
    ========================================================= */
 
-* {
-    box-sizing: border-box;
-}
-
-/* Mantener ancho similar al localhost */
-.block-container,
-[data-testid="stMainBlockContainer"] {
+/* Ancho general igual al diseño local */
+.block-container {
     max-width: 1320px !important;
-    width: 100% !important;
     padding-left: 1.4rem !important;
     padding-right: 1.4rem !important;
 }
 
-/* Columnas: no forzar desbordes */
+/* Las columnas no deben forzar desbordes */
 [data-testid="column"] {
     min-width: 0 !important;
 }
 
-/* Las tarjetas NO deben dejar escapar contenido */
-[class*="st-key-card_"] {
-    max-width: 100% !important;
-    width: 100% !important;
-    overflow: hidden !important;
-    box-sizing: border-box !important;
-}
-
-/* Contenido interno siempre dentro de la tarjeta */
-[class*="st-key-card_"] > div,
-[class*="st-key-card_"] [data-testid="stVerticalBlock"],
-[class*="st-key-card_"] [data-testid="stElementContainer"],
-[class*="st-key-card_"] [data-testid="stMarkdownContainer"] {
-    max-width: 100% !important;
-    min-width: 0 !important;
-    box-sizing: border-box !important;
-}
-
-/* Plotly debe ocupar solo el ancho de su contenedor */
+/* Plotly siempre dentro del contenedor */
 [data-testid="stPlotlyChart"],
 [data-testid="stPlotlyChart"] > div,
 .js-plotly-plot,
@@ -1671,45 +1646,44 @@ div[data-testid="stElementContainer"]:has(.ed-section-gap) {
     box-sizing: border-box !important;
 }
 
-/* Evita que las tarjetas fijas corten contenido en Cloud */
-.st-key-card_pc_aceptacion,
-.st-key-card_pc_manipulacion,
-.st-key-card_pc_desconfianza,
-.st-key-card_pc_regulacion,
-.st-key-card_ce_limpieza,
-.st-key-card_ce_fraude,
-.st-key-card_ce_influencia_voto,
-.st-key-card_ce_cambio_confianza {
-    height: auto !important;
-    min-height: 430px !important;
-}
-
-/* Alertas y notas dentro de su tarjeta */
-.alert-warning,
-.alert-danger,
-.alert-info-blue,
-.alert-info-green,
-.mp-note-green,
-.mp-note-blue,
-.ed-note-blue,
-.ed-note-green,
-.ed-note-yellow,
-.ed-note-red {
+/* Tarjetas: cerradas, pero con espacio interno para no cortar textos */
+[class*="st-key-card_"] {
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
-    overflow-wrap: break-word !important;
+    overflow: hidden !important;
 }
 
-/* Filas de barras HTML: valor a la derecha sin salirse */
+/* Contenido interno sin ancho mínimo extraño */
+[class*="st-key-card_"] > div,
+[class*="st-key-card_"] [data-testid="stVerticalBlock"],
+[class*="st-key-card_"] [data-testid="stElementContainer"],
+[class*="st-key-card_"] [data-testid="stMarkdownContainer"] {
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+}
+
+/* Barras HTML: dejar margen derecho para que no se corten valores */
+.progress-row,
+.mp-bar-row,
+.ed-bar-row {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-right: 22px !important;
+    box-sizing: border-box !important;
+}
+
 .progress-row-header,
 .mp-bar-head,
 .ed-bar-head {
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) auto !important;
-    gap: 10px !important;
+    gap: 12px !important;
     align-items: center !important;
     width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
 }
 
 .progress-row-header span:first-child,
@@ -1726,7 +1700,7 @@ div[data-testid="stElementContainer"]:has(.ed-section-gap) {
     text-align: right !important;
 }
 
-/* Barras siempre dentro del ancho disponible */
+/* Tracks de barras dentro del margen seguro */
 .progress-track,
 .mp-track,
 .mp-mini-track,
@@ -1734,9 +1708,40 @@ div[data-testid="stElementContainer"]:has(.ed-section-gap) {
     width: 100% !important;
     max-width: 100% !important;
     overflow: hidden !important;
+    box-sizing: border-box !important;
 }
 
-/* Tabla de modelos: que no se salga del contenedor */
+/* Notas dentro de tarjetas, sin salirse */
+.alert-warning,
+.alert-danger,
+.alert-info-blue,
+.alert-info-green,
+.mp-note-green,
+.mp-note-blue,
+.ed-note-blue,
+.ed-note-green,
+.ed-note-yellow,
+.ed-note-red {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-wrap: break-word !important;
+}
+
+/* Quitar alturas rígidas que en Cloud cortan contenido */
+.st-key-card_pc_aceptacion,
+.st-key-card_pc_manipulacion,
+.st-key-card_pc_desconfianza,
+.st-key-card_pc_regulacion,
+.st-key-card_ce_limpieza,
+.st-key-card_ce_fraude,
+.st-key-card_ce_influencia_voto,
+.st-key-card_ce_cambio_confianza {
+    height: auto !important;
+    min-height: 430px !important;
+}
+
+/* Tabla de modelos: evitar desborde horizontal */
 .st-key-card_mp_metricas {
     overflow-x: auto !important;
 }
@@ -1751,15 +1756,19 @@ div[data-testid="stElementContainer"]:has(.ed-section-gap) {
 .mp-table td {
     padding: 10px 6px !important;
     overflow-wrap: break-word !important;
-    word-break: normal !important;
 }
 
-/* En pantallas más estrechas, reducir un poco el padding */
-@media (max-width: 1200px) {
-    .block-container,
-    [data-testid="stMainBlockContainer"] {
+/* Ajuste suave en pantallas de Cloud/laptop */
+@media (max-width: 1250px) {
+    .block-container {
         padding-left: 1rem !important;
         padding-right: 1rem !important;
+    }
+
+    .kpi-value,
+    .mp-kpi-value,
+    .ed-kpi-value {
+        font-size: 1.35rem !important;
     }
 
     .section-title-card {
@@ -1769,15 +1778,7 @@ div[data-testid="stElementContainer"]:has(.ed-section-gap) {
     .section-subtitle-card {
         font-size: 0.82rem !important;
     }
-
-    .kpi-value,
-    .mp-kpi-value,
-    .ed-kpi-value {
-        font-size: 1.35rem !important;
-    }
 }
-
-
              
 </style>
 """, unsafe_allow_html=True)
