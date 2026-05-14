@@ -2,7 +2,7 @@ import pandas as pd
 import streamlit as st
 import plotly.express as px
 
-from components import topbar, kpi_card
+from dashboard.components import topbar, kpi_card
 
 
 LIKERT_LABELS = {

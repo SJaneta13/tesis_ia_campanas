@@ -2,6 +2,14 @@
 import streamlit as st
 from pathlib import Path
 import pandas as pd
+import sys
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 
 st.set_page_config(
     page_title="Plataforma de Resultados - IA en Campañas Políticas",
@@ -9,19 +17,20 @@ st.set_page_config(
     layout="wide"
 )
 
-from styles import inject_global_css
-from data_loader import (
+from dashboard.styles import inject_global_css
+from dashboard.data_loader import (
     load_survey,
     load_news_cases,
     load_latest_metrics,
 )
-from sections.resumen_general import render_resumen_general
-from sections.perfil_muestra import render_perfil_muestra
-from sections.conocimiento_ia import render_conocimiento_ia
-from sections.percepcion_ciudadana import render_percepcion_ciudadana
-from sections.confianza_electoral import render_confianza_electoral
-from sections.modelos_predictivos import render_modelos_predictivos
-from sections.evidencia_gdelt import render_evidencia_digital
+
+from dashboard.sections.resumen_general import render_resumen_general
+from dashboard.sections.perfil_muestra import render_perfil_muestra
+from dashboard.sections.conocimiento_ia import render_conocimiento_ia
+from dashboard.sections.percepcion_ciudadana import render_percepcion_ciudadana
+from dashboard.sections.confianza_electoral import render_confianza_electoral
+from dashboard.sections.modelos_predictivos import render_modelos_predictivos
+from dashboard.sections.evidencia_gdelt import render_evidencia_digital
 
 
 

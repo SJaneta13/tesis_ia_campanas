@@ -3,7 +3,7 @@ import pandas as pd
 import streamlit as st
 import plotly.express as px
 
-from components import (
+from dashboard.components import (
     topbar,
     kpi_card,
     method_card,

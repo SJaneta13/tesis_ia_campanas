@@ -6,7 +6,7 @@ import pandas as pd
 import streamlit as st
 import plotly.express as px
 
-from components import topbar
+from dashboard.components import topbar
 
 
 def html_block(content: str):
