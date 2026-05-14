@@ -3,7 +3,7 @@ import pandas as pd
 import streamlit as st
 import plotly.express as px
 
-from dashboard.components import topbar, kpi_card
+from components import topbar, kpi_card
 
 
 def find_first_existing_column(df: pd.DataFrame, candidates: list[str]):

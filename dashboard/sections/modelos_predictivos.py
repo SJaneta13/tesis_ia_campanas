@@ -4,7 +4,7 @@ import textwrap
 
 
 
-from dashboard.components import topbar
+from components import topbar
 
 
 def empty_state(message: str):

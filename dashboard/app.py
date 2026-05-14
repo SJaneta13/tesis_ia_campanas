@@ -16,8 +16,6 @@ from sections.conocimiento_ia import render_conocimiento_ia
 from sections.percepcion_ciudadana import render_percepcion_ciudadana
 from sections.confianza_electoral import render_confianza_electoral
 from sections.modelos_predictivos import render_modelos_predictivos
-
-from data_loader import load_survey, load_news_cases
 from sections.evidencia_gdelt import render_evidencia_digital
 
 

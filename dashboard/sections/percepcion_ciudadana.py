@@ -4,7 +4,7 @@ import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
 
-from dashboard.components import topbar, kpi_card
+from components import topbar, kpi_card
 
 
 LIKERT_LABELS = {
