@@ -1619,137 +1619,43 @@ div[data-testid="stElementContainer"]:has(.ed-section-gap) {
 }
 
 
-
-
-
-
-
-
 /* =====================================================
-   FIX GLOBAL RESPONSIVE STREAMLIT CLOUD
-   Evita gráficos/tarjetas cortadas horizontalmente
+   FIX MINIMO STREAMLIT CLOUD - NO CORTAR GRAFICOS
    ===================================================== */
 
-html, body, [data-testid="stAppViewContainer"] {
-    overflow-x: hidden !important;
-}
-
-[data-testid="stMain"] {
-    overflow-x: hidden !important;
-}
-
 [data-testid="stMainBlockContainer"] {
-    max-width: 1180px !important;
-    width: 100% !important;
-    padding-left: 1.25rem !important;
-    padding-right: 1.25rem !important;
+    max-width: 1280px !important;
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
 }
 
-/* Las columnas de Streamlit no deben forzar ancho mínimo */
+/* No cortar contenido de columnas ni gráficos */
 [data-testid="column"] {
-    min-width: 0 !important;
-    overflow: hidden !important;
+    overflow: visible !important;
 }
 
-/* Contenedores con borde */
 [data-testid="stVerticalBlockBorderWrapper"] {
-    max-width: 100% !important;
-    overflow: hidden !important;
+    overflow: visible !important;
 }
 
-/* Tarjetas propias */
+/* Plotly debe usar todo el ancho disponible */
+.js-plotly-plot,
+.plot-container,
+.svg-container {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Evita que las tarjetas fuercen desbordamiento */
 .custom-card,
 .kpi-card,
 .method-card,
-.empty-state,
+.topbar,
 .alert-warning,
 .alert-danger,
-.alert-success,
-.hypothesis-box,
-.topbar,
-.section-card-header {
-    max-width: 100% !important;
-    overflow-wrap: anywhere !important;
-    word-break: normal !important;
+.empty-state {
+    max-width: 100%;
 }
-
-/* Plotly responsive */
-.js-plotly-plot,
-.plot-container,
-.svg-container,
-.user-select-none,
-.main-svg {
-    max-width: 100% !important;
-}
-
-/* Barras HTML personalizadas */
-.progress-row,
-.progress-track {
-    max-width: 100% !important;
-    width: 100% !important;
-    overflow: hidden !important;
-}
-
-.progress-row-header {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: flex-start !important;
-    gap: 0.5rem !important;
-    flex-wrap: wrap !important;
-    max-width: 100% !important;
-}
-
-.progress-row-header span:first-child {
-    min-width: 0 !important;
-    overflow-wrap: anywhere !important;
-}
-
-.progress-row-header span:last-child {
-    flex-shrink: 0 !important;
-    white-space: nowrap !important;
-}
-
-/* Textos largos dentro de tarjetas */
-.card-title,
-.section-title-card,
-.section-subtitle-card,
-.kpi-label,
-.kpi-value,
-.kpi-help,
-.method-title,
-.method-text {
-    max-width: 100% !important;
-    overflow-wrap: anywhere !important;
-}
-
-/* Ajuste para pantallas tipo laptop / Streamlit Cloud */
-@media (max-width: 1400px) {
-    [data-testid="stMainBlockContainer"] {
-        max-width: 1040px !important;
-        padding-left: 1rem !important;
-        padding-right: 1rem !important;
-    }
-
-    .kpi-value {
-        font-size: 1.45rem !important;
-    }
-
-    .kpi-label,
-    .kpi-help,
-    .method-text,
-    .section-subtitle-card {
-        font-size: 0.82rem !important;
-    }
-}
-
-@media (max-width: 1100px) {
-    [data-testid="stMainBlockContainer"] {
-        max-width: 100% !important;
-        padding-left: 0.75rem !important;
-        padding-right: 0.75rem !important;
-    }
-}
-
 
 
                 
