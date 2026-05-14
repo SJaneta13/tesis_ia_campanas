@@ -3,6 +3,11 @@ import streamlit as st
 from pathlib import Path
 import pandas as pd
 
+st.set_page_config(
+    page_title="Plataforma de Resultados - IA en Campañas Políticas",
+    page_icon="📊",
+    layout="wide"
+)
 
 from styles import inject_global_css
 from data_loader import (
@@ -19,8 +24,6 @@ from sections.modelos_predictivos import render_modelos_predictivos
 from sections.evidencia_gdelt import render_evidencia_digital
 
 
-survey_df = load_survey()
-news_df = load_news_cases()
 
 def render_sidebar():
     st.sidebar.markdown(
@@ -58,11 +61,6 @@ def render_sidebar():
 
 
 def main():
-    st.set_page_config(
-        page_title="Plataforma de Resultados - IA en Campañas Políticas",
-        page_icon="📊",
-        layout="wide"
-    )
 
     inject_global_css()
 
