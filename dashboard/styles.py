@@ -524,13 +524,14 @@ div[data-testid="stVerticalBlock"] {
     height: 24px;
 }   
 
+
 .profile-card-header-soft {
     background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%) !important;
     border: 1px solid #e5e7eb;
     border-radius: 12px;
-    padding: 12px 14px;
-    margin-bottom: 12px;
-}
+    padding: 10px 12px;
+    margin-bottom: 8px;
+}                
 
 .profile-card-header-soft .section-title-card {
     margin-bottom: 4px;
@@ -658,44 +659,98 @@ div[data-testid="stVerticalBlock"] {
     font-size: 0.84rem;
     line-height: 1.35;
 }
-                
 
+                
 /* =========================================================
    Percepción ciudadana
    ========================================================= */
+
+.analysis-subsection-header {
+    margin-top: 1.05rem;
+    margin-bottom: 0.6rem;
+}
+
+.analysis-subsection-title {
+    font-size: clamp(1.05rem, 1.8vw, 1.28rem);
+    font-weight: 850;
+    color: #111827;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+}
+
+.analysis-subsection-desc {
+    margin-top: 0.25rem;
+    font-size: clamp(0.82rem, 1.3vw, 0.94rem);
+    color: #64748b;
+    line-height: 1.45;
+    max-width: 1100px;
+}
+
+.analysis-note-compact,
+.analysis-note-compact-green,
+.analysis-note-compact-yellow,
+.analysis-note-compact-red {
+    border-radius: 14px;
+    padding: 0.78rem 0.95rem;
+    font-size: clamp(0.82rem, 1.2vw, 0.9rem);
+    line-height: 1.45;
+    margin-top: 0.45rem;
+    margin-bottom: 0.85rem;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-wrap: break-word;
+}
+
+.analysis-note-compact {
+    background: #eff6ff !important;
+    border: 1px solid #bfdbfe;
+    color: #1d4ed8;
+}
+
+.analysis-note-compact-green {
+    background: #ecfdf5 !important;
+    border: 1px solid #a7f3d0;
+    color: #047857;
+}
+
+.analysis-note-compact-yellow {
+    background: #fffbeb !important;
+    border: 1px solid #fde68a;
+    color: #b45309;
+}
+
+.analysis-note-compact-red {
+    background: #fff7ed !important;
+    border: 1px solid #fed7aa;
+    color: #c2410c;
+}
 
 .st-key-card_pc_matriz,
 .st-key-card_pc_aceptacion,
 .st-key-card_pc_manipulacion,
 .st-key-card_pc_desconfianza,
 .st-key-card_pc_regulacion,
-.st-key-card_pc_interpretacion {
+.st-key-card_pc_interpretacion,
+.st-key-card_pc_edad_riesgo {
     background: #ffffff !important;
     border: 1px solid #d1d5db !important;
-    border-radius: 16px !important;
-    padding: 28px 28px 34px 28px !important;
-    margin-top: 0px !important;
-    margin-bottom: 0px !important;                        
+    border-radius: 18px !important;
+    padding: clamp(18px, 2.2vw, 28px) !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
     box-shadow: 0 2px 8px rgba(15, 23, 42, 0.055) !important;
     overflow: hidden !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
 }
-
-.st-key-card_pc_interpretacion .interpretation-grid {
-    margin-top: 24px;
-    gap: 18px;
-}
-
-.st-key-card_pc_interpretacion .interpretation-box {
-    min-height: 145px;
-    padding: 22px 20px;
-}                                
 
 .st-key-card_pc_matriz *,
 .st-key-card_pc_aceptacion *,
 .st-key-card_pc_manipulacion *,
 .st-key-card_pc_desconfianza *,
 .st-key-card_pc_regulacion *,
-.st-key-card_pc_interpretacion * {
+.st-key-card_pc_interpretacion *,
+.st-key-card_pc_edad_riesgo * {
     background-color: transparent !important;
 }
 
@@ -728,125 +783,160 @@ div[data-testid="stVerticalBlock"] {
 .st-key-card_pc_interpretacion > div,
 .st-key-card_pc_interpretacion [data-testid="stVerticalBlock"],
 .st-key-card_pc_interpretacion [data-testid="stElementContainer"],
-.st-key-card_pc_interpretacion [data-testid="stMarkdownContainer"] {
+.st-key-card_pc_interpretacion [data-testid="stMarkdownContainer"],
+.st-key-card_pc_edad_riesgo,
+.st-key-card_pc_edad_riesgo > div,
+.st-key-card_pc_edad_riesgo [data-testid="stVerticalBlock"],
+.st-key-card_pc_edad_riesgo [data-testid="stElementContainer"],
+.st-key-card_pc_edad_riesgo [data-testid="stPlotlyChart"],
+.st-key-card_pc_edad_riesgo [data-testid="stMarkdownContainer"] {
     background-color: #ffffff !important;
 }
 
 .st-key-card_pc_matriz .js-plotly-plot,
-.st-key-card_pc_matriz .plotly,
-.st-key-card_pc_matriz .plot-container,
-.st-key-card_pc_matriz .svg-container,
 .st-key-card_pc_aceptacion .js-plotly-plot,
-.st-key-card_pc_aceptacion .plotly,
-.st-key-card_pc_aceptacion .plot-container,
-.st-key-card_pc_aceptacion .svg-container,
 .st-key-card_pc_manipulacion .js-plotly-plot,
-.st-key-card_pc_manipulacion .plotly,
-.st-key-card_pc_manipulacion .plot-container,
-.st-key-card_pc_manipulacion .svg-container,
 .st-key-card_pc_desconfianza .js-plotly-plot,
-.st-key-card_pc_desconfianza .plotly,
-.st-key-card_pc_desconfianza .plot-container,
-.st-key-card_pc_desconfianza .svg-container,
 .st-key-card_pc_regulacion .js-plotly-plot,
+.st-key-card_pc_edad_riesgo .js-plotly-plot,
+.st-key-card_pc_matriz .plotly,
+.st-key-card_pc_aceptacion .plotly,
+.st-key-card_pc_manipulacion .plotly,
+.st-key-card_pc_desconfianza .plotly,
 .st-key-card_pc_regulacion .plotly,
+.st-key-card_pc_edad_riesgo .plotly,
+.st-key-card_pc_matriz .plot-container,
+.st-key-card_pc_aceptacion .plot-container,
+.st-key-card_pc_manipulacion .plot-container,
+.st-key-card_pc_desconfianza .plot-container,
 .st-key-card_pc_regulacion .plot-container,
-.st-key-card_pc_regulacion .svg-container {
+.st-key-card_pc_edad_riesgo .plot-container,
+.st-key-card_pc_matriz .svg-container,
+.st-key-card_pc_aceptacion .svg-container,
+.st-key-card_pc_manipulacion .svg-container,
+.st-key-card_pc_desconfianza .svg-container,
+.st-key-card_pc_regulacion .svg-container,
+.st-key-card_pc_edad_riesgo .svg-container {
     background: #ffffff !important;
 }
-
-.alert-info-blue {
-    background: #eff6ff !important;
-    border: 1px solid #bfdbfe;
-    color: #1d4ed8;
-    border-radius: 14px;
-    padding: 12px 14px;
-    font-size: 0.88rem;
-    line-height: 1.35;
-    margin-top: 8px;
-    margin-bottom: 14px;
-}
-
-.alert-info-green {
-    background: #ecfdf5 !important;
-    border: 1px solid #a7f3d0;
-    color: #047857;
-    border-radius: 14px;
-    padding: 12px 14px;
-    font-size: 0.88rem;
-    line-height: 1.35;
-    margin-top: 8px;
-    margin-bottom: 14px;
-}
-
-.interpretative-card {
-  padding: 32px 32px 36px;
-  margin-top: 32px;
-  margin-bottom: 32px;
-  border-radius: 22px;
-}
-
-.interpretative-grid {
-  margin-top: 26px;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 18px;
-}
-
-.interpretative-item {
-  padding: 24px 22px;
-  min-height: 150px;
-  border-radius: 18px;
-}                
-
-.percepcion-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 28px;
-  align-items: stretch;
-}
-
-.percepcion-card {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.chart-area {
-  flex: 1;
-  min-height: 260px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.card-note {
-  margin-top: auto;
-}                                                                
 
 
 .st-key-card_pc_aceptacion,
 .st-key-card_pc_manipulacion,
 .st-key-card_pc_desconfianza,
 .st-key-card_pc_regulacion {
-    min-height: 430px !important;
-    height: 430px !important;
-    padding: 20px 20px 24px 20px !important;
-    display: flex !important;
-    flex-direction: column !important;
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    padding: 14px 16px 16px 16px !important;
+    display: block !important;
 }
 
-.st-key-card_pc_desconfianza .alert-danger,
-.st-key-card_pc_regulacion .alert-info-green,
-.st-key-card_pc_aceptacion .alert-info-blue,
-.st-key-card_pc_manipulacion .alert-warning {
-    margin-top: auto !important;
+.st-key-card_pc_interpretacion .interpretation-grid {
+    margin-top: 18px;
+    gap: 14px;
 }
 
+.st-key-card_pc_interpretacion .interpretation-box {
+    min-height: 125px;
+    padding: 18px 18px;
+}
 
+.interpretation-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 12px;
+}
+
+.interpretation-box {
+    border-radius: 14px;
+    padding: 16px;
+    border: 1px solid #e5e7eb;
+    box-sizing: border-box;
+    overflow-wrap: break-word;
+}
+
+.interpretation-box.blue {
+    background: #eff6ff !important;
+    border-color: #bfdbfe;
+}
+
+.interpretation-box.green {
+    background: #ecfdf5 !important;
+    border-color: #a7f3d0;
+}
+
+.interpretation-box.yellow {
+    background: #fffbeb !important;
+    border-color: #fde68a;
+}
+
+.interpretation-box.red {
+    background: #fff7ed !important;
+    border-color: #fed7aa;
+}
+
+.interpretation-value {
+    font-size: clamp(1.35remfed7aa;
+}
+
+, 2.2vw, 1.65rem);
+    font-weight: 900;
+    color: #0f172a;
+    line-height: 1.1;
+    margin-bottom: 8px;
+}
+
+.interpretation-label {
+    color: #64748b;
+    font-size: clamp(0.78rem, 1.1vw, 0.86rem);
+    line-height: 1.38;
+}
+
+            
+.alert-info-blue,
+.alert-info-green,
+.alert-warning,
+.alert-danger {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-wrap: break-word !important;
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-size: clamp(0.78rem, 1.1vw, 0.86rem);
+    line-height: 1.32;
+    margin-top: 6px;
+    margin-bottom: 8px;
+}                
+
+.alert-info-blue {
+    background: #eff6ff !important;
+    border: 1px solid #bfdbfe;
+    color: #1d4ed8;
+}
+
+.alert-info-green {
+    background: #ecfdf5 !important;
+    border: 1px solid #a7f3d0;
+    color: #047857;
+}
+
+.alert-warning {
+    background: #fffbeb !important;
+    border: 1px solid #fde68a;
+    color: #b45309;
+}
+
+.alert-danger {
+    background: #fff7ed !important;
+    border: 1px solid #fed7aa;
+    color: #c2410c;
+}
 
 .section-gap-xs {
-    height: 8px !important;
+    height: 10px !important;
     margin: 0 !important;
     padding: 0 !important;
 }
@@ -854,9 +944,156 @@ div[data-testid="stVerticalBlock"] {
 div[data-testid="stElementContainer"]:has(.section-gap-xs) {
     margin: 0 !important;
     padding: 0 !important;
-    height: 2px !important;
+    height: 10px !important;
 }
 
+/* Tabs más limpias */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 8px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.stTabs [data-baseweb="tab"] {
+    padding: 10px 14px;
+    color: #334155;
+    font-size: 0.92rem;
+}
+
+.stTabs [aria-selected="true"] {
+    color: #ef4444 !important;
+    font-weight: 800;
+}
+
+/* Responsive percepción ciudadana */
+@media (max-width: 1100px) {
+    .interpretation-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .st-key-card_pc_aceptacion,
+    .st-key-card_pc_manipulacion,
+    .st-key-card_pc_desconfianza,
+    .st-key-card_pc_regulacion {
+        min-height: auto !important;
+    }
+}
+
+@media (max-width: 760px) {
+    .block-container {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+    }
+
+    .profile-card-header-soft {
+        padding: 10px 12px !important;
+    }
+
+    .section-title-card {
+        font-size: 1.02rem !important;
+        line-height: 1.25 !important;
+    }
+
+    .section-subtitle-card {
+        font-size: 0.8rem !important;
+        line-height: 1.35 !important;
+    }
+
+    .interpretation-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .interpretation-box {
+        min-height: auto !important;
+        padding: 14px 14px !important;
+    }
+
+    .analysis-subsection-header {
+        margin-top: 0.8rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .analysis-note-compact,
+    .analysis-note-compact-green,
+    .analysis-note-compact-yellow,
+    .analysis-note-compact-red {
+        padding: 0.72rem 0.85rem;
+    }
+
+    .stTabs [data-baseweb="tab"] {
+        padding: 8px 10px;
+        font-size: 0.84rem;
+    }
+}
+
+@media (max-width: 520px) {
+    .topbar {
+        padding: 14px 16px !important;
+    }
+
+    .topbar-title {
+        font-size: 1.2rem !important;
+    }
+
+    .topbar-subtitle {
+        font-size: 0.82rem !important;
+    }
+
+    .topbar-pill {
+        position: static !important;
+        margin-top: 10px;
+    }
+
+    .small-pill {
+        font-size: 0.76rem !important;
+        padding: 7px 10px !important;
+    }
+
+    .kpi-card {
+        height: auto !important;
+        min-height: 118px !important;
+        max-height: none !important;
+        padding: 14px !important;
+    }
+
+    .kpi-value {
+        font-size: 1.35rem !important;
+    }
+
+    .kpi-help {
+        font-size: 0.78rem !important;
+    }
+} 
+
+/* =========================================================
+   Compactación responsive de tarjetas de percepción
+   ========================================================= */
+
+@media (min-width: 900px) {
+    .st-key-card_pc_aceptacion,
+    .st-key-card_pc_manipulacion,
+    .st-key-card_pc_desconfianza,
+    .st-key-card_pc_regulacion {
+        min-height: 360px !important;
+        padding: 16px 16px 18px 16px !important;
+    }
+}
+
+@media (max-width: 899px) {
+    .st-key-card_pc_aceptacion,
+    .st-key-card_pc_manipulacion,
+    .st-key-card_pc_desconfianza,
+    .st-key-card_pc_regulacion {
+        min-height: auto !important;
+        padding: 14px !important;
+    }
+
+    .profile-card-header-soft {
+        padding: 9px 10px !important;
+        margin-bottom: 8px !important;
+    }
+}                               
+                
 
 /* =========================================================
    Confianza electoral
@@ -994,9 +1231,6 @@ div[data-testid="stElementContainer"]:has(.ce-section-gap) {
     padding: 22px 20px;
 }
 
-/* =========================================================
-   Modelos predictivos
-   ========================================================= */
 /* =========================================================
    Modelos predictivos
    ========================================================= */

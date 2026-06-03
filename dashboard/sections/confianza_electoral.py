@@ -15,12 +15,14 @@ LIKERT_LABELS = {
 
 LIKERT_ORDER = list(LIKERT_LABELS.values())
 
+
+
 LIKERT_COLORS = {
-    "Totalmente en desacuerdo": "#0f6fc9",
-    "En desacuerdo": "#7cc4f8",
-    "Ni de acuerdo ni en desacuerdo": "#ff2d2d",
-    "De acuerdo": "#fca5a5",
-    "Totalmente de acuerdo": "#2cb6a4",
+    "Totalmente en desacuerdo": "#1D4ED8",
+    "En desacuerdo": "#93C5FD",
+    "Ni de acuerdo ni en desacuerdo": "#CBD5E1",
+    "De acuerdo": "#99F6E4",
+    "Totalmente de acuerdo": "#14B8A6",
 }
 
 

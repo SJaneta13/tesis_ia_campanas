@@ -4,8 +4,9 @@ import pandas as pd
 import streamlit as st
 
 
-
-
+# =========================================================
+# Artefactos de encuestas publicados
+# =========================================================
 ROOT = Path(__file__).resolve().parents[1]
 
 DATA_SURVEY = ROOT / "data" / "processed" / "encuestas" / "model_ready.csv"
@@ -17,6 +18,15 @@ NEWS_CASES = {
 }
 
 METRICS_DIR = ROOT / "outputs" / "latest" / "tables"
+
+
+SURVEY_PUBLIC = ROOT / "backend" / "public" / "surveys"
+
+RISK_INDEX_BY_AGE = SURVEY_PUBLIC / "tables" / "risk_index_by_age.csv"
+DEEPFAKE_DISTRUST_BY_AGE = SURVEY_PUBLIC / "tables" / "deepfake_distrust_by_age.csv"
+
+EXPOSURE_INDEX_BY_AGE = SURVEY_PUBLIC / "tables" / "exposure_index_by_age.csv"
+EXPOSURE_INDEX_BY_AGE_ROBUST = SURVEY_PUBLIC / "tables" / "exposure_index_by_age_robust.csv"
 
 
 @st.cache_data
@@ -67,3 +77,37 @@ def load_latest_seed_metrics() -> pd.DataFrame:
         return pd.DataFrame()
 
     return pd.read_csv(files[-1], encoding="utf-8-sig")
+
+
+
+@st.cache_data
+def load_risk_index_by_age() -> pd.DataFrame:
+    if not RISK_INDEX_BY_AGE.exists():
+        return pd.DataFrame()
+
+    return pd.read_csv(RISK_INDEX_BY_AGE, encoding="utf-8-sig")
+
+
+@st.cache_data
+def load_deepfake_distrust_by_age() -> pd.DataFrame:
+    if not DEEPFAKE_DISTRUST_BY_AGE.exists():
+        return pd.DataFrame()
+
+    return pd.read_csv(DEEPFAKE_DISTRUST_BY_AGE, encoding="utf-8-sig")
+
+
+@st.cache_data
+def load_exposure_index_by_age() -> pd.DataFrame:
+    if not EXPOSURE_INDEX_BY_AGE.exists():
+        return pd.DataFrame()
+
+    return pd.read_csv(EXPOSURE_INDEX_BY_AGE, encoding="utf-8-sig")
+
+
+@st.cache_data
+def load_exposure_index_by_age_robust() -> pd.DataFrame:
+    if not EXPOSURE_INDEX_BY_AGE_ROBUST.exists():
+        return pd.DataFrame()
+
+    return pd.read_csv(EXPOSURE_INDEX_BY_AGE_ROBUST, encoding="utf-8-sig")
+    
