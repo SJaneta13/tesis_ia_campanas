@@ -32,14 +32,30 @@ cookies_*.json
 .env
 .env.*
 
-# Outputs generados 
-outputs/
+# Outputs generados: ignorar todo por defecto
+outputs/*
 artifacts/
 
+# Permitir solo tablas finales usadas por Streamlit
+!outputs/latest/
+!outputs/latest/tables/
+!outputs/latest/tables/*.csv
 
-# Datos procesados (generados por scripts)
-data/processed/
+# Permitir análisis de texto final si el dashboard lo usa
+!outputs/text_analysis/
+!outputs/text_analysis/case1_es/
+!outputs/text_analysis/case1_es/news_sentiment_scored.csv
+!outputs/text_analysis/case2_en/
+!outputs/text_analysis/case2_en/news_sentiment_scored.csv
+!outputs/text_analysis/case3_ec_media/
+!outputs/text_analysis/case3_ec_media/news_sentiment_scored.csv
 
+# Datos procesados: ignorar todo por defecto
+data/processed/*
 
-# Modelos entrenados
-backend/
+# Permitir dataset final no sensible usado por el dashboard
+!data/processed/encuestas/
+!data/processed/encuestas/model_ready.csv
+
+# Backend: ignorar todo por defecto
+backend/*
