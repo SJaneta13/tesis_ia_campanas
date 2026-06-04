@@ -1,0 +1,4 @@
+﻿rango_edad,n,indice_promedio,desviacion_estandar,error_estandar,interpretacion
+18-24,348,3.953,0.721,0.039,Exposición digital moderada
+25-34,177,4.137,0.719,0.054,Alta exposición digital
+35-64,50,4.11,0.707,0.1,Alta exposición digital
