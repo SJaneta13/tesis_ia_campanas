@@ -59,3 +59,13 @@ data/processed/*
 
 # Backend: ignorar todo por defecto
 backend/*
+
+
+
+# Permitir artefactos públicos usados por Streamlit
+!backend/public/
+!backend/public/surveys/
+!backend/public/surveys/tables/
+!backend/public/surveys/tables/*.csv
+!backend/public/surveys/MANIFEST.json
+!backend/public/surveys/MANIFEST.txt
