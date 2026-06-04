@@ -88,18 +88,19 @@ section[data-testid="stSidebar"] {
 }
 
 /* KPI */
+           
 .kpi-card {
     background: #ffffff;
     border: 1px solid #e5e7eb;
     border-radius: 18px;
     padding: 18px;
-    height: 150px;
     min-height: 150px;
-    max-height: 150px;
+    height: auto;
+    max-height: none;
     box-shadow: 0 1px 5px rgba(15, 23, 42, 0.04);
     box-sizing: border-box;
     overflow: hidden;
-}
+}                
 
 .kpi-card-blue {
     background: #eff6ff;
@@ -256,19 +257,17 @@ section[data-testid="stSidebar"] {
     margin-top: 14px;
 }                               
                 
-
-            
 .method-card {
     background: #ffffff;
     border: 1px solid #e5e7eb;
     border-radius: 16px;
     padding: 16px 17px;
     min-height: 142px;
-    height: 142px;
+    height: auto;
     box-shadow: 0 1px 5px rgba(15, 23, 42, 0.035);
     box-sizing: border-box;
     overflow: hidden;
-}                              
+}                                              
 
  
 .method-title {
@@ -343,7 +342,10 @@ div[data-testid="stVerticalBlock"] {
     background: #ffffff !important;
     border: 1px solid #d1d5db !important;
     border-radius: 14px !important;
-    padding: 18px 18px 18px 18px !important;
+    padding: 18px 20px 20px 20px !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
     box-shadow: 0 1px 5px rgba(15, 23, 42, 0.04) !important;
     overflow: hidden !important;
 }
@@ -361,7 +363,9 @@ div[data-testid="stVerticalBlock"] {
 .st-key-card_perfil > div,
 .st-key-card_perfil [data-testid="stVerticalBlock"],
 .st-key-card_perfil [data-testid="stElementContainer"],
-.st-key-card_perfil [data-testid="stPlotlyChart"],
+.st-key-card_perfil [data-testid="stPlotlyChart"] {
+    overflow: visible !important;
+}                
 .st-key-card_aceptacion,
 .st-key-card_aceptacion > div,
 .st-key-card_aceptacion [data-testid="stVerticalBlock"],
@@ -439,9 +443,22 @@ div[data-testid="stVerticalBlock"] {
     margin-bottom: 14px;
 }
                 
+              
 .section-gap-small {
     height: 1px;
 }
+
+.summary-section-gap {
+    height: 14px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+div[data-testid="stElementContainer"]:has(.summary-section-gap) {
+    height: 14px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}                
 
 
 /* =========================================================
@@ -877,11 +894,9 @@ div[data-testid="stVerticalBlock"] {
     border-color: #fed7aa;
 }
 
-.interpretation-value {
-    font-size: clamp(1.35remfed7aa;
-}
 
-, 2.2vw, 1.65rem);
+.interpretation-value {
+    font-size: clamp(1.35rem, 2.2vw, 1.65rem);
     font-weight: 900;
     color: #0f172a;
     line-height: 1.1;
@@ -1057,12 +1072,54 @@ div[data-testid="stElementContainer"]:has(.section-gap-xs) {
     }
 
     .kpi-value {
-        font-size: 1.35rem !important;
+        font-size: 1.25rem !important;
+        line-height: 1.15 !important;
+        overflow-wrap: anywhere !important;
     }
 
     .kpi-help {
-        font-size: 0.78rem !important;
+        font-size: 0.76rem !important;
+        line-height: 1.3 !important;
     }
+
+    .method-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+
+    .method-card {
+        height: auto !important;
+        min-height: auto !important;
+        padding: 14px 15px !important;
+    }
+
+    .st-key-card_perfil,
+    .st-key-card_aceptacion,
+    .st-key-card_confianza,
+    .st-key-card_regulacion {
+        padding: 15px !important;
+    }
+
+    .hypothesis-box {
+        padding: 14px !important;
+        font-size: 0.82rem !important;
+        line-height: 1.42 !important;
+    }
+
+    .progress-row {
+        padding-right: 0 !important;
+    }
+
+    .progress-row-header {
+        grid-template-columns: 1fr !important;
+        gap: 4px !important;
+    }
+
+    .progress-row-header span:last-child {
+        text-align: left !important;
+    }
+                
+                
 } 
 
 /* =========================================================
@@ -1962,18 +2019,27 @@ div[data-testid="stElementContainer"]:has(.ed-section-gap) {
     overflow-wrap: break-word !important;
 }
 
-/* Quitar alturas rígidas que en Cloud cortan contenido */
+                
+
+/* Tarjetas de percepción ciudadana: compactas y sin espacio sobrante */
 .st-key-card_pc_aceptacion,
 .st-key-card_pc_manipulacion,
 .st-key-card_pc_desconfianza,
-.st-key-card_pc_regulacion,
+.st-key-card_pc_regulacion {
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    padding: 16px 18px 18px 18px !important;
+}
+
+/* Tarjetas de confianza electoral: mantener altura solo si esa sección la necesita */
 .st-key-card_ce_limpieza,
 .st-key-card_ce_fraude,
 .st-key-card_ce_influencia_voto,
 .st-key-card_ce_cambio_confianza {
     height: auto !important;
     min-height: 430px !important;
-}
+}                
 
 /* Tabla de modelos: evitar desborde horizontal */
 .st-key-card_mp_metricas {
@@ -2012,6 +2078,17 @@ div[data-testid="stElementContainer"]:has(.ed-section-gap) {
     .section-subtitle-card {
         font-size: 0.82rem !important;
     }
+
+    .method-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+
+    .method-card {
+        height: auto !important;
+        min-height: auto !important;
+    }            
+                            
 }
              
 </style>

@@ -345,31 +345,6 @@ def render_likert_card(
     render_compact_note(note, note_color)
 
 
-def render_likert_card(
-    title: str,
-    subtitle: str,
-    df: pd.DataFrame,
-    col: str | None,
-    y_label: str,
-    note: str,
-    note_color: str,
-    empty_message: str,
-):
-    render_card_header(title, subtitle)
-
-    if not col:
-        empty_state(empty_message)
-        return
-
-    dist = make_likert_distribution(df, col)
-    fig = make_stacked_bar(dist, y_label, height=96)
-
-    if fig:
-        st.plotly_chart(fig, width="stretch", config=plotly_clean_config())
-
-    render_compact_note(note, note_color)
-
-
 def render_percepcion_ciudadana(survey_df: pd.DataFrame):
     n_survey = len(survey_df) if not survey_df.empty else 0
 
@@ -494,6 +469,7 @@ def render_percepcion_ciudadana(survey_df: pd.DataFrame):
     percibe_manipulacion = positive_count(survey_df, manipulacion_col)
     desconfia_bots = positive_count(survey_df, bots_confianza_col)
     exige_regulacion = positive_count(survey_df, regulacion_col)
+    desconfia_deepfakes = positive_count(survey_df, deepfakes_col)
 
 
     c1, c2, c3, c4 = st.columns(4, gap="medium")
@@ -627,7 +603,7 @@ def render_percepcion_ciudadana(survey_df: pd.DataFrame):
                 )
 
                 fig.update_layout(
-                    height=170,
+                    height=130,
                     paper_bgcolor="#ffffff",
                     plot_bgcolor="#ffffff",
                     margin=dict(l=0, r=52, t=2, b=16),
@@ -689,6 +665,7 @@ def render_percepcion_ciudadana(survey_df: pd.DataFrame):
         manipulacion_pct = round(percibe_manipulacion / n_survey * 100, 1) if n_survey else 0
         bots_pct = round(desconfia_bots / n_survey * 100, 1) if n_survey else 0
         regulacion_pct = round(exige_regulacion / n_survey * 100, 1) if n_survey else 0
+        deepfakes_pct = round(desconfia_deepfakes / n_survey * 100, 1) if n_survey else 0
 
         st.markdown(
             f"""
@@ -708,7 +685,7 @@ def render_percepcion_ciudadana(survey_df: pd.DataFrame):
                 <div class="interpretation-box red">
                     <div class="interpretation-value">{bots_pct:.1f}%</div>
                     <div class="interpretation-label">
-                        afirma que bots o cuentas falsas reducen su confianza; además, el 55.8% asocia los deepfakes con mayor desconfianza.
+                        afirma que bots o cuentas falsas reducen su confianza; además, el {deepfakes_pct:.1f}% asocia los deepfakes con mayor desconfianza.
                     </div>
                 </div>
                 <div class="interpretation-box green">
@@ -730,12 +707,7 @@ def render_percepcion_ciudadana(survey_df: pd.DataFrame):
     with st.container(border=True, key="card_pc_edad_riesgo"):
         render_card_header(
             "Análisis por rangos de edad",
-            "Comparación de exposición a contenido político digital, percepción de riesgo por IA y desconfianza frente a deepfakes entre grupos etarios.",
-        )
-
-        render_compact_note(
-            "La vista robusta agrupa los rangos superiores en 35-64 para reducir la inestabilidad de grupos con menor tamaño muestral. La vista detallada se mantiene como contraste exploratorio.",
-            "blue",
+            "Exposición digital, riesgo percibido y desconfianza frente a deepfakes.",
         )
 
         render_exposure_index_by_age()
@@ -1004,8 +976,8 @@ def render_risk_index_by_age():
     )
 
     fig.update_layout(
-        height=330,
-        margin=dict(l=20, r=40, t=20, b=30),
+        height=285,
+        margin=dict(l=8, r=36, t=8, b=24),
         paper_bgcolor="#ffffff",
         plot_bgcolor="#ffffff",
         showlegend=False,
@@ -1025,7 +997,7 @@ def render_risk_index_by_age():
     st.plotly_chart(
         fig,
         width="stretch",
-        config={"displayModeBar": False},
+        config=plotly_clean_config(),
     )
 
 
@@ -1142,8 +1114,8 @@ def render_deepfake_distrust_by_age():
     )
 
     fig.update_layout(
-        height=340,
-        margin=dict(l=20, r=30, t=20, b=30),
+        height=300,
+        margin=dict(l=8, r=24, t=8, b=24),
         paper_bgcolor="#ffffff",
         plot_bgcolor="#ffffff",
         legend_title_text="Respuesta agrupada",
@@ -1175,7 +1147,7 @@ def render_deepfake_distrust_by_age():
     st.plotly_chart(
         fig,
         width="stretch",
-        config={"displayModeBar": False},
+        config=plotly_clean_config(),
     )
 
 

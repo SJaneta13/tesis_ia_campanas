@@ -37,6 +37,32 @@ REGULATION_LABELS = {
 }
 
 
+PLOTLY_CONFIG = {
+    "displayModeBar": False,
+    "responsive": True,
+}
+
+LIKERT_COLORS = {
+    "Totalmente en desacuerdo": "#1D4ED8",
+    "En desacuerdo": "#93C5FD",
+    "Ni de acuerdo ni en desacuerdo": "#CBD5E1",
+    "De acuerdo": "#99F6E4",
+    "Totalmente de acuerdo": "#14B8A6",
+}
+
+CONFIDENCE_COLORS = {
+    "Muy baja confianza": "#F97316",
+    "Baja confianza": "#FDBA74",
+    "Confianza moderada": "#CBD5E1",
+    "Alta confianza": "#99F6E4",
+    "Muy alta confianza": "#14B8A6",
+}
+
+SCALE_COLORS = {
+    **LIKERT_COLORS,
+    **CONFIDENCE_COLORS,
+}
+
 def pretty_model_name(name: str) -> str:
     if not name or name == "No disponible":
         return "No disponible"
@@ -235,6 +261,7 @@ def make_stacked_bar(values: pd.DataFrame, title_y: str, height: int = 190):
         orientation="h",
         text="Porcentaje",
         category_orders={"Respuesta": values["Respuesta"].tolist()},
+        color_discrete_map=SCALE_COLORS,
     )
 
     fig.update_traces(
@@ -244,6 +271,7 @@ def make_stacked_bar(values: pd.DataFrame, title_y: str, height: int = 190):
         hovertemplate="<b>%{customdata}</b><br>Porcentaje: %{x:.1f}%<extra></extra>",
         customdata=values["Respuesta"],
     )
+
 
     fig.update_layout(
         barmode="stack",
@@ -265,6 +293,8 @@ def make_stacked_bar(values: pd.DataFrame, title_y: str, height: int = 190):
             x=0,
             font=dict(size=10),
         ),
+    
+
     )
 
     return fig
@@ -371,7 +401,7 @@ def render_resumen_general(
             "green",
         )
 
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown('<div class="summary-section-gap"></div>', unsafe_allow_html=True)
 
     # =========================================================
     # HIPÓTESIS + PERFIL
@@ -460,28 +490,27 @@ def render_resumen_general(
                 )
 
                 fig.update_layout(
-                    height=300,
+                    height=285,
                     paper_bgcolor="#ffffff",
                     plot_bgcolor="#ffffff",
-                    margin=dict(l=0, r=0, t=0, b=0),
+                    margin=dict(l=0, r=0, t=0, b=48),
                     legend_title_text="",
                     legend=dict(
-                        orientation="v",
-                        y=0.75,
-                        x=1.02,
-                        font=dict(size=12),
+                        orientation="h",
+                        yanchor="top",
+                        y=-0.08,
+                        xanchor="center",
+                        x=0.5,
+                        font=dict(size=11),
                     ),
                 )
 
-                st.plotly_chart(
-                    fig,
-                    use_container_width=True,
-                    config={"displayModeBar": False},
-                )
+                st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
             else:
                 empty_state("No se encontró columna de género en el archivo de encuestas.")
 
-    st.markdown("<br>", unsafe_allow_html=True)
+    
+    st.markdown('<div class="summary-section-gap"></div>', unsafe_allow_html=True)
 
     # =========================================================
     # ACEPTACIÓN + CONFIANZA
@@ -523,11 +552,7 @@ def render_resumen_general(
                 fig = make_stacked_bar(values, "Aceptación", height=165)
 
                 if fig is not None:
-                    st.plotly_chart(
-                        fig,
-                        use_container_width=True,
-                        config={"displayModeBar": False},
-                    )
+                    st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
                 else:
                     empty_state(
                         "La columna detectada no contiene una escala válida de aceptación."
@@ -544,10 +569,6 @@ def render_resumen_general(
                 unsafe_allow_html=True,
             )
 
-            st.markdown(
-            '<div class="aceptacion-bottom-spacer"></div>',
-            unsafe_allow_html=True,
-            )  
 
 
     with chart2:
@@ -583,11 +604,7 @@ def render_resumen_general(
                 fig = make_stacked_bar(conf_df, "Confianza", height=165)
 
                 if fig is not None:
-                    st.plotly_chart(
-                        fig,
-                        use_container_width=True,
-                        config={"displayModeBar": False},
-                    )
+                    st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
                 else:
                     empty_state(
                         "La columna de confianza electoral no contiene una escala 1-5 válida."
@@ -603,11 +620,6 @@ def render_resumen_general(
                 """,
                 unsafe_allow_html=True,
             )
-
-            st.markdown(
-            '<div class="regulacion-bottom-spacer"></div>',
-            unsafe_allow_html=True,
-            )  
 
     # =========================================================
     # REGULACIÓN
@@ -681,10 +693,7 @@ def render_resumen_general(
         else:
             empty_state("No se encontró columna de regulación de IA.") 
         
-        st.markdown(
-            '<div class="regulacion-bottom-spacer"></div>',
-            unsafe_allow_html=True,
-        )               
+      
 
 
     st.caption(
