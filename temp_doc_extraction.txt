@@ -1,0 +1,706 @@
+
+Universidad Central del Ecuador
+Facultad de Ingeniería y Ciencias Aplicadas
+Carrera de Sistemas de Información 
+
+
+
+Análisis de la percepción ciudadana sobre el uso de inteligencia artificial en campañas políticas digitales en Quito: Caso elecciones presidenciales 2025.
+
+Trabajo de titulación – Opción: Proyecto de investigación presentado para obtener el grado académico de Ingeniería en Sistemas de la Información 
+
+Autores: 
+Silvia Maribel Janeta Hipo
+Cristian Daniel Toca Rocha
+
+Tutor: Ing. Paulo Fernando Llaguno Calle MSc.
+
+Quito, 2025
+
+
+
+
+Cesión de derechos de autor.
+Cesión de derechos de autor.
+Mediante el envío del presente correo electrónico, ACEPTO EN FORMA EXPRESA en calidad de autor, titular de los derechos morales y patrimoniales del trabajo de titulación: [Análisis de la percepción ciudadana sobre el uso de inteligencia artificial en campañas políticas digitales en Quito: Caso elecciones presidenciales 2025]. De conformidad con el Artículo 114 del Código Orgánico de la Economía Social de los Conocimientos, Creatividad e Innovación:
+“De los titulares de derechos de obras creadas en las instituciones de educación superior y centros educativos.- En el caso de las obras creadas en centros educativos, universidades, escuelas politécnicas, institutos superiores técnicos, tecnológicos, pedagógicos, de artes y los conservatorios superiores, e institutos públicos de investigación como resultado de su actividad académica o de investigación tales como trabajos de titulación, proyectos de investigación o innovación, artículos académicos, u otros análogos, sin perjuicio de que pueda existir relación de dependencia, la titularidad de los derechos patrimoniales corresponderá a los autores. Sin embargo, el establecimiento tendrá una licencia gratuita, intransferible y no exclusiva para el uso no comercial de la obra con fines académicos.”
+Asimismo, autorizo a la Universidad Central del Ecuador para que realice la publicación de este trabajo de titulación en el repositorio institucional en formato digital tal como lo establece el documento RHCU.SO.22 CIRCULAR No. 027-2021 del 11 de junio del año 2021 con nombre “Creación del archivo digital de la Universidad Central del Ecuador”, y de conformidad a lo dispuesto en el Artículo 144 de la Ley Orgánica de Educación Superior:
+“Trabajos de Titulación en formato digital. - Todas las instituciones de educación superior estarán obligadas a entregar los trabajos de titulación que se elaboren para la obtención de títulos académicos de grado y posgrado en formato digital para ser integradas al Sistema Nacional de Información de la Educación Superior del Ecuador para su difusión pública respetando los derechos de autor.”
+Los autores declaran que la obra objeto de la presente autorización es original en su forma de expresión y no infringe el derecho de autor de terceros, asumiendo la responsabilidad por cualquier reclamación que pudiera presentarse por esta causa y liberando a la Universidad de toda responsabilidad.
+Los autores reconocen que este mensaje electrónico de aceptación reemplaza a la firma física, y tiene la validez legal de conformidad a lo dispuesto en la Ley de Comercio Electrónico, Firmas y Mensajes de Datos, en sus artículos 3, 6 y 8,
+“Art. 3.- Incorporación por remisión. - Se reconoce validez jurídica a la información no contenida directamente en un mensaje de datos, siempre que figure en el mismo, en forma de remisión o de anexo accesible mediante un enlace electrónico directo y su contenido sea conocido y aceptado expresamente por las partes.”
+“Art. 6.- Información escrita. - Cuando la Ley requiera u obligue que la información conste por escrito, este requisito quedará cumplido con un mensaje de datos, siempre que la información que este contenga sea accesible para su posterior consulta.”
+“Art. 8.- Conservación de los mensajes de datos. - Toda información sometida a esta Ley, podrá ser conservada; este requisito quedará cumplido mediante el archivo del mensaje de datos, siempre que se reúnan las siguientes condiciones:
+Que la información que contenga sea accesible para su posterior consulta;
+Que sea conservado con el formato en el que se haya generado, enviado o recibido, o con algún formato que sea demostrable que reproduce con exactitud la información generada, enviada o recibida;
+Que se conserve todo dato que permita determinar el origen, el destino del mensaje, la fecha y hora en que fue creado, generado, procesado, enviado, recibido y archivado; y,
+Que se garantice su integridad por el tiempo que se establezca en el reglamento a esta ley.
+Toda persona podrá cumplir con la conservación de mensajes de datos, usando los servicios de terceros, siempre que se cumplan las condiciones mencionadas en este artículo.”
+(Este documento esta validado por el autor a través del formato en el archivo de Mensaje de datos con descripción: “DERECHOS DE AUTOR”)
+Silvia Maribel Janeta Hipo
+C.I:1753910775
+Cristian Daniel Toca Rocha
+C.I:0503591067
+
+
+
+
+
+
+Dedicatoria.
+La presente tesis está dedicada a nuestros padres, quienes nos mantuvieron firmes en el camino, brindándonos su apoyo incondicional y enseñándonos el valor del esfuerzo. A ellos, que no solo nos dieron los recursos necesarios, sino también sus sabios consejos para hacernos cada día mejores personas.
+A nuestros hermanos, por su apoyo, compañía y palabras de aliento en cada caída, quienes nos enseñaron la importancia de la familia.
+A nuestros amigos y compañeros, con quienes compartimos momentos inolvidables a lo largo del camino, haciendo de esta trayectoria una experiencia memorable.
+Finalmente, a nuestros profesores, quienes con paciencia nos guiaron profesionalmente a través de sus enseñanzas.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Agradecimiento.
+Por medio del presente trabajo investigativo queremos expresar nuestro más sincero agradecimiento a nuestro tutor, el Ing. Paulo Llaguno, por su paciencia, su vasto conocimiento y su compromiso constante durante este proceso.
+Agradecemos también a nuestros padres por su apoyo moral y económico, que nos ha permitido cumplir el sueño de culminar esta etapa universitaria.
+A mi compañero/a de tesis, por el compañerismo, el esfuerzo compartido y la dedicación demostrada en cada momento de este proyecto. Sin su apoyo y compromiso, este logro no habría sido posible.
+Y, por último, a la Universidad Central del Ecuador, por brindarnos las herramientas necesarias y a sus docentes, quienes nos transmitieron los conocimientos que hoy se ven reflejados en esta investigación, además de proporcionarnos el entorno adecuado para desarrollarla. Gracias por ofrecernos oportunidades para aprender, crecer y materializar este sueño.
+
+
+
+
+
+
+
+
+
+
+
+
+Resumen.
+El presente estudio analiza la percepción de la comunidad universitaria de entre 18 y 64 años, sobre el uso de la inteligencia artificial (IA) en las campañas políticas digitales durante las elecciones presidenciales de Ecuador en 2025. El avance de tecnologías como la microsegmentación, los bots automatizados y el análisis masivo de datos ha transformado las estrategias de comunicación política, generando al mismo tiempo oportunidades y desafíos para la transparencia y la confianza ciudadana en los procesos electorales. Bajo un enfoque cuantitativo-descriptivo, se aplicaron encuestas en línea a la comunidad universitaria y se realizó un análisis de contenido en redes sociales. Esto permitió identificar el nivel de conocimiento, así como sus actitudes de aceptación, desconfianza o rechazo frente al uso de IA en campañas políticas. Paralelamente, se contrastaron estas percepciones con señales observables de automatización en plataformas digitales. Los resultados evidencian un nivel de exposición alto en contenido digital políticos, acompañado de conocimiento parcial sobre el uso real de la inteligencia artificial en campañas. También, los datos revelan una marcada tendencia hacia la desconfianza frente al uso de la IA, en el contexto asociado a la generación de contenido automatizado. En conjunto, estos hallazgos aportan evidencia empírica sobre el impacto de la inteligencia artificial en la confianza democrática y sirven de base para formular recomendaciones acerca de la transparencia, regulación y el uso responsable de la IA en el ámbito político.  
+Palabras clave: inteligencia artificial, percepción ciudadana, campañas políticas digitales, transparencia electoral, Ecuador.
+
+
+
+
+
+Abstract.
+The purpose of this research is to analyze the perception of the university community aged between 18 and 64 years old regarding the use of artificial intelligence (AI) in digital political campaigns during the 2025 presidential elections in Ecuador. Advances in technologies such as micro-segmentation, automated boots, and big data analysis have transformed political communication strategies, creating both opportunities and challenges for transparency and public trust in electoral processes. Using a quantitative-descriptive approach, online surveys were administered to the university community and content analysis was performed on social media. This made it possible to identify the level of knowledge, as well as attitudes of acceptance, distrust, or rejection toward the use of AI in political campaigns. At the same time, these perceptions were contrasted with observable signs of automation on digital platforms. The results show a high level of exposure to political digital content, accompanied by partial knowledge about the actual use of artificial intelligence in campaigns. A significant trend of distrust toward the use of AI was also identified in the context of automated content generation. Taken together, these findings provide empirical evidence on the impact of artificial intelligence on democratic trust and serve as a basis for formulating recommendations.
+
+Keywords: artificial intelligence, public perception, digital political campaigns, electoral transparency, Ecuador.
+
+
+
+
+
+
+
+
+Añadir
+Índice de tablas
+Tabla 1 Variables principales del estudio	32
+Tabla 2 Distribución de confianza electoral en tres niveles	44
+Tabla 3 Distribución de confianza electoral en cinco niveles	46
+Tabla 4 Tabla de distribución de cinco niveles	49
+Tabla 5 Comparación de modelos predictivos en tres niveles	51
+
+Índice de figuras
+Figura 1. Modelo teórico de la investigación y flujo de operacionalización de variables	27
+Figura 2 Proceso metodológico basado en CRISP-DM	41
+Figura 3 Distribución de sentimiento en noticias digitales	43
+Figura 4 Figura 5 Distribución de confianza electoral en tres niveles	45
+Figura 5 Distribución de confianza electoral en cinco niveles	46
+Figura 6 Comparación de AUC entre modelos en cinco niveles	50
+Figura 7 Comparación de modelos en configuración de tres niveles	52
+
+
+Introducción
+La adopción de Inteligencia Artificial (IA) en campañas políticas digitales ha transformado la comunicación electoral, desde la microsegmentación de audiencias hasta la automatización de contenido y la utilización de bots diseñados para la distribución masiva de mensajes. En este marco, es importante entender cómo percibe estos cambios la comunidad universitaria, la cual tiene alta exposición en redes sociales, además de tener un rol importante dentro de la opinión pública y participación electoral. Esta investigación se ve reforzada por la cercanía del ciclo presidencial de 2025 en Ecuador, contexto en el cual las estrategias digitales han tomado mayor relevancia y se sujetan a interrogantes sobre transparencia, integridad del proceso y confianza pública.
+Desde el ámbito académico, existe una carencia de investigaciones locales sobre el impacto de la Inteligencia Artificial en el ámbito político del Ecuador. Aunque abundan estudios que abordan aspectos técnicos y regulatorios del uso de IA, hay poca evidencia empírica sobre percepciones, actitudes, nivel de conocimiento y confianza en procesos electorales. Bajo esta premisa, el siguiente estudio aporta evidencia académica en el campo de la comunicación política digital, y también responde problemáticas sociales relacionadas con la transparencia electoral y la confianza ciudadana en los procesos democráticos 
+Este estudio busca cubrir dicho vacío mediante la recolección de datos originales y comparables, integrando marcos conceptuales que abordan la comunicación política mediada por algoritmos, la desinformación en el medio digital, la alfabetización mediática y los principios éticos del uso de IA.  
+
+La investigación tiene un enfoque cuantitativo-descriptivo, aplicando encuestas estructuradas a la comunidad universitaria de Quito y complementando con un análisis de prácticas digitales en campañas con el objetivo de medir percepciones y contrastar con resultados y evidencias observables en redes (contenido personalizado y contenido sintético). Se consideran variables como el conocimiento y la exposición a IA en campañas, actitudes y confianza en instituciones, alfabetización mediática y participación electoral. Este enfoque permite obtener datos con validez y fiabilidad para analizar percepciones para sustentar conclusiones y recomendaciones.   
+
+Los resultados proporcionarán información relevante para autoridades electorales, universidades, partidos políticos, medios y plataformas digitales. Se busca contribuir con recomendaciones y buenas prácticas sobre el uso responsable de la inteligencia artificial en campañas, fortaleciendo la confianza democrática y una mejor toma de decisiones en el entorno electoral. 
+Capítulo 1: Análisis del Problema
+Antecedentes
+Durante la última década, se ha consolidado un ecosistema de comunicación política basado en algoritmos combinado con microsegmentación, automatización en la difusión de mensajes y el análisis masivo de datos para influir en la persuasión electoral por medio de plataformas digitales. La literatura iberoamericana muestra que, desde 2016, el análisis de la desinformación ha evolucionado desde las redes sociales hacia modalidades apoyadas en Inteligencia Artificial. Se identifican cinco aspectos principales: proliferación de estudios sobre fake news (noticias falsas o información engañosa que provocan un peligroso círculo de desinformación), predominio de enfoques centralizados en la verificación de hechos, presencia de vacíos teóricos, énfasis en liderazgos extremos y análisis de automatización en el ecosistema informativo .
+
+A nivel internacional, diversos documentos han evidenciado el crecimiento de prácticas de propaganda computacional y microtargeting político (segmentación de mensajes políticos dirigidos a grupos o personas específicos), basadas en el uso de grandes bases de datos y modelos de comportamiento. Estas prácticas generan desafíos relacionados con la falta de transparencia en los sistemas y el riesgo de campañas persuasivas con escasa rendición de cuentas. Este campo, conocido como “computational politics” (política computacional, uso de datos y algoritmos para influir en procesos políticos), destaca el paso de segmentaciones demográficas amplias a hiperpersonalización de mensajes y experimentación continua en tiempo real en plataformas digitales .
+
+En América Latina, se han documentado casos concretos de uso de automatización y bots en campañas políticas. En el caso de Ecuador, durante las elecciones de 2017, se detectó el rol central de botnets en la difusión de etiquetas de ataque y en la creación de una apariencia de apoyos orgánicos en Twitter/X, evidenciando la capacidad de estas redes para manipular tendencias y alterar la conversación pública .
+
+Recientemente, la inteligencia artificial generativa ha comenzado a ser utilizada en campañas políticas a nivel mundial. Un ejemplo destacado es el caso de India en 2024, donde se implementaron técnicas de clonado de voz, traducciones a gran escala de mensajes dirigidos a públicos específicos y creación de contenido personalizado. Asimismo, surgió el llamado “dividendo del mentiroso”, donde se dificulta distinguir entre información autentica y contenido manipulado .   
+
+Por otro lado, organismos internacionales y think tanks (centros de investigación y análisis de políticas públicas) coinciden en que la IA en campañas representa un desafío en la integridad de la información y la equidad en la competencia política. Entre sus recomendaciones, destacan el rotulado de contenidos sintéticos, incrementar la transparencia publicitaria y realizar auditorías algorítmicas en colaboración con las autoridades y plataformas. En América Latina, un informe reciente de International IDEA subraya la existencia de vacíos regulatorios y documenta el uso de la IA en tareas como creación, edición, moderación y publicidad política durante las elecciones de 2024 en países como Brasil y México . De igual forma, análisis jurídicos y estudios legales de política pública en Estados Unidos han señalado los riesgos de la publicidad política apoyada en IA (por ejemplo, el uso de deepfakes en anuncios), así como la insuficiencia de la autorregulación, sugiriendo la adopción de normativas que garanticen la transparencia y correcta identificación de los contenidos generados por Inteligencia Artificial . 
+Aunque en los últimos años han aumentado los estudios sobre desinformación y propaganda computacional, en el caso ecuatoriano aún es escasa la evidencia empírica que permita comprender cómo la comunidad universitaria percibe el uso de la inteligencia artificial en campañas políticas digitales, así como la manera en que dichas percepciones inciden en la confianza en los procesos electorales. Esta limitación pone de manifiesto la necesidad de desarrollar investigaciones que integren un enfoque social con herramientas de análisis de datos, a fin de ofrecer una comprensión más completa y contextualizada del fenómeno. 
+
+Planteamiento del Problema
+La integración de la inteligencia artificial (IA) en la política contemporánea ha dejado de ser una posibilidad futura para convertirse en un eje central de las estrategias electorales. Durante las elecciones presidenciales de 2025 en Ecuador, herramientas como el procesamiento de lenguaje natural y la generación de contenido sintético han transformado la interacción entre candidatos y votantes, evidenciado por una digitalización sin precedentes y la adopción intensiva de estrategias de segmentación. 
+De acuerdo con la investigación periodística de Plan V basados en registros de Meta y análisis de especialistas, durante las elecciones del 2025 se identificó una inversión de más de USD 2.5 millones de dólares en anuncios de Facebook dirigidos a influir en la opinión pública hacia los binomios finalistas, calificados como la contienda más “digital, viral, desinformadora y polémica” de los últimos años. Además, estas cifran estiman cerca de 54.000 bots durante la campaña, cifra significativa respecto a los niveles observados en 2023, donde existió entre 13.000 y 17.000 bots activados (cuentas automatizadas que simulan comportamiento humano en redes sociales) .
+Estos datos no se asumen como medición oficial del Consejo Nacional Electoral (CNE), sino como evidencia contextual que justifica el análisis de la percepción ciudadana frente a la automatización y la desinformación digital.
+Estos indicadores evidencian un entorno electoral altamente mediado por plataformas digitales y técnicas de persuasión, con posible influencia de procesos de automatización. Ante este escenario, surge la necesidad de explorar la percepción de la comunidad universitaria, comprendidos entre 18 y 64 años, respecto al uso de inteligencia artificial en las campañas políticas, abordando niveles de aceptación, desconfianza o rechazo y su confianza electoral. Además, es necesario contrastar estas percepciones con evidencias reales sobre las prácticas digitales actuales, con el propósito de construir recomendaciones fundamentadas en el uso ético y regulado en la utilización de inteligencia artificial en el ámbito político . 
+Desde el enfoque de la Ingeniería en Sistemas de la Información, este problema no se limita únicamente al análisis de percepciones, sino que también requiere la organización, el procesamiento y la modelización de datos obtenidos a partir de encuestas digitales. El objetivo es identificar patrones y posibles relaciones entre la exposición al uso de inteligencia artificial y los niveles de confianza electoral. En este marco, se integran técnicas de análisis de datos y de aprendizaje automático como herramientas metodológicas clave para abordar y comprender el fenómeno de manera más rigurosa y sistemática.
+En el contexto ecuatoriano, existe poca investigación empírica sobre la percepción ciudadana. Por ello, la investigación se propone investigar la interrogante: ¿Cómo percibe la comunidad universitaria de la Universidad Central del Ecuador (UCE) el uso de la inteligencia artificial en las campañas políticas digitales de las elecciones presidenciales de 2025 y de qué manera dicha percepción se asocia con su nivel de confianza en el proceso electoral?
+     
+Hipótesis
+H1. Existe una relación negativa entre la exposición percibida a contenidos generados o potenciados por inteligencia artificial en campañas políticas digitales y el nivel de confianza electoral de la comunidad universitaria de la Universidad Central del Ecuador posterior a las elecciones presidenciales de 2025.  
+H2. La alfabetización mediática modera la relación entre la exposición percibida a contenidos generados o potenciados por inteligencia artificial y la confianza electoral, de manera que los participantes con mayores capacidades de verificación de información presentan menor disminución de confianza frente a la exposición a bots, deepfakes o microsegmentación política.
+  
+Esta relación será analizada mediante técnicas de análisis de datos y modelado predictivo. Justificación 
+La presente investigación se fundamenta en la necesidad de comprender de qué manera la ciudadanía interpreta el uso de tecnologías de inteligencia artificial en las campañas políticas digitales, particularmente en contextos caracterizados por una alta exposición a contenidos automatizados y altamente segmentados. En este marco, adquiere especial relevancia examinar cómo estas prácticas inciden tanto en la percepción de transparencia como en los niveles de confianza en los procesos electorales.
+
+Por otra parte, la presente investigación constituye uno de los primeros estudios empíricos en el Ecuador que vincula la percepción de la comunidad universitaria de la Universidad Central del Ecuador con el uso de tecnologías de inteligencia artificial en campañas políticas digitales, aportando evidencia en un campo donde predomina estudios de casos internacionales.
+Desde el ámbito de la Ingeniería en Sistemas de la Información, este estudio ofrece un enfoque aplicado basado en el análisis de datos, al convertir las respuestas de encuestas en variables estructuradas susceptibles de ser procesadas mediante técnicas de aprendizaje automático. Este procedimiento facilita la identificación de patrones y relaciones entre las variables perceptuales y los niveles de confianza electoral, aportando así una comprensión más sistemática del fenómeno.
+ Desde el enfoque teórico, este trabajo se alinea con estudios sobre comportamiento digital electoral y percepción ciudadana en entornos tecnológicos. Metodológicamente, la delimitación por edad permite obtener una muestra más homogénea, facilitando el análisis estadístico y reduciendo la dispersión de respuestas. Socialmente, los resultados podrían ser de interés para organismos como el CNE, partidos políticos y universidades, al identificar qué tan informada, crítica o vulnerable es esta generación ante campañas basadas en algoritmos.
+Objetivos
+Objetivo General
+Analizar la percepción, conocimiento y confianza de la comunidad universitaria de la UCE, comprendida entre 18 y 64 años, sobre el uso de inteligencia artificial en campañas políticas digitales en la ciudad de Quito, durante las elecciones presidenciales de 2025 mediante encuestas estructuradas, técnicas de análisis de datos y modelado predictivo exploratorio.
+Objetivos Específicos 
+Identificar el nivel de conocimiento que tiene la población universitaria entre 18 y 64 años sobre el uso de herramientas de inteligencia artificial aplicadas a campañas políticas digitales. 
+Determinar el grado de aceptación, desconfianza o rechazo frente al uso de IA en la generación de contenido político digital durante el proceso electoral de 2025.
+Contrastar los resultados de las encuestas con señales en redes sociales mediante análisis documental y casos comparados sobre campañas digitalizadas en Ecuador y la región.
+Aplicar técnicas de análisis de datos y modelado predictivo para identificar patrones de asociación entre la percepción del uso de inteligencia artificial en campañas políticas digitales y los niveles de confianza electoral de la comunidad universitaria.
+Alcance 
+El presente estudio se orienta a analizar la percepción ciudadana frente al uso de inteligencia artificial en campañas políticas digitales, tomando como referencia el caso de las elecciones presidenciales ecuatorianas de abril de 2025. Esta investigación se centrará en la percepción de la comunidad universitaria entre 18 y 64 años, un grupo que, por experiencia propia y observación, tiene una alta participación en redes sociales y ha estado expuesto a múltiples contenidos políticos digitales durante el proceso electoral.
+
+Se busca identificar niveles de conocimiento, aceptación o rechazo hacia el uso de bots, algoritmos de segmentación y contenido automatizado, así como evaluar cómo estos elementos inciden en la confianza hacia el proceso electoral. El enfoque es cuantitativo-descriptivo, complementado por un análisis de contenido digital sobre campañas publicadas en redes sociales durante el periodo electoral.
+El alcance de la investigación es exploratorio a nivel urbano y poblacional, con potencial para convertirse en un punto de partida para estudios similares a nivel nacional o comparativo en el futuro.
+El estudio incluye un componente exploratorio basado en modelado predictivo, cuyo objetivo es identificar patrones en los datos. No obstante, no busca establecer relaciones causales ni generalizar los resultados a toda la población.
+Limitaciones
+Este trabajo presenta algunas limitaciones que deben tenerse en cuenta al analizar sus resultados. En primer lugar, el alcance geográfico está restringido únicamente a la ciudad de Quito, lo que impide generalizar los resultados a otras regiones del país. Además, el estudio se enfoca la comunidad comprendida entre 18 a 64 años, por lo que no se considera la perspectiva de otros grupos etarios. La recolección de datos a través de encuestas en línea puede excluir a personas sin acceso a internet o con dificultad en el uso de tecnologías digitales, lo que podría generar un sesgo en la muestra. En el análisis digital, la detección de bots o contenidos generados por inteligencia artificial se realiza mediante indicadores indirectos y fuentes secundarias, debido a que no se dispone de herramientas forenses especializadas. Por otro lado, la investigación se desarrolla en un entorno digital dinámico, por lo que las percepciones obtenidas podrían modificarse ante eventuales transformaciones tecnológicas o políticas. 
+Estas limitaciones abren la puerta a futuras investigaciones comparativos a nivel nacional o regional, que incorporen muestras más amplias y diversas y profundicen el análisis técnico, ampliando y fortaleciendo los resultados aquí obtenidos.  
+El análisis predictivo presenta limitaciones asociadas al tamaño de la muestra, la naturaleza subjetiva de los datos y el desbalance parcial de las clases. Por ello, los resultados deben interpretarse como patrones exploratorios y no como predicciones determinísticas.
+En el siguiente capítulo se desarrolla el marco teórico que sustenta el análisis de las variables y el enfoque metodológico utilizado.
+Capítulo 2: Marco Teórico 
+
+
+Delimitación conceptual
+En este apartado se definen conceptos y términos que enmarcan la investigación, con la finalidad de aclarar sus significados en el contexto de inteligencia artificial en campañas políticas digitales. A continuación, se presentan las definiciones de conceptos clave:
+Inteligencia artificial (IA): Se define como el conjunto de técnicas computacionales diseñadas para emular procesos propios del aprendizaje, el reconocimiento de patrones, la predicción y la generación de contenido, a partir del análisis de datos un conjunto de sistemas con la capacidad de imitar funciones cognitivas humanas como la generación de texto, procesamiento de lenguaje natural o detección de patrones. En el contexto electoral, la IA se aplica para automatizar mensajes, personalizar propaganda, generar contenido sintético (texto, imagen, audio, video) y dirigir anuncios según perfiles predictivos .    
+Comunicación política algorítmica: Hace referencia al uso de sistemas automatizados, datos e inteligencia artificial para planificar, personalizar y difundir mensajes políticos. Esto incluye algoritmos de recomendación en redes sociales, motores de búsqueda y plataformas de campañas que segmentan audiencias. La comunicación política algorítmica permite microajustar el contenido político de acuerdo con las preferencias para maximizar la eficacia persuasiva . En el contexto de esta investigación es importante entender este concepto debido a que la población a estudiar consume gran parte de propaganda electoral mediante plataformas alimentadas por algoritmos.
+Microsegmentación y targeting político: La microsegmentación consiste en la división minuciosa del electorado en segmentos específicos establecidos a través de datos demográficos, psicográficos o comportamentales, con la finalidad de enviar a cada segmento mensajes políticos personalizados (targeting) . El microtargeting utiliza datos de redes sociales, historiales de navegación y ubicación para identificar nichos de votantes y adaptar el contenido de acuerdo con los intereses. Esta práctica es potenciada por la IA generativa que permiten producir mensajes persuasivos adaptados a diferentes segmentos de audiencia, el cual permite generar textos persuasivos a gran escala [8]. En el contexto de este estudio, se medirá la aceptación o rechazo que manifiesta la población ante la idea de recibir propaganda política microsegmentada, debido a que esto podría incidir en su confianza en la honestidad de las campañas.      
+Propaganda computacional: Es el uso coordinado de automatización digital para difundir propaganda y manipular la opinión pública en línea  Esto incluye la creación de cuentas automatizadas o “bots”, la difusión masiva de desinformación a través de redes sociales y la amplificación algorítmica de mensajes. La propaganda computacional aprovecha la automatización, la amplificación algorítmica y la coordinación de cuentas para influir en la conversación pública y alterar la percepción de apoyo político a favor de determinados actores . En esta investigación, la propaganda computacional es un concepto relativo debido a que en Ecuador como en muchos países se han reportado estrategias digitales agresivas basadas en la automatización . 
+   Bots (cuentas automatizadas): desde una perspectiva técnica, son programas o cuentas automatizadas diseñadas para ejecutar acciones en plataformas digitales con mínima intervención humana. En campañas políticas, pueden utilizarse para amplificar mensajes, simular apoyo ciudadano y alterar artificialmente la visibilidad de determinados contenidos [12], [13].
+Inteligencia artificial generativa: La inteligencia artificial generativa se refiere al conjunto de modelos capaces de producir contenido nuevo, como texto, imágenes, audio o video, con apariencia verosímil enfocada en producir nuevo contenido (texto, imágenes, audios, videos) que parezcan completamente creado por humanos. Existen tecnologías para los diferentes casos, redes generativas antagónicas (GAN) para la generación de imágenes, deep learning para voz, o diferentes modelos para generar discursos, rostros, voces y videos sintéticos. En el contexto político se emplea para fabricar mensajes de campaña automatizada o incluso la generación de contenido falso con fines persuasivos de desinformación .   
+Deepfakes: Se definen como contenidos audiovisuales sintéticos generados mediante inteligencia artificial, en los que se superponen de manera realista la imagen o la voz de una persona. En el ámbito político, esta tecnología se emplea para crear videos o audios manipulados que simulan declaraciones o acciones falsas de figuras públicas, lo que, sumado a los avances en los algoritmos, los hace cada vez más convincentes. En el contexto ecuatoriano, durante procesos electorales recientes han circulado este tipo de contenidos en redes sociales, generando confusión y afectando la percepción de autenticidad de la información, lo que incide directamente en la confianza de los ciudadanos, incluidos los estudiantes universitarios expuestos a este entorno digital. 
+Gobernanza de la información: Está conformada de normas, políticas, mecanismos de autorregulación y prácticas institucionales destinadas a ordenar el ecosistema informativo digital, con el fin de garantizar la integridad y minimizar la desinformación en la manipulación electoral.  En el ámbito de la IA en campañas, abarca regulaciones legales (leyes electorales, de protección de datos, normativa sobre publicidad online) así como iniciativas voluntarias de plataformas para fomentar la transparencia . Para este estudio, este concepto aporta el marco normativo de referencia para interpretar la necesidad de regulación y transparencia en campañas digitales debido a que en Ecuador existe un vacío normativo, por lo cual es necesario conocer la opinión sobre posibles medidas.
+Percepción ciudadana: para efectos de esta investigación, se entiende como el conjunto de conocimientos, creencias y actitudes que manifiesta la comunidad universitaria frente al uso de inteligencia artificial en campañas políticas digitales.
+Confianza electoral: para efectos de esta investigación, se entiende como el grado en que los participantes consideran que el proceso electoral es transparente, justo y libre de manipulación. Esta variable se operacionaliza mediante ítems relacionados con percepción de transparencia y percepción de fraude electoral.
+Estado del Arte
+A continuación, se presentan antecedentes y hallazgos de investigaciones previas relacionadas con los ejes temáticos definidos, tanto a nivel internacional como en América Latina y Ecuador.  Además, se establece en cada caso la conexión con el enfoque de la investigación: la percepción ante el uso de IA en campañas y su relación con la confianza electoral y la alfabetización mediática. 
+Comunicación política algorítmica y personalización
+Diversos estudios evidencian que hoy los flujos informativos en el ámbito electoral no solo dependen de decisiones editoriales, sino también de sistemas automatizados que recomiendan contenido de acuerdo con los datos de los usuarios. Esta tendencia ha sido analizada por varios autores. Howard y Wolley (2020) introdujeron el concepto de propaganda computacional para hacer referencia a cómo la automatización, los algoritmos y los bots inciden en la comunicación política contemporánea .  
+Este enfoque resulta central para la presente investigación, ya que permite comprender cómo la personalización del contenido político puede influir en la percepción de autenticidad, transparencia y confianza electoral.
+Por otra parte, Tufekci  advierte que esta lógica algorítmica puede encerrar al ciudadano en burbujas de contenido, afectando su autonomía política, donde sólo reciben mensajes acordes a sus preferencias o histórico de navegación– limitando el acceso a puntos de vista diversos. 
+En Ecuador, Perugachi  Señala que en 2025 hubo campañas con fuerte orientación algorítmica, sin mecanismos de rotulado ni transparencia para los votantes.
+Microsegmentación política y targeting emocional
+El microtargeting político tiene la capacidad de enviar mensajes diferenciados a públicos sumamente específicos, ha sido uno de los desarrollos más debatidos de la última década en comunicación
+electoral. A partir del escándalo de Cambridge Analytica en 2016, que reveló cómo se usaron datos de millones de perfiles de Facebook para personalizar propaganda en las elecciones de EE. UU. y el referéndum del Brexit, creció la preocupación pública y académica sobre los efectos de estas tácticas de microsegmentación en la democracia . Numerosos estudios se han abocado a entender qué tan persuasivo es el microtargeting y cómo lo perciben los ciudadanos.
+De acuerdo con estudios recientes, se puede evidenciar que el microtargeting puede aumentar la influencia de un mensaje político.  Simchon et al.   afirman que la microsegmentación aumenta la eficacia persuasiva respecto a mensajes genéricos, aunque los efectos tienden a ser modestos y dependen del tipo de variable usada (emocional, ideológica o demográfica). 
+Por otra parte, la percepción ciudadana ha sido afectada en la creciente desconfianza y rechazo público hacia ciertas formas de microtargeting. Bon et al. (2024) realizaron una investigación comparativa entre EE. UU., Alemania y Países Bajos en donde indican que los ciudadanos son más críticos cuando se usan datos sensibles sin consentimiento, y en su mayoría rechazan este tipo de prácticas .  Estos hallazgos son relevantes para esta investigación, dado que la percepción de manipulación personalizada constituye un factor potencialmente asociado a menores niveles de confianza electoral.  
+Automatización y propaganda computacional en Ecuador
+La propaganda computacional se ha convertido en un fenómeno global en donde se hace uso de herramientas digitales automatizadas. Investigaciones del Oxford Internet Institute revelan que para finales de la década del 2010 más de 30 países en el mundo hacían uso de bots políticos en redes sociales . 
+A nivel global, la propaganda computacional se ha consolidado como una estrategia para influir en la opinión pública mediante el uso de automatización y contenido digital. En América Latina, se han identificado casos en países como Venezuela, México y Brasil, donde bots y troles han sido utilizados para difundir propaganda y atacar a actores políticos . En este contexto, Freedom House reporta que Ecuador también presenta patrones de automatización en procesos electorales recientes [4]. En consecuencia, el caso ecuatoriano resulta pertinente para analizar cómo la percepción de estas prácticas influye en la evaluación ciudadana del proceso democrático.
+En el caso particular de Ecuador, aunque la escala pudiera ser menor, también se han documentado incidentes significativos. La investigadora Iris Puyosa (2017) analizó la presencia de bots en Twitter durante la segunda vuelta de las elecciones presidenciales de 2017 .  En un estudio más reciente, Perugachi  Confirma que en 2025 hubo más de 50.000 cuentas automatizadas activas, operando sin transparencia ni control institucional. Estas tácticas influyen en la percepción pública sobre la legitimidad del debate electoral.
+IA generativa, deepfakes y percepción de veracidad
+Los deepfakes, en particular los videos falsificados de figuras políticas son percibidos como una forma de desinformación de figuras políticas son percibidos como una forma de desinformación ya que atacan la confianza en la evidencia visual y auditiva. Existen casos concretos como el de India 2020 en donde un político difundió videos deepfakes en distintos idiomas para llegar a electores de cada región .     
+Dobber et al. demuestran que los deepfakes afectan la actitud política, especialmente cuando refuerzan creencias preexistentes . Sin embargo, estudios recientes señalan que su poder persuasivo no es mucho mayor al de otras falsedades (texto o audio), pero sí representan un riesgo por su bajo costo y escalabilidad. En campañas de India y México se ha reportado clonación de voz, creación de avatares sintéticos y desinformación automatizada . En Argentina, según Delgado Valery , los votantes jóvenes reaccionaron con escepticismo, lo que plantea interrogantes sobre cómo estas prácticas influyen en la confianza electoral.
+Esta línea de investigación refuerza la necesidad de estudiar cómo la exposición percibida a contenido sintético puede erosionar la confianza en la autenticidad de la información electoral.
+Gobernanza digital, transparencia y estándares éticos
+International IDEA  propone estándares de integridad informativa: rotulado de contenidos sintéticos, transparencia en publicidad política (quién paga, a quién se dirige, por qué lo ves) y auditorías independientes. La UE avanza en regulaciones similares, pero en Ecuador aún no existen normativas específicas. LaChapelle y Tucker , desde el Brennan Center, advierten que, sin regulación, estas prácticas pueden amplificar desigualdades y vulnerar la confianza democrática. Esta ausencia normativa refuerza la pertinencia de investigar cómo la ciudadanía percibe y reacciona ante estos desarrollos tecnológicos.
+Desde esta perspectiva, la ausencia de marcos regulatorios claros no solo representa un problema institucional, sino también un factor que puede incrementar la percepción de opacidad y reducir la confianza ciudadana.
+Marco legal ecuatoriano sobre campañas digitales, datos personales e integridad informativa
+En el contexto ecuatoriano, el uso de inteligencia artificial en campañas políticas digitales debe analizarse a partir del marco constitucional, electoral y de protección de datos personales. La Constitución de la República del Ecuador reconoce el derecho de las personas a buscar, recibir, intercambiar, producir y difundir información veraz, verificada, oportuna, contextualizada y plural, principio relevante frente a riesgos de desinformación, manipulación algorítmica y circulación de contenido sintético en procesos electorales .
+
+Desde el ámbito electoral, el Código de la Democracia establece que el Consejo Nacional Electoral tiene la función de organizar, dirigir, vigilar y garantizar de manera transparente y eficaz los procesos electorales, además de controlar la propaganda y el gasto electoral . De forma complementaria, el Reglamento de Promoción Electoral regula la promoción electoral, la contratación de publicidad, el uso del Fondo de Promoción Electoral y la participación de proveedores y responsables del manejo económico .
+
+Asimismo, el Reglamento para el Control y Fiscalización del Gasto Electoral establece normas para regular el control y vigilancia de la propaganda y publicidad electoral, así como la fiscalización del monto, origen y destino de los recursos utilizados en campaña . Esta normativa también reconoce que los gastos en redes sociales pueden constituir gasto electoral cuando favorecen a una candidatura u opción electoral .
+
+En materia de datos personales, la Ley Orgánica de Protección de Datos Personales regula el tratamiento de datos en soportes automatizados y no automatizados, aspecto directamente relacionado con la microsegmentación política, la construcción de perfiles digitales y el uso de información personal en campañas digitales . En conjunto, este marco normativo evidencia que Ecuador cuenta con reglas generales sobre información, promoción electoral, gasto electoral y protección de datos; sin embargo, el avance de la inteligencia artificial plantea la necesidad de fortalecer la transparencia sobre contenidos sintéticos, automatización y segmentación digital.
+Modelo teórico y variables del estudio
+Esta investigación plantea un modelo explicativo que vincula el uso percibido de tecnologías de IA en campañas digitales con la confianza electoral de votantes de la comunidad universitaria. La estructura conceptual integra cinco variables clave, para operacionalizar el problema de investigación, se definieron constructos analíticos que sintetizan dimensiones perceptuales y actitudinales observadas en el instrumento aplicado:
+ExpIA: frecuencia autopercibida de contacto con mensajes generados por IA, bots, o contenido sintético.
+BotsPerc: percepción ciudadana sobre la presencia e impacto de cuentas automatizadas en redes.
+AcepMicro: nivel de aceptación o rechazo ante prácticas de microsegmentación política sin transparencia.
+AlfMed: capacidades declaradas de verificación, reconocimiento de rotulado y alfabetización digital.
+ConfInst/ConfElec: confianza general en las instituciones democráticas y en la transparencia del proceso electoral 2025.
+Hipótesis: A mayor exposición autopercibida a contenido político generado o amplificado mediante inteligencia artificial, menor tenderá a ser la confianza electoral. Esta relación se amplifica con la percepción de bots y la aversión a la microsegmentación, y se atenúa con mayor alfabetización mediática.
+Estos constructos no solo orientan la interpretación teórica del fenómeno, sino que también sirven de base para la operacionalización de variables y para la aplicación posterior de modelos de análisis estadístico y aprendizaje automático.
+A modo de síntesis, la siguiente figura despliega el modelo teórico propuesto que da respuesta a esta necesidad de operacionalización. Este esquema articula los dos universos analíticos enmarcados en la Tesis: el Entorno de Campañas Digitales, sometido al análisis de Scraping Social (extracción y recolección automatizada de datos en plataformas digitales), y la Percepción Ciudadana, extraída de los instrumentos de Encuesta.
+
+Figura . Modelo teórico de la investigación y flujo de operacionalización de variables
+ Fuente: Elaboración propia
+La Figura 1 sintetiza la relación entre exposición percibida a inteligencia artificial, percepción de automatización, aceptación de microsegmentación, alfabetización mediática y confianza electoral. El modelo permite vincular el marco conceptual con las variables que posteriormente serán medidas en la encuesta y utilizadas en el análisis predictivo.
+Este modelo permite transformar los constructos teóricos en variables computables para el análisis estadístico y el modelado predictivo. De esta forma, la investigación articula el componente social de percepción ciudadana con el componente técnico propio de la Ingeniería en Sistemas de Información. 
+Relación con el enfoque de investigación
+Este marco teórico sustenta directamente el diseño metodológico planteado en el plan de tesis. La investigación se inscribe en un enfoque cuantitativo-descriptivo. Las variables descritas orientan la construcción del instrumento, que medirá percepción, actitudes y confianza mediante escalas Likert. Esta población fue seleccionada por su alta exposición digital y su relevancia electoral.
+Además, el diseño contempla el contraste entre los resultados de percepción ciudadana y señales observables de propaganda computacional, identificadas a través del análisis de contenido en redes sociales (actividad de bots, anuncios no rotulados, etc.). 
+Asimismo, la definición de estas variables permite su transformación en un conjunto de datos estructurado, apto para el empleo de técnicas de modelado predictivo exploratorio, tales como Random Forest, SVM y regresión ordinal, con el objetivo de identificar patrones de asociación entre percepción y confianza electoral.
+Modelos de aprendizaje automático aplicados al análisis social
+En el análisis de fenómenos sociales complejos, como la percepción ciudadana y la confianza electoral, el uso de modelos de aprendizaje automático permite identificar patrones no lineales y relaciones entre variables que no siempre pueden ser captadas mediante enfoques estadísticos tradicionales . Estos modelos resultan especialmente útiles cuando se trabaja con múltiples variables perceptuales, como las utilizadas en el presente estudio.
+El modelo Random Forest es un algoritmo de aprendizaje supervisado basado en el ensamblado de múltiples árboles de decisión. Su principal ventaja radica en su capacidad para capturar interacciones entre variables y modelar relaciones no lineales, además de permitir la estimación de la importancia relativa de cada predictor, lo que lo hace especialmente adecuado para datos complejos .
+Por su parte, las máquinas de vectores de soporte (SVM) constituyen un enfoque de clasificación que permite separar clases en espacios de alta dimensión mediante funciones kernel. El uso de kernels no lineales, como el radial (RBF), permite modelar relaciones complejas entre variables, lo cual resulta útil en contextos donde las fronteras entre categorías no son claramente lineales .
+En cuanto a la regresión logística ordinal, este modelo es particularmente adecuado cuando la variable dependiente se encuentra en una escala ordinal, como es el caso de las escalas tipo Likert utilizadas para medir la confianza electoral. Este enfoque permite estimar probabilidades acumuladas y respeta la naturaleza ordenada de las categorías, facilitando además la interpretación de los resultados .
+En el contexto de esta investigación, estos modelos permiten explorar la relación entre variables perceptuales asociadas al uso de inteligencia artificial en campañas políticas digitales y los niveles de confianza electoral, aportando tanto capacidad predictiva como herramientas de interpretación de los factores más influyentes.
+Capítulo 3: Diseño Metodológico
+
+Tipo de estudio y diseño
+La presente investigación adopta un enfoque cuantitativo, descriptivo-exploratorio, observacional, no experimental y de corte transversal. En el cual, se recolectaron datos mediante una encuesta digital para caracterizar la situación actual en la comunidad universitaria, sin manipulación deliberada de las variables. Al no intervenir sobre las condiciones observadas, se considera este estudio como no experimental  Este enfoque permite analizar las percepciones ciudadanas posteriores al proceso electoral, así como identificar patrones de comportamiento y actitudes. 
+Este diseño resulta adecuado para analizar fenómenos sociales y tecnológicos en un momento determinado, especialmente cuando se identifican relaciones exploratorias entre variables sin intervenir sobre el entorno estudiado.  
+Población y muestra
+La población estuvo conformada por miembros de la comunidad universitaria de la Universidad Central del Ecuador, incluidos estudiantes, docentes y personal administrativo, con edades entre 18 y 64 años y residencia en la ciudad de Quito. Este segmento fue seleccionado por su exposición frecuente a medios digitales, redes sociales y contenidos políticos durante el proceso electoral de 2025.
+La muestra final estuvo compuesta por 575 registros válidos. Se utilizó un muestreo no probabilístico por conveniencia, con criterios de segmentación descriptiva por edad, género y rol institucional. Esta estrategia fue adecuada para un estudio exploratorio, ya que permitió recolectar información de una población accesible y pertinente para el análisis, sin pretender generalizar los resultados a toda la población electoral ecuatoriana.
+Se incluyeron participantes que cumplían con los siguientes criterios: pertenecer a la comunidad universitaria de la UCE, tener entre 18 y 64 años, residir en Quito y haber estado expuestos a contenido político digital durante la campaña electoral de 2025. Se excluyeron respuestas incompletas, inconsistentes o que no cumplían con los criterios de inclusión.
+
+Instrumento de recolección de datos
+Para la recolección de datos, se utilizó una encuesta digital estructurada, diseñada en Google Forms. El instrumento incluyo ítems cerrados por bloques temáticos y preguntas con escala tipo Likert, que permiten medir actitudes y percepciones orientadas a medir exposición a contenido político digital, conocimiento sobre IA en campañas, alfabetización mediática y confianza electoral.
+El cuestionario fue estructurado en bloques temáticos alineados con las variables del estudio, incluyendo secciones sobre exposición digital, percepción del uso de inteligencia artificial, actitudes frente a estas tecnologías y confianza electoral. Esta estructura permitió transformar las respuestas en variables codificables para el análisis estadístico y el modelo predictivo. 
+El instrumento fue validado mediante revisión conceptual de literatura especializada y se diseñó para asegurar coherencia entre los ítems y las variables del estudio. El instrumento completo aplicado se presenta en el Anexo A.
+Variables principales
+Las variables del estudio fueron definidas de acuerdo con los objetivos de investigación y con los constructos desarrollados en el marco teórico. La Tabla 1 resume las variables principales utilizadas en el análisis.
+Tabla  Variables principales del estudio
+
+La confianza electoral fue definida como la variable dependiente principal. Las variables relacionadas con exposición percibida a IA, actitud hacia IA y alfabetización mediática fueron utilizadas como predictores perceptuales. Las variables sociodemográficas permitieron segmentar el análisis y explorar diferencias entre grupos. La matriz de operacionalización completa se presenta en el Anexo B.
+Procedimiento de recolección y consideraciones éticas 
+El formulario fue difundido mediante canales digitales universitarios durante el periodo de recolección definido para el estudio. Antes de responder, los participantes visualizaron un consentimiento informado digital, en el cual se explicó el propósito académico de la investigación, el carácter voluntario de la participación, el anonimato de las respuestas y el uso exclusivo de los datos con fines de titulación.
+Una vez cerrado el formulario, los datos fueron exportados en formato CSV para su depuración, codificación y análisis. Se revisaron respuestas incompletas, inconsistentes o fuera de los criterios de inclusión. Posteriormente, las variables fueron codificadas para su uso en análisis descriptivo, construcción de índices y modelado predictivo. La descripción de la base depurada se presenta en el Anexo C.
+Preparación y procesamiento de datos
+La preparación de los datos tuvo como finalidad transformar las respuestas de la encuesta en un conjunto estructurado apto para análisis estadístico y aprendizaje automático. Este proceso incluyó la eliminación de registros incompletos o inconsistentes, la codificación de variables categóricas y ordinales, y la transformación de escalas tipo Likert a valores numéricos ordenados.
+Para la variable confianza electoral se utilizaron dos ítems del cuestionario: (a) confianza en que las elecciones nacionales en Ecuador se realizaron de forma justa y transparente; y (b) percepción de fraude o manipulación en el proceso electoral. Debido a que el segundo ítem presenta orientación inversa respecto al constructo de confianza, se aplicó una recodificación inversa:
+Fraude invertido = 6 - Fraude
+Confianza electoral = (Limpieza electoral + Fraude invertido) / 2
+El índice resultante se expresó en una escala ordinal de 1 a 5, donde valores altos representan mayor confianza electoral y valores bajos representan menor confianza. Para el modelado se utilizaron dos configuraciones: una escala original de cinco niveles y una escala agregada de tres niveles: baja, media y alta. Esta doble configuración permitió evaluar si la reducción de categorías disminuía la ambigüedad entre niveles cercanos y mejoraba la estabilidad de los modelos.
+En el caso del corpus digital, se aplicaron procesos de limpieza básica, deduplicación por URL, normalización de texto, estandarización de fechas y etiquetado temático mediante expresiones regulares relacionadas con inteligencia artificial, bots, deepfakes, desinformación, manipulación y algoritmos. Este corpus fue utilizado únicamente con fines contextuales y no como entrada directa de los modelos predictivos.
+Metodología de análisis de datos basadas en CRISP-DM
+Para plantear el análisis de datos y el componente predictivo, se adoptó la metodología Cross Industry Standard Process for Data Mining (CRISP-DM), estándar ampliamente utilizado para organizar proyectos de minería de datos y análisis predictivo, la cual permite organizar de manera sistemática las distintas fases del proceso analítico desde la definición del problema hasta la visualización de resultados. 
+
+Figura  Proceso metodológico basado en CRISP-DM adaptado al estudio
+Fuente: Elaboración propia.
+
+La Figura 2 resume la adaptación de CRISP-DM al estudio. El flujo inicia con la comprensión del problema electoral y de percepción ciudadana, continúa con la preparación de datos provenientes de encuestas y contenido digital, incorpora el modelado mediante algoritmos supervisados, evalúa el desempeño con métricas de clasificación y métricas ordinales, y finaliza con el despliegue de resultados en una plataforma web interactiva.
+Comprensión del problema 
+En esta fase se definió el problema analítico: identificar patrones de asociación entre la exposición percibida a inteligencia artificial en campañas políticas digitales y el nivel de confianza electoral de la comunidad universitaria posterior a las elecciones presidenciales de 2025. El análisis se planteó como exploratorio y no causal.
+Comprensión de los datos
+El estudio utilizó dos fuentes principales de información. La primera correspondió a los datos estructurados obtenidos mediante encuesta digital aplicada a la comunidad universitaria de la UCE. La segunda estuvo conformada por un corpus complementario de contenido digital público relacionado con el proceso electoral ecuatoriano de 2025, recolectado mediante consultas automatizadas a GDELT (Global Database of Events, Language, and Tone), plataforma internacional orientada al monitoreo y análisis de noticias, eventos y narrativas mediáticas, así como mediante la recopilación de publicaciones públicas en redes sociales.
+La encuesta constituyó la fuente principal para el análisis estadístico y predictivo. El corpus digital se utilizó únicamente con fines descriptivos y contextuales, por lo que no fue incorporado como entrada directa de los modelos predictivos
+ Preparación de los datos 
+La preparación de datos incluyó depuración de respuestas, eliminación de registros incompletos o inconsistentes, codificación de variables categóricas y transformación de escalas tipo Likert a valores ordinales. Las variables sociodemográficas fueron codificadas para análisis descriptivo, mientras que los ítems perceptuales fueron estructurados como predictores del modelo.
+Para el corpus digital se aplicó limpieza básica de texto, deduplicación, normalización de fechas y etiquetado temático. Estos procedimientos permitieron generar salidas exploratorias para apoyar la interpretación contextual de los resultados de encuesta.
+Modelado 
+En la fase de modelado se compararon tres algoritmos supervisados: regresión logística ordinal, Random Forest y Support Vector Machine con kernel radial (SVM-RBF). La regresión ordinal fue seleccionada por su coherencia con la naturaleza ordenada de la variable dependiente; Random Forest, por su capacidad para capturar relaciones no lineales e importancia de variables; y SVM-RBF, por su utilidad en problemas de clasificación con fronteras no lineales.
+El conjunto de datos fue dividido mediante una partición estratificada de 70 % para entrenamiento y 30 % para validación. Además, el proceso se repitió con cinco semillas aleatorias para evaluar la estabilidad de los resultados. En el caso del modelo ordinal, se empleó una validación cruzada interna para seleccionar la distribución logit o probit según el mejor valor de QWK, en coherencia con la escala ordinal de la variable dependiente.
+Evaluación 
+La evaluación de modelos se realizó mediante métricas clásicas de clasificación y métricas específicas para variables ordinales. Se utilizaron exactitud, F1 ponderado y AUC OvR para comparar desempeño general. Adicionalmente, se incluyeron el Kappa cuadrático ponderado (QWK) y el error absoluto medio ordinal (MAE ordinal), debido a que la variable dependiente representa niveles ordenados de confianza electoral.
+La comparación no tuvo como propósito obtener un modelo predictivo determinístico, sino identificar qué enfoque capturaba mejor los patrones exploratorios entre variables perceptuales y confianza electoral. Los resultados completos del modelado se presentan en el Anexo E.
+Despliegue 
+La fase de despliegue consistió en la construcción de una plataforma web interactiva desarrollada en Streamlit, orientada a visualizar los principales resultados del análisis. La plataforma incluyó módulos para explorar la distribución de la confianza electoral, comparar modelos predictivos, revisar variables influyentes y presentar gráficos del análisis complementario de contenido digital.
+Este componente permitió materializar el resultado técnico del proyecto desde la perspectiva de Sistemas de Información, al integrar procesamiento de datos, visualización e interacción web en una herramienta accesible para consulta académica. El pipeline técnico y la plataforma se documentan en el Anexo D.
+Análisis complementario de contenido digital
+Con el objetivo de contextualizar los resultados obtenidos mediante la encuesta, se realizó un análisis complementario de contenido digital proveniente de fuentes abiertas, incluyendo noticias recopiladas mediante GDELT y publicaciones públicas en redes sociales durante el periodo electoral de 2025.
+El procesamiento de la información incluyó etapas de limpieza, normalización de texto y etiquetado de contenido relacionado con inteligencia artificial mediante expresiones regulares. Posteriormente, se aplicaron técnicas de análisis de sentimiento y modelado de tópicos para identificar patrones discursivos relevantes.
+Este análisis no tuvo como finalidad detectar técnicamente bots ni probar causalidad, sino aportar evidencia contextual sobre el entorno digital en el que se formaron las percepciones de los participantes. La evidencia digital complementaria se presenta en el Anexo F.
+
+
+Figura  Distribución de sentimiento en noticias digitales
+Fuente: Elaboración propia
+
+La Figura 3 muestra la distribución general del sentimiento identificado en el corpus digital analizado. El predominio de contenido neutral y negativo sugiere que la conversación digital electoral estuvo marcada por una carga informativa moderada y crítica, lo que permite contextualizar las percepciones de desconfianza observadas en la encuesta.
+Capítulo 4: Resultados y Discusión
+
+ Caracterización de la muestra
+El conjunto de datos estuvo conformado por 575 registros válidos, obtenidos a partir de encuestas digitales aplicadas a la población objetivo definida en el estudio. Para el modelado predictivo, se utilizó una partición estratificada de 70 % para entrenamiento y 30 % para validación, con el fin de preservar la proporción original de las clases de la variable dependiente y reducir sesgos derivados del desbalance. Esta estrategia permitió trabajar con 402 observaciones en entrenamiento y 173 observaciones en prueba.
+La variable dependiente del estudio fue el nivel de confianza electoral, construido como índice compuesto a partir de ítems relacionados con percepción de transparencia electoral y percepción de fraude o manipulación. Para el análisis se emplearon dos configuraciones: una clasificación agregada de tres niveles y una clasificación ordinal de cinco niveles. La primera permite una lectura más estable del fenómeno, mientras que la segunda conserva la granularidad original de la escala tipo Likert.
+Distribución de Confianza Electoral 
+En la configuración de tres niveles, la confianza electoral se agrupó en las categorías baja, media y alta. La categoría baja integra los niveles 1 y 2 del índice original, la categoría media corresponde al nivel 3 y la categoría alta agrupa los niveles 4 y 5. La Tabla 2 presenta la distribución general y la partición estratificada utilizada para el modelado.
+Tabla  Distribución de confianza electoral en tres niveles
+Fuente: Elaboración propia con base en resultados del procesamiento de datos.
+La distribución muestra una mayor concentración en el nivel bajo de confianza electoral, con 243 observaciones, equivalente al 42,3 % de la muestra. Este resultado evidencia una tendencia inicial hacia la desconfianza electoral dentro de la comunidad universitaria encuestada. Sin embargo, la presencia de casos en los niveles medio y alto permite comparar perfiles de percepción y aplicar modelos de clasificación supervisada con una distribución relativamente equilibrada.
+
+Figura  Distribución de confianza electoral en tres niveles
+Fuente: Elaboración propia 
+
+La Figura 4 permite observar que la categoría de baja confianza electoral concentra la mayor frecuencia. Esta tendencia justifica el análisis posterior de factores asociados con la confianza electoral y respalda la pertinencia de utilizar modelos de clasificación para explorar patrones en las respuestas de la encuesta.
+En la configuración de cinco niveles se conservó la escala ordinal original del índice de confianza electoral. Esta alternativa permite observar con mayor detalle la concentración de respuestas en categorías intermedias y bajas, aunque introduce mayor complejidad para el modelado predictivo.
+Tabla  Distribución de confianza electoral en cinco niveles
+Fuente: Elaboración propia con base en resultados del procesamiento de datos.
+
+La distribución de cinco niveles evidencia un desbalance parcial, principalmente por la baja frecuencia de los niveles extremos 1 y 5. Esta condición explica la dificultad de los algoritmos para discriminar con precisión categorías adyacentes y extremos poco representados, por lo que los resultados predictivos deben interpretarse como exploratorios.
+
+Figura  Distribución de confianza electoral en cinco niveles
+Fuente: Elaboración propia 
+
+La Figura 5 muestra que la mayor concentración de observaciones se ubica en los niveles 2, 3 y 4. Esta concentración confirma la naturaleza ordinal del fenómeno y evidencia que las diferencias entre categorías próximas pueden ser subjetivas, especialmente cuando se analizan percepciones mediante escalas tipo Likert.
+
+Construcción del índice de confianza electoral
+La variable confianza electoral se construyó a partir de dos ítems del cuestionario: la confianza en que las elecciones nacionales se realizan de forma justa y transparente, y la percepción de existencia de fraude o manipulación en el proceso electoral. Debido a que el segundo ítem tiene orientación inversa respecto al constructo de confianza, se aplicó una recodificación inversa mediante la transformación 6 - valor del ítem de fraude. De esta manera, ambos indicadores quedaron alineados en la misma dirección interpretativa: valores altos representan mayor confianza electoral y valores bajos representan menor confianza.
+Posteriormente, se calculó un índice compuesto como el promedio entre el ítem de transparencia electoral y el ítem de fraude recodificado. Esta decisión metodológica permitió integrar dos dimensiones relacionadas del mismo constructo y generar una variable ordinal de 1 a 5 apta para el análisis descriptivo y el modelado predictivo. Para fines de comparación técnica, el índice fue utilizado tanto en su escala original de cinco niveles como en una escala agregada de tres niveles.
+
+Resultados descriptivos de percepción y confianza
+El análisis descriptivo permitió identificar patrones relevantes en relación con la percepción del uso de inteligencia artificial en campañas políticas digitales y su asociación con la confianza electoral. En términos generales, la muestra reporta una alta exposición a contenido político digital durante el proceso electoral, acompañada de un conocimiento parcial sobre el uso real de herramientas de inteligencia artificial en campañas.
+Sin embargo, dicha exposición no se traduce necesariamente en una valoración positiva de las campañas digitales. Cuando los participantes asocian el contenido político con bots, automatización, microsegmentación o posibles deepfakes, tienden a manifestar mayor desconfianza hacia la transparencia del proceso electoral. Este patrón es coherente con la hipótesis de investigación, aunque debe interpretarse como una asociación perceptual y no como una relación causal.
+Estos resultados descriptivos justifican el uso de técnicas de modelado predictivo exploratorio, ya que permiten evaluar si las variables perceptuales relacionadas con IA, automatización, alfabetización mediática y exposición digital aportan información relevante para clasificar niveles de confianza electoral.
+Resultados del modelado en 5 niveles
+En la configuración de cinco niveles se evaluaron tres modelos supervisados: regresión logística ordinal, Random Forest y Support Vector Machine con kernel radial (SVM-RBF). Esta configuración conserva la granularidad original de la variable dependiente, pero también representa el escenario más exigente para los modelos, debido al desbalance de clases y a la cercanía conceptual entre niveles ordinales adyacentes.
+Tabla  Tabla de distribución de cinco niveles
+
+Fuente: Elaboración propia con base en resultados del procesamiento de datos.
+
+Los resultados muestran que Random Forest obtuvo el mejor desempeño general en la configuración de cinco niveles, con una exactitud promedio de 0,461, F1 ponderado de 0,453 y AUC OvR de 0,683. SVM-RBF presentó un rendimiento competitivo, especialmente en AUC, mientras que la regresión logística ordinal mostró menor desempeño predictivo, aunque conserva valor analítico por su interpretabilidad y por respetar la estructura ordinal de la variable dependiente.
+El desempeño debe considerarse moderado. Esto no invalida el análisis, sino que refleja la complejidad del fenómeno estudiado: la confianza electoral depende de factores perceptuales, sociales y contextuales que no siempre pueden capturarse completamente mediante variables observables de encuesta. Por ello, el modelado se interpreta como exploratorio y orientado a identificar patrones, no como una herramienta de predicción determinística.
+
+Figura  Comparación de AUC entre modelos en cinco niveles
+Fuente: Elaboración propia 
+
+La Figura 6 muestra que Random Forest alcanza el mejor AUC relativo en la configuración de cinco niveles, seguido por SVM-RBF. La diferencia frente a la regresión ordinal sugiere que las relaciones entre percepción de IA y confianza electoral no son completamente lineales, por lo que los modelos no lineales capturan mejor ciertos patrones de los datos.
+
+
+Matriz de confusión del modelo Random Forest (5 niveles)
+
+
+
+Resultados del modelado en 3 niveles
+En la configuración de tres niveles se redujo la granularidad de la variable dependiente para disminuir la ambigüedad entre categorías ordinales próximas. Esta estrategia permitió evaluar si una clasificación agregada resultaba más estable para un fenómeno perceptual complejo como la confianza electoral.
+Tabla  Comparación de modelos predictivos en tres niveles
+
+Fuente: Elaboración propia con base en resultados del procesamiento de datos.
+
+La configuración de tres niveles mejora la estabilidad general de los modelos. Random Forest obtuvo la mayor exactitud promedio, con 0,520, y el mejor F1 ponderado, con 0,513. SVM-RBF presentó un desempeño muy cercano, con exactitud de 0,516 y AUC OvR de 0,690, además de un QWK ligeramente superior. La regresión ordinal mantuvo menor desempeño predictivo, pero continúa siendo útil como referencia interpretativa.
+La mejora observada al pasar de cinco a tres niveles sugiere que la agregación de categorías reduce la ambigüedad entre respuestas próximas. En estudios de percepción, esta decisión puede ser metodológicamente adecuada cuando las diferencias entre niveles contiguos de una escala Likert son difíciles de distinguir para los participantes o para los algoritmos de clasificación.
+Figura  Comparación de modelos en configuración de tres niveles
+Fuente: Elaboración propia 
+
+La Figura 7 evidencia que Random Forest y SVM-RBF presentan desempeños similares en la clasificación de tres niveles. Esta cercanía confirma que los modelos no lineales capturan mejores patrones complejos que la regresión ordinal, aunque esta última conserva mayor interpretabilidad estadística.
+
+
+
+
+
+Matriz de confusión del modelo Random Forest
+
+
+Matriz de confusión del modelo ordinal
+
+
+
+
+
+Comparación e interpretación de modelos
+La comparación entre modelos permite identificar tres hallazgos técnicos. Primero, Random Forest presenta el mejor equilibrio entre exactitud, F1 ponderado, AUC e interpretabilidad parcial mediante importancia de variables. Segundo, SVM-RBF ofrece un desempeño competitivo, especialmente cuando la variable dependiente se agrupa en tres niveles, aunque su interpretación sustantiva es más limitada. Tercero, la regresión logística ordinal, pese a su menor desempeño predictivo, resulta relevante como modelo de referencia por su coherencia con la naturaleza ordinal de la variable dependiente.
+En conjunto, los resultados indican que las relaciones entre percepción del uso de IA, automatización, alfabetización mediática y confianza electoral son probablemente no lineales. Por esta razón, los modelos de aprendizaje automático aportan valor al identificar patrones que no se observan con la misma claridad mediante enfoques estadísticos tradicionales. No obstante, dado el diseño transversal y no probabilístico del estudio, los resultados deben entenderse como asociaciones exploratorias.
+
+Variables más influyentes
+El análisis de importancia de variables, obtenido a partir del modelo Random Forest, permitió identificar los factores con mayor contribución en la predicción de la confianza electoral.
+Entre las variables más relevantes se encuentran:
+Percepción sobre el uso de inteligencia artificial en campañas políticas 
+Cambios en la confianza electoral asociados a la exposición digital 
+Tipo de interacción con contenido político en plataformas digitales 
+Variables sociodemográficas como edad y afiliación académica 
+Un hallazgo importante es que las variables relacionadas con la percepción y experiencia digital presentan mayor peso relativo en comparación con variables demográficas tradicionales.
+Este resultado sugiere que la confianza electoral, en el contexto analizado, está más influenciada por factores cognitivos y perceptuales que por características estructurales de los individuos.
+
+
+
+
+Discusión técnica 
+Los resultados obtenidos en esta investigación permiten establecer varias conclusiones relevantes desde una perspectiva técnica y analítica.
+En primer lugar, se confirma que es posible modelar la confianza electoral a partir de variables perceptuales relacionadas con el uso de inteligencia artificial en campañas políticas digitales, aunque con limitaciones inherentes a la naturaleza subjetiva de los datos.
+En segundo lugar, el desempeño moderado de los modelos evidencia la complejidad del fenómeno estudiado, caracterizado por la influencia de múltiples factores sociales, cognitivos y contextuales que no siempre pueden ser capturados completamente mediante variables observables.
+En tercer lugar, la comparación entre configuraciones de 5 y 3 niveles demuestra que la reducción de la variable objetivo mejora la estabilidad predictiva, lo cual constituye una estrategia metodológica válida en escenarios con alta ambigüedad entre clases.
+Finalmente, el análisis de importancia de variables refuerza la hipótesis de que la percepción del uso de inteligencia artificial en campañas políticas tiene un impacto significativo en la confianza electoral, consolidando la relevancia del enfoque propuesto en la investigación.
+Análisis complementario de contenido digital
+Como complemento al análisis cuantitativo basado en encuestas, se realizó un análisis exploratorio de contenido digital relacionado con campañas políticas en redes sociales durante el periodo electoral de 2025.
+Para ello, se aplicaron técnicas básicas de recolección de información mediante scraping manual y revisión sistemática de publicaciones en plataformas digitales, incluyendo ejemplos de contenido automatizado, repetitivo o potencialmente generado mediante inteligencia artificial.
+Este análisis permitió identificar patrones cualitativos relacionados con la presencia de bots, contenido automatizado y estrategias de amplificación digital, los cuales sirven como contexto interpretativo para los resultados obtenidos en el modelado predictivo.
+Los hallazgos evidencian una alta exposición a contenido político digital, caracterizado por la repetición de mensajes, uso de formatos estandarizados y posible automatización, lo cual refuerza la percepción de manipulación reportada por los encuestados.
+Como complemento al análisis cuantitativo de encuestas, se examinó un corpus de contenido digital público relacionado con el proceso electoral ecuatoriano de 2025. Este corpus fue construido a partir de noticias recolectadas mediante GDELT y publicaciones públicas en redes sociales, posteriormente enriquecidas y limpiadas para su análisis. El objetivo de esta fase no fue alimentar directamente el modelo predictivo, sino aportar evidencia contextual sobre las narrativas, tonos y patrones de comunicación presentes durante la campaña.
+Hallazgo 1: corpus noticioso útil, pero heterogéneo
+En el caso de las noticias, la recolección inicial generó un universo amplio y heterogéneo, con presencia de múltiples dominios e idiomas. Esto permitió recuperar cobertura internacional sobre candidaturas, debate, CNE y coyuntura electoral; sin embargo, también introdujo ruido temático, por lo que el corpus fue utilizado con fines descriptivos y no como base inferencial principal.
+Hallazgo 2: Facebook político sí dio evidencia más directa
+En contraste, el conjunto de publicaciones públicas de Facebook resultó más útil para ilustrar la comunicación política digital durante la campaña, ya que incluyó mensajes explícitamente proselitistas, acompañados de métricas de interacción como reacciones, compartidos y comentarios. Además, una versión procesada del corpus permitió clasificar el tono del contenido mediante etiquetas de sentimiento, lo que aportó una dimensión descriptiva adicional al análisis.
+En conjunto, esta evidencia complementaria respaldó la interpretación de los resultados de encuesta, al mostrar que la campaña se desarrolló en un entorno digital intensivo, con alta circulación de mensajes políticos, fuerte interacción en redes y coexistencia de contenido informativo, promocional y potencialmente asociado a automatización o IA.
+Capítulo 5:
+
+Conclusiones
+Conclusión 1. Relacionada con el objetivo general.
+La investigación permitió analizar la percepción, el conocimiento y la confianza de la comunidad universitaria de la Universidad Central del Ecuador frente al uso de inteligencia artificial en campañas políticas digitales durante las elecciones presidenciales de 2025. Los resultados evidencian que la IA es percibida como una herramienta con capacidad de transformar la comunicación electoral, pero también como un factor asociado a riesgos de manipulación, desinformación y pérdida de confianza en la transparencia del proceso electoral.
+Conclusión 2. Relacionada con el objetivo específico 1.
+Se identificó que la comunidad universitaria posee un conocimiento parcial sobre el uso de herramientas de inteligencia artificial en campañas políticas digitales. Aunque los participantes reconocen elementos como bots, contenido automatizado, microsegmentación y deepfakes, no siempre distinguen con precisión entre contenido político legítimo, contenido automatizado y contenido generado mediante IA.
+Conclusión 3. Relacionada con el objetivo específico 2.
+Los resultados muestran una tendencia predominante hacia la desconfianza frente al uso de IA en campañas políticas digitales, especialmente cuando estas tecnologías se asocian con cuentas automatizadas, manipulación emocional, generación de contenido sintético o falta de transparencia sobre el origen de los mensajes.
+Conclusión 4. Relacionada con el objetivo específico 3.
+El análisis complementario de contenido digital permitió contextualizar los resultados de las encuestas, mostrando un entorno electoral caracterizado por alta circulación de mensajes políticos, interacción en redes sociales y presencia de narrativas asociadas a automatización, desinformación e inteligencia artificial. Este contraste refuerza la pertinencia del estudio al vincular percepción ciudadana con evidencia digital observable.
+Conclusión 5. Relacionada con el objetivo específico 4.
+La aplicación de técnicas de análisis de datos y modelado predictivo permitió transformar respuestas de encuesta en variables estructuradas, construir un índice de confianza electoral y comparar modelos supervisados. Los resultados del modelado deben interpretarse como exploratorios, no causales, debido al tipo de muestra, la naturaleza perceptual de los datos y el desempeño moderado de los algoritmos.
+Recomendaciones
+Recomendaciones técnicas
+Implementar mecanismos de rotulado visible para contenidos políticos generados o modificados mediante inteligencia artificial, especialmente imágenes, audios, videos y mensajes automatizados. 
+Desarrollar tableros de monitoreo que permitan identificar patrones de actividad anómala, repetición de mensajes, cuentas automatizadas y cambios abruptos en la conversación política digital. 
+Fortalecer la transparencia de la publicidad política digital mediante registros abiertos que incluyan responsable del anuncio, monto invertido, público objetivo, periodo de circulación y plataforma utilizada. 
+Mejorar la trazabilidad de los datos utilizados en campañas digitales, especialmente cuando se apliquen técnicas de segmentación o personalización de mensajes.
+Recomendaciones institucionales
+Recomendar al Consejo Nacional Electoral fortalecer mecanismos específicos para supervisar propaganda política digital, publicidad segmentada y contenidos sintéticos durante periodos electorales. 
+Promover lineamientos de transparencia para partidos políticos, candidatos y proveedores de comunicación digital, a fin de declarar el uso de herramientas de inteligencia artificial en campañas. 
+Impulsar programas de alfabetización mediática y digital dirigidos a estudiantes universitarios, con énfasis en detección de desinformación, bots, deepfakes y manipulación algorítmica. 
+Fomentar cooperación entre universidades, organismos electorales, sociedad civil y plataformas digitales para monitorear riesgos informativos durante procesos electorales.
+Recomendaciones académicas
+Ampliar la investigación hacia otras universidades y regiones del Ecuador para comparar percepciones entre distintos grupos poblacionales. 
+Incorporar muestras probabilísticas en futuras investigaciones para mejorar la capacidad de generalización de los resultados. 
+Profundizar el análisis mediante modelos explicativos y no solo predictivos, integrando variables como alfabetización mediática, ideología política, frecuencia de uso de redes sociales y nivel de confianza institucional. 
+Publicar el instrumento de encuesta, matriz de variables y código de análisis como anexos técnicos para fortalecer la reproducibilidad del estudio.
+Trabajo Futuro
+Como línea futura de investigación se recomienda ampliar el estudio a una muestra nacional que incluya distintas universidades, provincias y grupos etarios. También se sugiere incorporar análisis longitudinal para observar si la percepción sobre IA en campañas políticas cambia antes, durante y después de un proceso electoral. Desde el enfoque técnico, futuras investigaciones podrían aplicar métodos más avanzados de detección de automatización, análisis de redes sociales, procesamiento de lenguaje natural y clasificación de contenido sintético. Asimismo, sería pertinente evaluar el efecto moderador de la alfabetización mediática en la relación entre exposición percibida a IA y confianza electoral.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Glosario
+
+
+Anexos
+Anexo A. Instrumento de encuesta aplicado
+Encuesta sobre la percepción ciudadana sobre el uso de IA en campañas políticas digitales  
+Propósito de la Encuesta y Confidencialidad
+Esta encuesta forma parte de una investigación académica titulada “Análisis de la percepción ciudadana sobre el uso de inteligencia artificial en campañas políticas digitales en Quito: Caso elecciones presidenciales 2025”, desarrollada en la Universidad Central del Ecuador, Facultad de Ingeniería y Ciencias Aplicadas.
+El objetivo es analizar el nivel de conocimiento, percepción y confianza de los miembros de la comunidad universitaria UCE frente al uso de inteligencia artificial en campañas políticas digitales durante el proceso electoral de 2025 segunda vuelta. Sus respuestas serán anónimas y confidenciales, utilizadas únicamente con fines académicos y de análisis estadístico. Los datos recolectados no serán compartidos con terceros ni utilizados para ningún otro propósito distinto al mencionado.
+Su participación es completamente voluntaria y puede abandonar la encuesta en cualquier momento. Al continuar, usted autoriza el uso de la información proporcionada para fines estrictamente investigativos y reconoce que comprende la naturaleza confidencial de este estudio.
+
+¿Cuál es tu edad?
+18–24
+25–34
+35–44
+45–54
+55–64
+¿Cuál es tu género?  
+Masculino
+Femenino
+Otros
+¿Cuál es su rol dentro de la Universidad Central del Ecuador?  
+Estudiante de pregrado
+Estudiante de posgrado
+Docente
+Personal administrativo
+¿A qué facultad o unidad académica pertenece?
+Facultad de Artes
+Facultad de Arquitectura y Urbanismo
+Facultad de Ciencias Administrativas
+Facultad de Ciencias Agrícolas
+Facultad de Ciencias Biológicas
+Facultad de Ciencias Económicas
+Facultad de Ciencias Psicológicas
+Facultad de Ciencias Químicas
+Facultad de Comunicación Social
+Facultad de Cultura Física
+Facultad de Ingeniería y Ciencias Aplicadas
+Facultad de Derecho
+Facultad de Filosofía, Letras y Ciencias de la Educación
+Facultad de Jurisprudencia, Ciencias Políticas y Sociales
+Facultad de Ingeniería en Geología, Minas, Petróleos y Ambiental
+Facultad de Odontología
+Instituto de Posgrado
+Centro de Investigación
+No pertenece a ninguna facultad / Área administrativa
+Otro:
+¿Reside actualmente en la ciudad de Quito?
+Sí
+No
+ SECCION 2 USO DE REDES SOCIALES Y EXPOSICIÓN DIGITAL  
+¿Con qué frecuencia utiliza redes sociales?  *
+Varias veces al día
+Una vez al día
+Varias veces a la semana
+Rara vez
+Nunca
+¿A través de qué dispositivos accede principalmente a Internet?  *
+Smartphone
+Computadora
+Tablet
+Otro:
+Durante la campaña presidencial entre Luisa González y Daniel Noboa, ¿con qué frecuencia vio o recibió contenido político en redes sociales o plataformas digitales?  
+Varias veces al día
+Una vez al día
+Varias veces a la semana
+Rara vez
+Nunca
+¿Qué tipo de interacción tuvo con el contenido político digital relacionado a la campaña Noboa vs. González?  
+Solo leí/vi
+Comenté
+Compartí
+Reaccioné (me gusta, me enfada, etc.)
+Ignoré
+No tuve interacción
+
+SECCION 3 CONOCIMIENTO Y EXPERIENCIA CON IA EN POLÍTICA DIGITAL  
+¿Ha escuchado hablar sobre inteligencia artificial aplicada a campañas políticas digitales?  
+Sí
+No
+No estoy seguro/a
+¿Reconoció o notó el uso de herramientas automatizadas (bots, anuncios personalizados, deepfakes, etc.) en la campaña digital de Noboa o González?  
+Sí, lo he notado claramente
+Tal vez, pero no estoy seguro/a
+No
+¿Sabe identificar cuándo un mensaje, imagen, video o audio político ha sido generado por inteligencia artificial?  
+Sí, fácilmente
+A veces
+No, me resulta difícil distinguirlo
+¿Vio alguna vez un video, imagen, audio o noticia política de la campaña entre Luisa González y Daniel Noboa que le pareció “falso”, “manipulado” o generado con IA?  
+Sí, muchas veces
+Sí, algunas veces
+No
+No estoy seguro/a
+ACTITUDES Y CONFIANZA  
+Percepción sobre el uso de IA en campañas políticas  
+El uso de inteligencia artificial en campañas políticas digitales mejora la comunicación entre partidos y ciudadanos.
+Totalmente en desacuerdo
+En desacuerdo
+Ni de acuerdo ni en desacuerdo
+De acuerdo
+Totalmente de acuerdo
+Los partidos pueden manipular mi opinión mediante mensajes personalizados creados con IA.
+Totalmente en desacuerdo
+En desacuerdo
+Ni de acuerdo ni en desacuerdo
+De acuerdo
+Totalmente de acuerdo
+La presencia de bots o cuentas falsas en redes sociales reduce mi confianza en la información política digital.
+Totalmente en desacuerdo
+En desacuerdo
+Ni de acuerdo ni en desacuerdo
+De acuerdo
+Totalmente de acuerdo
+La inteligencia artificial puede mejorar la transparencia del proceso electoral.
+Totalmente en desacuerdo
+En desacuerdo
+Ni de acuerdo ni en desacuerdo
+De acuerdo
+Totalmente de acuerdo
+La existencia de deepfakes o contenido manipulado me hace desconfiar más de las campañas políticas digitales.
+Totalmente en desacuerdo
+En desacuerdo
+Ni de acuerdo ni en desacuerdo
+De acuerdo
+Totalmente de acuerdo
+Considero que el uso de inteligencia artificial en campañas políticas debería estar regulado por la ley.
+Totalmente en desacuerdo
+En desacuerdo
+Ni de acuerdo ni en desacuerdo
+De acuerdo
+Totalmente de acuerdo
+Confianza Electoral  
+Confío en que las elecciones nacionales en Ecuador se realizan de forma justa y transparente.
+Totalmente en desacuerdo
+En desacuerdo
+Ni de acuerdo ni en desacuerdo
+De acuerdo
+Totalmente de acuerdo
+Creo que existe fraude o manipulación en el proceso electoral.
+Totalmente en desacuerdo
+En desacuerdo
+Ni de acuerdo ni en desacuerdo
+De acuerdo
+Totalmente de acuerdo
+¿Por quién votó en la segunda vuelta presidencial de 2025?  
+Luisa González
+Daniel Noboa
+Nulo/blanco
+No voté
+Prefiero no responder
+¿Considera que el uso de IA en campañas digitales influyó en su decisión de voto en las elecciones presidenciales de 2025?  
+Sí, mucho
+Sí, algo
+Poco
+Nada
+No sé/no aplica
+¿Ha cambiado su confianza en el proceso electoral al saber que existen bots, deepfakes o manipulación mediante IA?  
+Sí, ahora confío menos
+Sí, ahora confío más
+No ha cambiado
+No sé
+¿Realiza alguna verificación (chequea fuentes, busca noticias, consulta otras personas) de la información política digital antes de compartirla?  
+Siempre
+A veces
+Rara vez
+Nunca
+¿Conoce alguna medida, ley o regulación sobre el uso de IA en campañas políticas en Ecuador?  
+Sí
+No
+No estoy seguro/a
+¿Cree que debería regularse el uso de IA en campañas políticas digitales en el país?
+Sí
+No
+No sé
+¿Participó activamente en redes sociales o medios digitales durantes las últimas elecciones presidenciales de 2025?  
+Sí
+No
+Prefiero no responder
+¿Qué recomendaciones haría para garantizar un uso responsable y transparente de la inteligencia artificial en campañas políticas digitales en Ecuador, considerando la experiencia de la campaña entre Luisa González y Daniel Noboa?  
+
+Anexo B. Matriz de operacionalización de variables
+La matriz de operacionalización permite vincular los constructos teóricos del estudio con los ítems del instrumento aplicado y con su uso dentro del análisis descriptivo y predictivo.
+. Matriz de operacionalización de variables
+
+Anexo C. Descripción de la base de datos depurada
+La base de datos depurada estuvo conformada por 575 registros válidos. Cada fila representa a un participante de la comunidad universitaria de la Universidad Central del Ecuador y cada columna corresponde a un ítem del cuestionario o a una variable transformada.
+La base de datos depurada estuvo conformada por 575 registros válidos. Cada fila representa a un participante de la comunidad universitaria de la Universidad Central del Ecuador y cada columna corresponde a un ítem del cuestionario o a una variable transformada.
+La variable dependiente principal fue el índice de confianza electoral, construido a partir de dos ítems: percepción de transparencia electoral y percepción de fraude o manipulación. Para el modelado se utilizaron dos configuraciones: una escala original de cinco niveles y una escala agregada de tres niveles.
+. Descripción de campos principales de la base depurada
+
+Anexo D. Pipeline de análisis de datos y plataforma web interactiva
+
+. Pantalla inicial de la plataforma web interactiva
+
+Figura D2. Módulo Perfil de Muestra 
+
+. Módulo Perfil de Muestra
+
+Figura D3. Módulo Conocimiento de IA
+
+. Módulo Conocimiento de IA
+
+Figura D4. Módulo de percepción ciudadana
+. Módulo de percepción ciudadana
+
+Figura D5. Módulo de confianza electoral
+
+. Módulo de confianza electoral
+Figura D5. Módulo de modelos predictivos
+
+. Módulo de modelos predictivos
+Figura D6. Módulo de Evidencia Digital GDELT y Encuesta 
+
+. Módulo de Evidencia Digital GDELT y Encuesta
+
+Anexo E. Resultados completos del modelado predictivo
+Este anexo resume los resultados técnicos del modelado predictivo aplicado para clasificar los niveles de confianza electoral a partir de variables sociodemográficas y perceptuales relacionadas con el uso de inteligencia artificial en campañas políticas digitales. Su función es respaldar los resultados presentados en el Capítulo 4, sin reemplazar la interpretación analítica desarrollada en el cuerpo de la tesis.
+
+Distribución de clases  
+. Comparación de modelos en cinco niveles
+
+La distribución muestra una concentración mayor en las clases 2, 3 y 4, mientras que las clases extremas presentan menor frecuencia. Este comportamiento explica parcialmente la dificultad de los modelos para clasificar adecuadamente los niveles extremos de confianza electoral.
+Estabilidad por semilla
+
+Anexo F. Evidencia del análisis complementario de contenido digital
+
+Anexo G. Glosario de términos técnicos
+Anexo H. Consentimiento informado
+

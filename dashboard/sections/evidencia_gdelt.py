@@ -112,6 +112,78 @@ def render_bars(items: list[dict], color_class: str = ""):
     html_block(html)
 
 
+def social_platform_sentiment_summary(gdelt_df: pd.DataFrame):
+    if gdelt_df is None or gdelt_df.empty:
+        return pd.DataFrame(columns=["plataforma", "sentimiento", "registros"])
+
+    if "case_id" not in gdelt_df.columns:
+        return pd.DataFrame(columns=["plataforma", "sentimiento", "registros"])
+
+    social_df = gdelt_df[gdelt_df["case_id"].astype(str).str.contains("social", case=False, na=False)].copy()
+
+    if social_df.empty or "platform" not in social_df.columns or "sentiment_label" not in social_df.columns:
+        return pd.DataFrame(columns=["plataforma", "sentimiento", "registros"])
+
+    social_df = social_df[["platform", "sentiment_label"]].copy()
+    social_df["plataforma"] = social_df["platform"].fillna("No registrado").astype(str).str.strip().str.title()
+    social_df["sentimiento"] = (
+        social_df["sentiment_label"]
+        .fillna("neutral")
+        .astype(str)
+        .str.strip()
+        .str.lower()
+        .replace({"positivo": "Positivo", "positive": "Positivo", "pos": "Positivo",
+                  "neutral": "Neutral", "neu": "Neutral", "negativo": "Negativo",
+                  "negative": "Negativo", "neg": "Negativo"})
+    )
+
+    summary = (
+        social_df.groupby(["plataforma", "sentimiento"], sort=False)
+        .size()
+        .reset_index(name="registros")
+    )
+
+    return summary
+
+
+def render_platform_sentiment_chart(gdelt_df: pd.DataFrame):
+    summary = social_platform_sentiment_summary(gdelt_df)
+
+    if summary.empty:
+        empty_state("No se encontraron registros sociales con columna de plataforma y sentimiento para esta visualización.")
+        return
+
+    fig = px.bar(
+        summary,
+        x="plataforma",
+        y="registros",
+        color="sentimiento",
+        barmode="group",
+        color_discrete_map={
+            "Positivo": "#2ecc71",
+            "Neutral": "#f4b942",
+            "Negativo": "#ef6b6b",
+        },
+        category_orders={"sentimiento": ["Positivo", "Neutral", "Negativo"]},
+        labels={"plataforma": "Plataforma", "registros": "Registros", "sentimiento": "Sentimiento"},
+    )
+
+    fig.update_layout(
+        height=320,
+        paper_bgcolor="#ffffff",
+        plot_bgcolor="#ffffff",
+        margin=dict(l=0, r=10, t=10, b=30),
+        legend=dict(title="Sentimiento"),
+        xaxis=dict(title="", showgrid=False),
+        yaxis=dict(title="Registros", gridcolor="#e5e7eb"),
+        font=dict(size=11),
+    )
+
+    fig.update_traces(hovertemplate="<b>%{x}</b><br>Sentimiento: %{fullData.name}<br>Registros: %{y}<extra></extra>")
+
+    st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
+
+
 def gdelt_date_column(gdelt_df: pd.DataFrame):
     return find_first_existing_column(
         gdelt_df,
@@ -206,28 +278,63 @@ def prepare_gdelt_timeline(gdelt_df: pd.DataFrame):
     return timeline
 
 
+def sentiment_label_column(df: pd.DataFrame):
+    return find_first_existing_column(
+        df,
+        ["sentiment_label", "sentiment_raw_label", "label", "tone_label"],
+    )
+
+
+def sentiment_score_column(df: pd.DataFrame):
+    return find_first_existing_column(
+        df,
+        ["sentiment_score", "sentiment_raw_score", "score", "avg_tone", "tone"],
+    )
+
+
 def gdelt_tone_summary(gdelt_df: pd.DataFrame):
     if gdelt_df is None or gdelt_df.empty:
         return None
 
-    tone_col = gdelt_tone_column(gdelt_df)
+    label_col = sentiment_label_column(gdelt_df)
+    score_col = sentiment_score_column(gdelt_df)
 
-    if not tone_col:
-        return None
+    if label_col:
+        labels = gdelt_df[label_col].fillna("").astype(str).str.strip().str.lower()
+        counts = labels.value_counts()
+        neg = int(counts.get("negativo", 0) + counts.get("negative", 0) + counts.get("neg", 0))
+        neu = int(counts.get("neutral", 0) + counts.get("neu", 0))
+        pos = int(counts.get("positivo", 0) + counts.get("positive", 0) + counts.get("pos", 0))
+        total = int(counts.sum())
+        mean = None
+    else:
+        neg = neu = pos = 0
+        total = 0
+        mean = None
 
-    tone = pd.to_numeric(gdelt_df[tone_col], errors="coerce").dropna()
+    if score_col:
+        tone = pd.to_numeric(gdelt_df[score_col], errors="coerce").dropna()
+        if not tone.empty:
+            mean = round(float(tone.mean()), 3)
+            if total == 0:
+                total = int(tone.count())
+                neg = int((tone < 0).sum())
+                neu = int((tone == 0).sum())
+                pos = int((tone > 0).sum())
+    else:
+        tone = pd.Series(dtype=float)
 
-    if tone.empty:
+    if total == 0:
         return None
 
     return {
-        "mean": round(float(tone.mean()), 3),
-        "min": round(float(tone.min()), 3),
-        "max": round(float(tone.max()), 3),
-        "neg": int((tone < 0).sum()),
-        "neu": int((tone == 0).sum()),
-        "pos": int((tone > 0).sum()),
-        "total": int(tone.count()),
+        "mean": mean,
+        "min": round(float(tone.min()), 3) if not tone.empty else None,
+        "max": round(float(tone.max()), 3) if not tone.empty else None,
+        "neg": int(neg),
+        "neu": int(neu),
+        "pos": int(pos),
+        "total": int(total),
     }
 
 
@@ -325,14 +432,14 @@ def render_gdelt_timeline(gdelt_df: pd.DataFrame):
         line=dict(width=3),
     )
 
-    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+    st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
 
 
 def render_tone_card(gdelt_df: pd.DataFrame):
     tone = gdelt_tone_summary(gdelt_df)
 
     if not tone:
-        empty_state("No se encontró una columna de tono/sentimiento válida en la base GDELT.")
+        empty_state("No se encontró una columna de sentimiento/tono válida en la base social o de noticias.")
         return
 
     items = [
@@ -345,9 +452,9 @@ def render_tone_card(gdelt_df: pd.DataFrame):
         f"""
         <div class="ed-source-grid">
             <div class="ed-source-card blue">
-                <div class="ed-source-title">Tono promedio</div>
-                <div class="ed-kpi-value">{tone["mean"]}</div>
-                <div class="ed-source-text">Promedio de tono en registros GDELT válidos.</div>
+                <div class="ed-source-title">Score medio de sentimiento</div>
+                <div class="ed-kpi-value">{tone['mean'] if tone['mean'] is not None else 'N/D'}</div>
+                <div class="ed-source-text">Promedio de sentimiento en registros de redes o noticias válidos.</div>
             </div>
             <div class="ed-source-card green">
                 <div class="ed-source-title">Rango observado</div>
@@ -355,9 +462,9 @@ def render_tone_card(gdelt_df: pd.DataFrame):
                 <div class="ed-source-text">Valor mínimo y máximo de tono registrado.</div>
             </div>
             <div class="ed-source-card yellow">
-                <div class="ed-source-title">Registros con tono</div>
-                <div class="ed-kpi-value">{tone["total"]}</div>
-                <div class="ed-source-text">Casos GDELT usados para el resumen tonal.</div>
+                <div class="ed-source-title">Registros con sentimiento</div>
+                <div class="ed-kpi-value">{tone['total']}</div>
+                <div class="ed-source-text">Casos de texto social o periodístico usados para el resumen de sentimiento.</div>
             </div>
         </div>
         """
@@ -380,10 +487,10 @@ def render_source_method_card(n_survey: int, n_gdelt: int):
             </div>
 
             <div class="ed-source-card green">
-                <div class="ed-source-title">GDELT</div>
+                <div class="ed-source-title">Redes y medios</div>
                 <div class="ed-source-text">
-                    Evidencia documental-digital externa. Permite observar volumen, evolución temporal,
-                    fuentes y tono de cobertura asociada al ecosistema electoral digital.
+                    Evidencia textual de redes y medios. Permite observar volumen, evolución temporal,
+                    fuentes y sentimiento asociado al ecosistema electoral digital.
                     <br><br><strong>n = {n_gdelt:,} registros</strong>
                 </div>
             </div>
@@ -408,10 +515,10 @@ def render_evidencia_digital(
     n_gdelt = len(gdelt_df) if gdelt_df is not None and not gdelt_df.empty else 0
 
     topbar(
-        title="Evidencia digital GDELT + Encuesta",
+        title="Sentimiento social + Encuesta",
         subtitle=(
-            "Triangulación entre evidencia autodeclarada de la encuesta y señales digitales externas "
-            "provenientes de GDELT sobre exposición, automatización, contenido manipulado, cobertura y tono mediático."
+            "Triangulación entre evidencia autodeclarada de la encuesta y señales digitales de redes/medios "
+            "sobre exposición, automatización, contenido manipulado, cobertura y sentimiento digital."
         ),
         pill_text=f"n = {n_survey:,} encuestas · GDELT = {n_gdelt:,} registros",
     )
@@ -510,13 +617,13 @@ def render_evidencia_digital(
             </div>
 
             <div class="ed-kpi green">
-                <div class="ed-kpi-label">GDELT · registros digitales</div>
+                <div class="ed-kpi-label">Redes/medios · registros digitales</div>
                 <div class="ed-kpi-value">{n_gdelt:,}</div>
                 <div class="ed-kpi-help">registros externos disponibles para análisis documental.</div>
             </div>
 
             <div class="ed-kpi yellow">
-                <div class="ed-kpi-label">GDELT · tono promedio</div>
+                <div class="ed-kpi-label">Redes/medios · tono promedio</div>
                 <div class="ed-kpi-value">{tone_value}</div>
                 <div class="ed-kpi-help">promedio de tono en registros GDELT válidos.</div>
             </div>
@@ -529,7 +636,7 @@ def render_evidencia_digital(
             """
             <div class="section-title-card">Diseño de triangulación digital</div>
             <div class="section-subtitle-card">
-                La pestaña integra dos tipos de evidencia: percepción ciudadana mediante encuesta y señales externas de cobertura digital mediante GDELT.
+                La pestaña integra dos tipos de evidencia: percepción ciudadana mediante encuesta y señales externas de cobertura digital mediante redes y medios.
             </div>
             """
         )
@@ -654,30 +761,27 @@ def render_evidencia_digital(
         with st.container(border=True, key="card_ed_gdelt_timeline"):
             html_block(
                 """
-                <div class="section-title-card">GDELT · evolución temporal de registros</div>
+                <div class="section-title-card">Redes sociales · sentimiento por plataforma</div>
                 <div class="section-subtitle-card">
-                    Distribución temporal de registros digitales asociados al corpus GDELT cargado para el análisis.
+                    Distribución de tono positivo, neutro y negativo en los registros sociales disponibles por plataforma.
                 </div>
                 """
             )
 
-            if gdelt_df is not None and not gdelt_df.empty:
-                render_gdelt_timeline(gdelt_df)
-                html_block(
-                    """
-                    <div class="ed-note-green">
-                        La serie temporal permite observar momentos de mayor intensidad informativa dentro del corpus digital externo.
-                    </div>
-                    """
-                )
-            else:
-                empty_state("No se ha cargado una base GDELT. Esta tarjeta se completará al incorporar el dataframe gdelt_df.")
+            render_platform_sentiment_chart(gdelt_df)
+            html_block(
+                """
+                <div class="ed-note-green">
+                    Esta vista permite comparar la composición del tono en cada canal digital y ofrece una base visual más directa para la discusión académica.
+                </div>
+                """
+            )
 
     with col6:
         with st.container(border=True, key="card_ed_gdelt_tono"):
             html_block(
                 """
-                <div class="section-title-card">GDELT · tono de cobertura</div>
+                <div class="section-title-card">Redes/medios · sentimiento</div>
                 <div class="section-subtitle-card">
                     Resumen del tono o sentimiento disponible en los registros GDELT.
                 </div>
@@ -704,7 +808,7 @@ def render_evidencia_digital(
         with st.container(border=True, key="card_ed_gdelt_fuentes"):
             html_block(
                 """
-                <div class="section-title-card">GDELT · principales fuentes</div>
+                <div class="section-title-card">Redes/medios · principales fuentes</div>
                 <div class="section-subtitle-card">
                     Fuentes, dominios o medios con mayor presencia dentro del corpus GDELT.
                 </div>
@@ -727,7 +831,7 @@ def render_evidencia_digital(
         with st.container(border=True, key="card_ed_gdelt_keywords"):
             html_block(
                 """
-                <div class="section-title-card">GDELT · términos recurrentes</div>
+                <div class="section-title-card">Redes/medios · términos recurrentes</div>
                 <div class="section-subtitle-card">
                     Palabras o temas frecuentes extraídos del texto, títulos, temas o resúmenes disponibles en GDELT.
                 </div>
@@ -751,7 +855,7 @@ def render_evidencia_digital(
     with st.container(border=True, key="card_ed_triangulacion"):
         html_block(
             """
-            <div class="section-title-card">Triangulación entre encuesta y GDELT</div>
+            <div class="section-title-card">Triangulación entre encuesta y redes/medios</div>
             <div class="section-subtitle-card">
                 Cruce interpretativo entre experiencia ciudadana declarada y señales digitales externas del ecosistema informativo.
             </div>
@@ -775,7 +879,7 @@ def render_evidencia_digital(
                 <div class="ed-source-card green">
                     <div class="ed-source-title">Señal digital externa</div>
                     <div class="ed-source-text">
-                        El corpus GDELT está <strong>{gdelt_status}</strong> con <strong>{n_gdelt:,}</strong> registros.
+                        El corpus de redes/medios está <strong>{gdelt_status}</strong> con <strong>{n_gdelt:,}</strong> registros.
                         Permite observar volumen, fuentes, tono y evolución temporal de la cobertura digital.
                     </div>
                 </div>
@@ -823,14 +927,14 @@ def render_evidencia_digital(
                 <div class="interpretation-box green">
                     <div class="interpretation-value">{n_gdelt:,}</div>
                     <div class="interpretation-label">
-                        registros GDELT disponibles para contextualizar la cobertura digital externa.
+                        registros de redes/medios disponibles para contextualizar la cobertura digital externa.
                     </div>
                 </div>
 
                 <div class="interpretation-box yellow">
                     <div class="interpretation-value">{tone_value}</div>
                     <div class="interpretation-label">
-                        corresponde al tono promedio observado en los registros GDELT válidos.
+                        corresponde al tono promedio observado en registros de redes/medios válidos.
                     </div>
                 </div>
             </div>
@@ -838,14 +942,14 @@ def render_evidencia_digital(
             <div class="ed-note-green">
                 En conjunto, la encuesta y GDELT permiten distinguir entre percepción ciudadana y señal digital externa.
                 La encuesta evidencia alta exposición, reconocimiento de automatización y percepción de contenido manipulado.
-                GDELT, cuando se incorpora como corpus externo, permite observar la dinámica temporal, fuentes y tono de la cobertura.
+                El corpus de redes/medios, cuando se incorpora como evidencia externa, permite observar la dinámica temporal, fuentes y tono de la cobertura.
                 Esta combinación fortalece la lectura metodológica del ecosistema electoral digital sin asumir causalidad directa.
             </div>
             """
         )
 
     st.caption(
-        "Nota metodológica: esta pestaña triangula evidencia autodeclarada de encuesta con evidencia documental-digital de GDELT. "
+        "Nota metodológica: esta pestaña triangula evidencia autodeclarada de encuesta con evidencia documental-digital de redes y medios. "
         "La encuesta mide percepción y experiencia ciudadana; GDELT permite contextualizar volumen, fuentes, tono y evolución temporal "
         "de registros externos. La triangulación es interpretativa y no implica inferencia causal directa."
     )

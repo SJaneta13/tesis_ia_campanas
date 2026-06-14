@@ -365,7 +365,7 @@ def render_conocimiento_ia(survey_df: pd.DataFrame):
                 )
 
                 if fig:
-                    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+                    st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
                 else:
                     empty_state("No existen datos suficientes para graficar conocimiento de IA.")
             else:
@@ -399,7 +399,7 @@ def render_conocimiento_ia(survey_df: pd.DataFrame):
                 )
 
                 if fig:
-                    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+                    st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
                 else:
                     empty_state("No existen datos suficientes para graficar reconocimiento de automatización.")
             else:
@@ -440,7 +440,7 @@ def render_conocimiento_ia(survey_df: pd.DataFrame):
                 )
 
                 if fig:
-                    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+                    st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
                 else:
                     empty_state("No existen datos suficientes para graficar identificación de IA.")
             else:
@@ -475,7 +475,7 @@ def render_conocimiento_ia(survey_df: pd.DataFrame):
                 )
 
                 if fig:
-                    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+                    st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
                 else:
                     empty_state("No existen datos suficientes para graficar exposición a contenido sospechoso.")
             else:

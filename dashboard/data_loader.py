@@ -16,6 +16,7 @@ NEWS_CASES = {
     "case2_en": ROOT / "outputs" / "text_analysis" / "case2_en" / "news_sentiment_scored.csv",
     "case3_ec_media": ROOT / "outputs" / "text_analysis" / "case3_ec_media" / "news_sentiment_scored.csv",
 }
+SOCIAL_SENTIMENT_PATH = ROOT / "outputs" / "text_analysis" / "social_x" / "social_sentiment_scored.csv"
 
 METRICS_DIR = ROOT / "outputs" / "latest" / "tables"
 
@@ -46,6 +47,11 @@ def load_news_cases() -> pd.DataFrame:
             df = pd.read_csv(path, encoding="utf-8-sig")
             df["case_id"] = case_id
             frames.append(df)
+
+    if SOCIAL_SENTIMENT_PATH.exists():
+        social_df = pd.read_csv(SOCIAL_SENTIMENT_PATH, encoding="utf-8-sig")
+        social_df["case_id"] = "social_x"
+        frames.append(social_df)
 
     if not frames:
         return pd.DataFrame()

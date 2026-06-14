@@ -469,7 +469,7 @@ def render_confianza_electoral(survey_df: pd.DataFrame):
         fig = make_likert_matrix(confianza_items, height=330)
 
         if fig:
-            st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+            st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
         else:
             empty_state("No se encontraron columnas suficientes para construir la matriz de confianza electoral.")
 
@@ -489,7 +489,7 @@ def render_confianza_electoral(survey_df: pd.DataFrame):
                 fig = make_stacked_bar(dist, "Limpieza electoral", height=165)
 
                 if fig:
-                    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+                    st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
 
                 st.markdown(
                     """
@@ -514,7 +514,7 @@ def render_confianza_electoral(survey_df: pd.DataFrame):
                 fig = make_stacked_bar(dist, "Fraude/manipulación", height=165)
 
                 if fig:
-                    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+                    st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
 
                 st.markdown(
                     """
@@ -543,7 +543,7 @@ def render_confianza_electoral(survey_df: pd.DataFrame):
                 fig = make_category_bar(survey_df, influencia_voto_col, order, height=225)
 
                 if fig:
-                    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+                    st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
 
                 st.markdown(
                     """
@@ -568,7 +568,7 @@ def render_confianza_electoral(survey_df: pd.DataFrame):
                 fig = make_category_bar(survey_df, cambio_confianza_col, order, height=225)
 
                 if fig:
-                    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+                    st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
 
                 st.markdown(
                     """

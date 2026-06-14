@@ -1,0 +1,4 @@
+﻿group,sentiment_label,count,pct
+all,neutral,571,52.7
+all,positivo,324,29.9
+all,negativo,188,17.4

@@ -348,7 +348,7 @@ def render_perfil_muestra(survey_df: pd.DataFrame):
                 )
 
                 if fig:
-                    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+                    st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
                 else:
                     empty_state("No existen datos suficientes para graficar edad.")
             else:
@@ -377,7 +377,7 @@ def render_perfil_muestra(survey_df: pd.DataFrame):
                 )
 
                 if fig:
-                    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+                    st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
                 else:
                     empty_state("No existen datos suficientes para graficar género.")
             else:
@@ -419,7 +419,7 @@ def render_perfil_muestra(survey_df: pd.DataFrame):
                 )
 
                 if fig:
-                    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+                    st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
                 else:
                     empty_state("No existen datos suficientes para graficar el rol.")
             else:
@@ -448,7 +448,7 @@ def render_perfil_muestra(survey_df: pd.DataFrame):
                 )
 
                 if fig:
-                    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+                    st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
                 else:
                     empty_state("No existen datos suficientes para graficar residencia en Quito.")
             else:
@@ -481,7 +481,7 @@ def render_perfil_muestra(survey_df: pd.DataFrame):
             )
 
             if fig:
-                st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+                st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
             else:
                 empty_state("No existen datos suficientes para graficar facultades.")
         else:

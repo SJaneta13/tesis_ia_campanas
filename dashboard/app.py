@@ -56,7 +56,7 @@ def render_sidebar():
             "Percepción ciudadana",
             "Confianza electoral",
             "Modelos predictivos",
-            "Evidencia digital GDELT y Encuestas",
+            "Sentimiento social + Encuestas",
             "Triangulación",
             "Datos y artefactos"
         ],
@@ -104,7 +104,7 @@ def main():
     elif section == "Modelos predictivos":
         render_modelos_predictivos(survey_df)
 
-    elif section == "Evidencia digital GDELT y Encuestas":
+    elif section == "Sentimiento social + Encuestas":
         render_evidencia_digital(survey_df, news_df)
 
 

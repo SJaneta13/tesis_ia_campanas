@@ -350,8 +350,8 @@ def render_resumen_general(
         """
         Esta plataforma presenta los resultados del trabajo de titulación sobre la percepción ciudadana
         frente al uso de inteligencia artificial en campañas políticas digitales. La encuesta constituye
-        la fuente principal del análisis; las noticias GDELT se incorporan como evidencia digital
-        complementaria y exploratoria.
+        la fuente principal del análisis; los registros de redes y medios se incorporan como evidencia
+        digital complementaria y exploratoria.
         """
     )
 
@@ -370,17 +370,17 @@ def render_resumen_general(
 
     with c2:
         kpi_card(
-            "Noticias GDELT",
+            "Registros digitales",
             f"{n_news:,}",
-            "Noticias digitales analizadas",
+            "Redes y medios analizados",
             "blue",
         )
 
     with c3:
         kpi_card(
-            "Casos GDELT",
+            "Casos de análisis",
             f"{n_cases}",
-            "Escenarios de búsqueda analizados",
+            "Fuentes y fuentes sociales incorporadas",
             "yellow",
         )
 
@@ -436,7 +436,7 @@ def render_resumen_general(
                 </div>
                 <div class="method-card">
                     <div class="method-title">Metodología</div>
-                    <div class="method-text">CRISP-DM, enfoque cuantitativo descriptivo y análisis complementario con GDELT.</div>
+                    <div class="method-text">CRISP-DM, enfoque cuantitativo descriptivo y análisis complementario con redes y medios.</div>
                 </div>
             </div>
             """
@@ -698,5 +698,5 @@ def render_resumen_general(
 
     st.caption(
         "Nota metodológica: la encuesta es la fuente principal del análisis. "
-        "Las noticias GDELT se interpretan como evidencia digital complementaria, no como prueba causal."
+        "Los registros de redes y medios se interpretan como evidencia digital complementaria, no como prueba causal."
     )
