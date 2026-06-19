@@ -1,195 +1,24 @@
 # dashboard/sections/conocimiento_ia.py
-import pandas as pd
-import streamlit as st
+
+
 import plotly.express as px
 
+import pandas as pd
+import streamlit as st
+
 from dashboard.components import topbar, kpi_card
+from dashboard.common import (
+    PLOTLY_CONFIG,
+    find_first_existing_column,
+    empty_state,
+    clean_category_series,
+    make_category_distribution,
+    donut_chart,
+    horizontal_bar_chart,
+    render_card_header,
+    safe_pct,
+)
 
-
-def find_first_existing_column(df: pd.DataFrame, candidates: list[str]):
-    if df.empty:
-        return None
-
-    normalized = {c.lower().strip(): c for c in df.columns}
-
-    for candidate in candidates:
-        key = candidate.lower().strip()
-        if key in normalized:
-            return normalized[key]
-
-    for col in df.columns:
-        col_l = col.lower().strip()
-        for candidate in candidates:
-            if candidate.lower().strip() in col_l:
-                return col
-
-    return None
-
-
-def clean_category_series(series: pd.Series, default: str = "No especificado"):
-    return (
-        series.fillna(default)
-        .astype(str)
-        .str.strip()
-        .replace("", default)
-    )
-
-
-def make_category_distribution(
-    df: pd.DataFrame,
-    col: str,
-    label_name: str,
-    order: list[str] | None = None,
-) -> pd.DataFrame:
-    if df.empty or not col or col not in df.columns:
-        return pd.DataFrame(columns=[label_name, "Cantidad", "Porcentaje"])
-
-    temp = clean_category_series(df[col])
-    counts = temp.value_counts()
-
-    if order:
-        counts = counts.reindex(order).fillna(0).astype(int)
-        counts = counts[counts > 0]
-
-    out = counts.reset_index()
-    out.columns = [label_name, "Cantidad"]
-
-    total = out["Cantidad"].sum()
-
-    if total == 0:
-        return pd.DataFrame(columns=[label_name, "Cantidad", "Porcentaje"])
-
-    out["Porcentaje"] = (out["Cantidad"] / total * 100).round(1)
-
-    return out
-
-
-def empty_state(message: str):
-    st.markdown(
-        f"""
-        <div class="empty-state">
-            {message}
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-
-def donut_chart(df: pd.DataFrame, names_col: str, values_col: str, height: int = 315):
-    if df.empty:
-        return None
-
-    fig = px.pie(
-        df,
-        names=names_col,
-        values=values_col,
-        hole=0.52,
-        color_discrete_sequence=[
-            "#0f6fc9",
-            "#7cc4f8",
-            "#2cb6a4",
-            "#facc15",
-            "#fb7185",
-            "#94a3b8",
-        ],
-    )
-
-    fig.update_traces(
-        textposition="inside",
-        textinfo="percent",
-        hovertemplate=(
-            "<b>%{label}</b><br>"
-            "Cantidad: %{value}<br>"
-            "Porcentaje: %{percent}<extra></extra>"
-        ),
-    )
-
-    fig.update_layout(
-        height=height,
-        paper_bgcolor="#ffffff",
-        plot_bgcolor="#ffffff",
-        margin=dict(l=0, r=0, t=0, b=8),
-        legend_title_text="",
-        legend=dict(
-            orientation="v",
-            y=0.72,
-            x=1.02,
-            font=dict(size=11),
-        ),
-    )
-
-    return fig
-
-
-def horizontal_bar_chart(
-    df: pd.DataFrame,
-    x_col: str,
-    y_col: str,
-    text_col: str = "Porcentaje",
-    height: int = 315,
-):
-    if df.empty:
-        return None
-
-
-    plot_df = df.copy()
-
-    fig = px.bar(
-        plot_df,
-        x=x_col,
-        y=y_col,
-        orientation="h",
-        text=text_col,
-        color=y_col,
-        color_discrete_sequence=[
-            "#0f6fc9",
-            "#7cc4f8",
-            "#2cb6a4",
-            "#facc15",
-            "#fb7185",
-            "#94a3b8",
-        ],
-    )
-
-    fig.update_traces(
-        texttemplate="%{text:.1f}%",
-        textposition="outside",
-        hovertemplate=(
-            "<b>%{y}</b><br>"
-            "Cantidad: %{x}<br>"
-            "Porcentaje: %{text:.1f}%<extra></extra>"
-        ),
-    )
-
-    fig.update_layout(
-        height=height,
-        paper_bgcolor="#ffffff",
-        plot_bgcolor="#ffffff",
-        margin=dict(l=0, r=45, t=4, b=18),
-        xaxis=dict(
-            title="",
-            showgrid=True,
-            gridcolor="#e5e7eb",
-            zeroline=False,
-        ),
-        yaxis=dict(title=""),
-        showlegend=False,
-        font=dict(size=11),
-    )
-
-    return fig
-
-
-def render_card_header(title: str, subtitle: str):
-    st.markdown(
-        f"""
-        <div class="profile-card-header-soft">
-            <div class="section-title-card">{title}</div>
-            <div class="section-subtitle-card">{subtitle}</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
 
 
 def calculate_positive_count(df: pd.DataFrame, col: str, positives: list[str]) -> int:
@@ -265,14 +94,6 @@ def render_conocimiento_ia(survey_df: pd.DataFrame):
         ],
     )
 
-    detected_vars = sum(
-        [
-            bool(escucho_ia_col),
-            bool(reconocio_col),
-            bool(identifica_col),
-            bool(falso_col),
-        ]
-    )
 
     # =========================================================
     # KPI
@@ -306,41 +127,41 @@ def render_conocimiento_ia(survey_df: pd.DataFrame):
     with c1:
         kpi_card(
             "Conoce IA electoral",
-            f"{conoce_ia:,}" if escucho_ia_col else "N/D",
-            "Ha escuchado sobre IA en campañas",
+            f"{safe_pct(conoce_ia, n_survey):.1f}%" if escucho_ia_col else "N/D",
+            f"{conoce_ia:,} de {n_survey:,} participantes",
             "blue",
         )
 
     with c2:
         kpi_card(
             "Reconoce automatización",
-            f"{reconoce_herramientas:,}" if reconocio_col else "N/D",
-            "Detectó bots, deepfakes o anuncios",
+            f"{safe_pct(reconoce_herramientas, n_survey):.1f}%" if reconocio_col else "N/D",
+            f"{reconoce_herramientas:,} de {n_survey:,} participantes",
             "green",
         )
 
     with c3:
         kpi_card(
-            "Identifica IA",
-            f"{identifica_facil:,}" if identifica_col else "N/D",
-            "Dice identificar contenido generado",
+            "Identifica facilmente IA",
+            f"{safe_pct(identifica_facil, n_survey):.1f}%" if identifica_col else "N/D",
+            f"{identifica_facil:,} de {n_survey:,} participantes",
             "yellow",
         )
 
     with c4:
         kpi_card(
-            "Contenido sospechoso",
-            f"{vio_falso:,}" if falso_col else "N/D",
-            "Vio contenido falso o manipulado",
-            "blue",
+            "Percibe Contenido sospechoso",
+            f"{safe_pct(vio_falso, n_survey):.1f}%" if falso_col else "N/D",
+            f"{vio_falso:,} de {n_survey:,} participantes",
+            "purple",
         )
 
-    st.markdown('<div class="profile-section-gap"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
 
     # =========================================================
     # Conocimiento general + reconocimiento
     # =========================================================
-    col1, col2 = st.columns(2, gap="large")
+    col1, col2 = st.columns(2, gap="medium")
 
     with col1:
         with st.container(border=True, key="card_ia_escucho"):
@@ -365,7 +186,7 @@ def render_conocimiento_ia(survey_df: pd.DataFrame):
                 )
 
                 if fig:
-                    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+                    st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
                 else:
                     empty_state("No existen datos suficientes para graficar conocimiento de IA.")
             else:
@@ -399,18 +220,18 @@ def render_conocimiento_ia(survey_df: pd.DataFrame):
                 )
 
                 if fig:
-                    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+                    st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
                 else:
                     empty_state("No existen datos suficientes para graficar reconocimiento de automatización.")
             else:
                 empty_state("No se encontró la columna sobre herramientas automatizadas.")
 
-    st.markdown('<div class="section-gap-small"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
 
     # =========================================================
     # Identificación + experiencia con contenido falso
     # =========================================================
-    col3, col4 = st.columns(2, gap="large")
+    col3, col4 = st.columns(2, gap="medium")
 
     with col3:
         with st.container(border=True, key="card_ia_identifica"):
@@ -440,7 +261,7 @@ def render_conocimiento_ia(survey_df: pd.DataFrame):
                 )
 
                 if fig:
-                    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+                    st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
                 else:
                     empty_state("No existen datos suficientes para graficar identificación de IA.")
             else:
@@ -475,13 +296,13 @@ def render_conocimiento_ia(survey_df: pd.DataFrame):
                 )
 
                 if fig:
-                    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+                    st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
                 else:
                     empty_state("No existen datos suficientes para graficar exposición a contenido sospechoso.")
             else:
                 empty_state("No se encontró la columna sobre contenido falso o manipulado.")
 
-    st.markdown('<div class="section-gap-small"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
 
     # =========================================================
     # Lectura interpretativa
@@ -491,7 +312,7 @@ def render_conocimiento_ia(survey_df: pd.DataFrame):
             """
             <div class="section-title-card">Lectura interpretativa</div>
             <div class="section-subtitle-card">
-                Esta síntesis permite contextualizar el nivel de alfabetización digital e informacional de la muestra frente a la IA electoral.
+                Esta síntesis resume la diferencia entre conocimiento declarado, reconocimiento de automatización, capacidad de identificación y exposición percibida a contenido sospechoso.
             </div>
             """,
             unsafe_allow_html=True,
@@ -534,7 +355,13 @@ def render_conocimiento_ia(survey_df: pd.DataFrame):
             unsafe_allow_html=True,
         )
 
-    st.caption(
-        "Nota metodológica: esta sección describe el conocimiento declarado y la experiencia percibida frente a la IA en campañas digitales. "
-        "Los resultados corresponden a autopercepción de los participantes y no a una verificación técnica forense de contenidos."
-    )
+    st.markdown(
+    """
+    <div class="ia-method-note">
+        <strong>Nota metodológica:</strong> esta sección describe el conocimiento declarado y la experiencia percibida
+        frente a la IA en campañas digitales. Los resultados corresponden a autopercepción de los participantes
+        y no a una verificación técnica forense de contenidos.
+    </div>
+    """,
+    unsafe_allow_html=True,
+)

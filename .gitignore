@@ -69,3 +69,32 @@ backend/*
 !backend/public/surveys/tables/*.csv
 !backend/public/surveys/MANIFEST.json
 !backend/public/surveys/MANIFEST.txt
+
+# Permitir JSON finales usados por Streamlit
+!outputs/latest/tables/*.json
+
+# Permitir modelos finales usados por el simulador, si están dentro de outputs/latest/models
+!outputs/latest/models/
+!outputs/latest/models/*.joblib
+
+# Permitir joblib si quedó guardado dentro de tables
+!outputs/latest/tables/*.joblib
+
+# Streamlit secrets
+.streamlit/secrets.toml
+
+# Permitir JSON finales usados por Streamlit
+!outputs/latest/tables/*.json
+
+# Permitir modelos finales usados por Streamlit
+!outputs/latest/models/
+!outputs/latest/models/*.joblib
+!outputs/latest/tables/*.joblib
+
+# Permitir JSON finales usados por Streamlit
+!outputs/latest/tables/*.json
+
+# Permitir modelo final del simulador usado por Streamlit
+!outputs/latest/models_dashboard/
+!outputs/latest/models_dashboard/*.joblib
+!outputs/latest/models_dashboard/*.json

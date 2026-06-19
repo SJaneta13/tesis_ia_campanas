@@ -1,0 +1,5 @@
+﻿criterio,condicion,aplicado_en
+Rol institucional,Debe pertenecer a la comunidad universitaria UCE,rol_uce
+Residencia,Debe residir actualmente en Quito,reside_quito
+Edad,Debe estar entre 18 y 64 años,edad
+Anonimización,Se elimina correo o nombre de usuario del formulario,Nombre de usuario

@@ -1,0 +1,14 @@
+{
+  "modelo_final": "Random Forest",
+  "configuracion": "5 niveles",
+  "variable_objetivo": "confianza_idx_round",
+  "n_registros": 575,
+  "features": 23,
+  "metricas_holdout": {
+    "AUC_OvR": 0.6441989099892456,
+    "Accuracy": 0.4583333333333333,
+    "F1_ponderado": 0.44141389432485323,
+    "QWK": 0.24650332308302758
+  },
+  "proposito": "simulacion_exploratoria_no_causal"
+}

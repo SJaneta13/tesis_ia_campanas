@@ -14,62 +14,21 @@ from dashboard.data_loader import (
     load_exposure_index_by_age_robust,
 )
 
-LIKERT_LABELS = {
-    1: "Totalmente en desacuerdo",
-    2: "En desacuerdo",
-    3: "Ni de acuerdo ni en desacuerdo",
-    4: "De acuerdo",
-    5: "Totalmente de acuerdo",
-}
+from dashboard.common import (
+    PLOTLY_CONFIG,
+    LIKERT_LABELS,
+    LIKERT_ORDER,
+    LIKERT_COLORS,
+    find_first_existing_column,
+    empty_state,
+    safe_pct,
+    likert_to_numeric,
+    make_likert_distribution,
+    positive_count,
+    render_card_header,
+    render_note,
+)
 
-LIKERT_ORDER = list(LIKERT_LABELS.values())
-
-
-
-LIKERT_COLORS = {
-    "Totalmente en desacuerdo": "#1D4ED8",
-    "En desacuerdo": "#93C5FD",
-    "Ni de acuerdo ni en desacuerdo": "#CBD5E1",
-    "De acuerdo": "#99F6E4",
-    "Totalmente de acuerdo": "#14B8A6",
-}
-
-
-def find_first_existing_column(df: pd.DataFrame, candidates: list[str]):
-    if df.empty:
-        return None
-
-    normalized = {c.lower().strip(): c for c in df.columns}
-
-    for candidate in candidates:
-        key = candidate.lower().strip()
-        if key in normalized:
-            return normalized[key]
-
-    for col in df.columns:
-        col_l = col.lower().strip()
-        for candidate in candidates:
-            if candidate.lower().strip() in col_l:
-                return col
-
-    return None
-
-
-def empty_state(message: str):
-    st.markdown(
-        f"""
-        <div class="empty-state">
-            {message}
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-
-def safe_pct(count: int, total: int) -> float:
-    if not total:
-        return 0.0
-    return round(count / total * 100, 1)
 
 
 def kpi_value_with_pct(count: int, total: int) -> str:
@@ -83,102 +42,6 @@ def kpi_help_with_count(count: int, total: int, text: str) -> str:
     if not total:
         return text
     return f"{count:,} de {total:,} · {text}"
-
-
-def plotly_clean_config() -> dict:
-    return {
-        "displayModeBar": False,
-        "responsive": True,
-    }
-
-
-
-def render_compact_note(text: str, color: str = "blue"):
-    css_class = {
-        "blue": "analysis-note-compact",
-        "green": "analysis-note-compact-green",
-        "yellow": "analysis-note-compact-yellow",
-        "red": "analysis-note-compact-red",
-    }.get(color, "analysis-note-compact")
-
-    st.markdown(
-        f"""
-        <div class="{css_class}">
-            {text}
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-def likert_to_numeric(series: pd.Series) -> pd.Series:
-    mapping = {
-        "totalmente en desacuerdo": 1,
-        "en desacuerdo": 2,
-        "ni de acuerdo ni en desacuerdo": 3,
-        "de acuerdo": 4,
-        "totalmente de acuerdo": 5,
-    }
-
-    numeric = pd.to_numeric(series, errors="coerce")
-
-    if numeric.notna().sum() > 0:
-        return numeric.round()
-
-    return (
-        series.fillna("")
-        .astype(str)
-        .str.strip()
-        .str.lower()
-        .map(mapping)
-    )
-
-
-def make_likert_distribution(
-    df: pd.DataFrame,
-    col: str,
-) -> pd.DataFrame:
-    if df.empty or not col or col not in df.columns:
-        return pd.DataFrame(columns=["Respuesta", "Cantidad", "Porcentaje"])
-
-    values = likert_to_numeric(df[col])
-    temp = pd.DataFrame({"valor": values})
-    temp = temp[temp["valor"].isin(LIKERT_LABELS.keys())].copy()
-
-    if temp.empty:
-        return pd.DataFrame(columns=["Respuesta", "Cantidad", "Porcentaje"])
-
-    temp["Respuesta"] = temp["valor"].astype(int).map(LIKERT_LABELS)
-
-    counts = (
-        temp["Respuesta"]
-        .value_counts()
-        .reindex(LIKERT_ORDER)
-        .fillna(0)
-        .astype(int)
-    )
-
-    total = counts.sum()
-
-    if total == 0:
-        return pd.DataFrame(columns=["Respuesta", "Cantidad", "Porcentaje"])
-
-    out = pd.DataFrame(
-        {
-            "Respuesta": counts.index,
-            "Cantidad": counts.values,
-            "Porcentaje": (counts.values / total * 100).round(1),
-        }
-    )
-
-    return out
-
-
-def positive_count(df: pd.DataFrame, col: str) -> int:
-    if df.empty or not col or col not in df.columns:
-        return 0
-
-    values = likert_to_numeric(df[col])
-    return values.isin([4, 5]).sum()
 
 
 def negative_count(df: pd.DataFrame, col: str) -> int:
@@ -340,9 +203,9 @@ def render_likert_card(
     fig = make_stacked_bar(dist, y_label, height=96)
 
     if fig:
-        st.plotly_chart(fig, width="stretch", config=plotly_clean_config())
+        st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
 
-    render_compact_note(note, note_color)
+    render_note(note, note_color)
 
 
 def render_percepcion_ciudadana(survey_df: pd.DataFrame):
@@ -351,8 +214,8 @@ def render_percepcion_ciudadana(survey_df: pd.DataFrame):
     topbar(
         title="Percepción ciudadana",
         subtitle=(
-            "Análisis de actitudes ciudadanas frente al uso de IA en campañas políticas digitales: aceptación, riesgo"
-            "percibido, desconfianza informativa y demanda de regulación."
+            "Análisis de actitudes ciudadanas frente al uso de IA en campañas políticas digitales: "
+            "aceptación, riesgo percibido, desconfianza informativa y demanda de regulación."
         ),
         pill_text=f"n = {n_survey:,} encuestas" if n_survey else "encuestas no cargadas",
     )
@@ -460,8 +323,6 @@ def render_percepcion_ciudadana(survey_df: pd.DataFrame):
     for item in perception_items:
         item["dist"] = make_likert_distribution(survey_df, item["col"])
 
-    detected_vars = sum(bool(item["col"]) for item in perception_items)
-
     # =========================================================
     # KPI
     # =========================================================
@@ -506,7 +367,7 @@ def render_percepcion_ciudadana(survey_df: pd.DataFrame):
             "blue",
         )     
 
-    st.markdown('<div class="profile-section-gap"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
 
     # =========================================================
     # Matriz general
@@ -520,11 +381,11 @@ def render_percepcion_ciudadana(survey_df: pd.DataFrame):
         fig = make_likert_matrix(perception_items, height=440)
 
         if fig:
-            st.plotly_chart(fig, width="stretch", config=plotly_clean_config())
+            st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
         else:
             empty_state("No se encontraron columnas suficientes para construir la matriz de percepción.")
 
-    st.markdown('<div class="section-gap-xs"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
 
     # =========================================================
     # Indicadores específicos
@@ -557,7 +418,7 @@ def render_percepcion_ciudadana(survey_df: pd.DataFrame):
                 empty_message="No se encontró la columna sobre manipulación mediante IA.",
             )
 
-    st.markdown('<div class="section-gap-xs"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
 
     col3, col4 = st.columns(2, gap="medium")
 
@@ -622,10 +483,10 @@ def render_percepcion_ciudadana(survey_df: pd.DataFrame):
                     font=dict(size=11),
                 )
 
-                st.plotly_chart(fig, width="stretch", config=plotly_clean_config())
+                st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
 
-                render_compact_note(
-                    "Bots y deepfakes concentran el componente de desconfianza asociado al ecosistema digital electoral.",
+                render_note(
+                    "Bots y deepfakes concentran uno componente relevante de desconfianza asociado al ecosistema digital electoral.",
                     "red",
                 )
             else:
@@ -644,7 +505,7 @@ def render_percepcion_ciudadana(survey_df: pd.DataFrame):
                 empty_message="No se encontró la columna sobre regulación de IA.",
             )
 
-    st.markdown('<div class="section-gap-xs"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
 
 
     # =========================================================
@@ -655,7 +516,7 @@ def render_percepcion_ciudadana(survey_df: pd.DataFrame):
             """
             <div class="section-title-card">Lectura interpretativa</div>
             <div class="section-subtitle-card">
-                La percepción ciudadana combina aceptación funcional de la IA con preocupación por manipulación, desinformación y falta de regulación.
+                La percepción ciudadana muestra una aceptación funcional limitada de la IA, junto con preocupación por manipulación, desinformación y necesidad de regulación.
             </div>
             """,
             unsafe_allow_html=True,
@@ -699,7 +560,7 @@ def render_percepcion_ciudadana(survey_df: pd.DataFrame):
             unsafe_allow_html=True,
         )
 
-    st.markdown('<div class="section-gap-xs"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
 
     # =========================================================
     # Análisis por rangos de edad
@@ -712,22 +573,29 @@ def render_percepcion_ciudadana(survey_df: pd.DataFrame):
 
         render_exposure_index_by_age()
 
-        st.markdown('<div class="section-gap-xs"></div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
 
         render_risk_index_by_age()
 
-        st.markdown('<div class="section-gap-xs"></div>', unsafe_allow_html=True)
+        st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
 
         render_deepfake_distrust_by_age()
 
-    st.caption(
-        "Nota metodológica: los indicadores se miden en escala Likert de 1 a 5. "
-        "El índice de percepción de riesgo por IA se construyó como el promedio de tres ítems: manipulación mediante mensajes personalizados, "
-        "reducción de confianza por bots o cuentas falsas, y desconfianza frente a deepfakes o contenido manipulado. "
-        "El índice de exposición digital se construyó a partir de frecuencia de uso de redes sociales, exposición a contenido político digital, "
-        "reconocimiento de herramientas automatizadas y exposición a contenido falso o manipulado. "
-        "Los rangos con menor tamaño muestral se interpretan como contraste exploratorio."
-    )    
+
+    st.markdown(
+    """
+    <div class="analysis-method-note">
+        <strong>Nota metodológica:</strong> los indicadores se miden en escala Likert de 1 a 5.
+        El índice de percepción de riesgo por IA se construyó como el promedio de tres ítems:
+        manipulación mediante mensajes personalizados, reducción de confianza por bots o cuentas falsas
+        y desconfianza frente a deepfakes o contenido manipulado. El índice de exposición digital
+        se construyó a partir de frecuencia de uso de redes sociales, exposición a contenido político digital,
+        reconocimiento de herramientas automatizadas y exposición a contenido falso o manipulado.
+        Los rangos con menor tamaño muestral se interpretan como contraste exploratorio.
+    </div>
+    """,
+    unsafe_allow_html=True,
+)   
 
 
 
@@ -764,7 +632,7 @@ def render_exposure_index_by_age():
         if not robust_df.empty:
             _render_exposure_dot_chart(robust_df)
 
-            render_compact_note(
+            render_note(
                 "Vista recomendada: agrupa los rangos superiores en 35-64 para reducir la inestabilidad por bajo tamaño muestral.",
                 "blue",
             )
@@ -773,7 +641,7 @@ def render_exposure_index_by_age():
         if not detailed_df.empty:
             _render_exposure_dot_chart(detailed_df)
 
-            render_compact_note(
+            render_note(
                 "Vista exploratoria: mantiene todos los rangos originales de la encuesta.",
                 "blue",
             )
@@ -877,7 +745,7 @@ def _render_exposure_dot_chart(df: pd.DataFrame):
     st.plotly_chart(
         fig,
         width="stretch",
-        config=plotly_clean_config(),
+        config=PLOTLY_CONFIG,
     )
 
 
@@ -997,7 +865,7 @@ def render_risk_index_by_age():
     st.plotly_chart(
         fig,
         width="stretch",
-        config=plotly_clean_config(),
+        config=PLOTLY_CONFIG,
     )
 
 
@@ -1147,7 +1015,7 @@ def render_deepfake_distrust_by_age():
     st.plotly_chart(
         fig,
         width="stretch",
-        config=plotly_clean_config(),
+        config=PLOTLY_CONFIG,
     )
 
 

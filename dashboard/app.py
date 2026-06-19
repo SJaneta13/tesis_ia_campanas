@@ -1,8 +1,8 @@
 # dashboard/app.py
-import streamlit as st
-from pathlib import Path
-import pandas as pd
 import sys
+from pathlib import Path
+
+import streamlit as st
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -11,20 +11,21 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 
-
 st.set_page_config(
-    page_title="Plataforma de Resultados - IA en Campañas Políticas",
+    page_title="UCE · IA y Política",
     page_icon="📊",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded",
 )
 
-
 from dashboard.styles import inject_global_css
+from dashboard.filters import render_global_filters
 from dashboard.data_loader import (
     load_survey,
     load_news_cases,
     load_latest_metrics,
 )
+
 
 from dashboard.sections.resumen_general import render_resumen_general
 from dashboard.sections.perfil_muestra import render_perfil_muestra
@@ -33,10 +34,10 @@ from dashboard.sections.percepcion_ciudadana import render_percepcion_ciudadana
 from dashboard.sections.confianza_electoral import render_confianza_electoral
 from dashboard.sections.modelos_predictivos import render_modelos_predictivos
 from dashboard.sections.evidencia_gdelt import render_evidencia_digital
+from dashboard.sections.datos_artefactos import render_datos_artefactos
 
 
-
-def render_sidebar():
+def render_sidebar_header():
     st.sidebar.markdown(
         """
         <div class="sidebar-title">UCE · 2025<br>IA & Política</div>
@@ -44,10 +45,12 @@ def render_sidebar():
             Percepción ciudadana sobre IA en campañas electorales
         </div>
         """,
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
 
-    section = st.sidebar.radio(
+
+def render_sidebar_navigation():
+    return st.sidebar.radio(
         "Navegación",
         [
             "Resumen General",
@@ -56,66 +59,66 @@ def render_sidebar():
             "Percepción ciudadana",
             "Confianza electoral",
             "Modelos predictivos",
-            "Evidencia digital GDELT y Encuestas",
-            "Triangulación",
-            "Datos y artefactos"
+            "Evidencia digital y triangulación",
+            "Datos y artefactos",
         ],
-        label_visibility="collapsed"
+        label_visibility="collapsed",
     )
 
+
+def render_sidebar_footer():
     st.sidebar.divider()
     st.sidebar.caption("Investigadores:")
     st.sidebar.caption("Silvia Janeta · Cristian Toca")
     st.sidebar.caption("Tutor: Ing. Paulo Llaguno")
 
-    return section
-
 
 def main():
-
     inject_global_css()
 
     survey_df = load_survey()
     news_df = load_news_cases()
     metrics_df = load_latest_metrics()
 
-    section = render_sidebar()
+    render_sidebar_header()
+    section = render_sidebar_navigation()
+
+    survey_df_filtered, active_filters = render_global_filters(survey_df)
+
+    render_sidebar_footer()
 
     if section == "Resumen General":
         render_resumen_general(
-            survey_df=survey_df,
+            survey_df=survey_df_filtered,
             news_df=news_df,
-            metrics_df=metrics_df
+            metrics_df=metrics_df,
         )
 
     elif section == "Perfil de la muestra":
-        render_perfil_muestra(survey_df)
-
+        render_perfil_muestra(survey_df_filtered)
 
     elif section == "Conocimiento de IA":
-        render_conocimiento_ia(survey_df)
+        render_conocimiento_ia(survey_df_filtered)
 
     elif section == "Percepción ciudadana":
-        render_percepcion_ciudadana(survey_df)
+        render_percepcion_ciudadana(survey_df_filtered)
 
     elif section == "Confianza electoral":
-        render_confianza_electoral(survey_df)
+        render_confianza_electoral(survey_df_filtered)
 
     elif section == "Modelos predictivos":
         render_modelos_predictivos(survey_df)
 
-    elif section == "Evidencia digital GDELT y Encuestas":
-        render_evidencia_digital(survey_df, news_df)
-
-
-    elif section == "Triangulación":
-        st.title("Triangulación")
-        st.info("Siguiente módulo por construir.")
+    elif section == "Evidencia digital y triangulación":
+        render_evidencia_digital(survey_df_filtered, news_df)
 
     elif section == "Datos y artefactos":
-        st.title("Datos y artefactos")
-        st.info("Siguiente módulo por construir.")
-
+        render_datos_artefactos(
+            survey_df=survey_df,
+            survey_df_filtered=survey_df_filtered,
+            news_df=news_df,
+            metrics_df=metrics_df,
+        )
 
 if __name__ == "__main__":
     main()

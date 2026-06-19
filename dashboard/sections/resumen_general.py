@@ -3,12 +3,26 @@ import pandas as pd
 import streamlit as st
 import plotly.express as px
 
+
+from textwrap import dedent
+
 from dashboard.components import (
     topbar,
     kpi_card,
     method_card,
 )
 
+
+from dashboard.common import (
+    PLOTLY_CONFIG,
+    find_first_existing_column,
+    empty_state,
+    make_category_distribution,
+    make_likert_distribution,
+    horizontal_bar_chart,
+    donut_chart,
+    render_card_header,
+)
 
 CONFIDENCE_LABELS = {
     1: "Muy baja confianza",
@@ -62,6 +76,16 @@ SCALE_COLORS = {
     **LIKERT_COLORS,
     **CONFIDENCE_COLORS,
 }
+
+def render_html(markup: str) -> None:
+    st.markdown(
+        "\n".join(
+            line.strip()
+            for line in dedent(markup).splitlines()
+            if line.strip()
+        ),
+        unsafe_allow_html=True,
+    )
 
 def pretty_model_name(name: str) -> str:
     if not name or name == "No disponible":
@@ -311,6 +335,7 @@ def empty_state(message: str):
     )
 
 
+
 def render_resumen_general(
     survey_df: pd.DataFrame,
     news_df: pd.DataFrame,
@@ -350,8 +375,8 @@ def render_resumen_general(
         """
         Esta plataforma presenta los resultados del trabajo de titulación sobre la percepción ciudadana
         frente al uso de inteligencia artificial en campañas políticas digitales. La encuesta constituye
-        la fuente principal del análisis; las noticias GDELT se incorporan como evidencia digital
-        complementaria y exploratoria.
+        la fuente principal del análisis; los registros de redes y medios se incorporan como evidencia
+        digital complementaria y exploratoria.
         """
     )
 
@@ -370,17 +395,17 @@ def render_resumen_general(
 
     with c2:
         kpi_card(
-            "Noticias GDELT",
-            f"{n_news:,}",
-            "Noticias digitales analizadas",
-            "blue",
+            "Corpus analíticos",
+            f"{n_cases:,}",
+            "Casos o fuentes de evidencia digital agrupada",
+            "purple",
         )
 
     with c3:
         kpi_card(
-            "Casos GDELT",
-            f"{n_cases}",
-            "Escenarios de búsqueda analizados",
+            "Registros digitales",
+            f"{n_news:,}",
+            "Registros de GDELT, medios o redes procesadas",
             "yellow",
         )
 
@@ -398,32 +423,43 @@ def render_resumen_general(
             "Mejor modelo",
             best_model,
             f"F1 ponderado: {score_label}",
-            "green",
+            "cyan",
         )
 
-    st.markdown('<div class="summary-section-gap"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
 
     # =========================================================
     # HIPÓTESIS + PERFIL
     # =========================================================
-    left, right = st.columns([1.15, 1], gap="large")
+    left, right = st.columns([1, 1], gap="medium")
 
     with left:
-        st.markdown(
+
+        render_html(
             """
             <div class="custom-card">
-                <div class="card-title">Hipótesis del Estudio</div>
-                <div class="hypothesis-box">
-                    Existe una relación negativa entre la exposición a contenidos generados o potenciados
-                    por inteligencia artificial en campañas políticas digitales y el nivel de confianza que
-                    manifiestan los votantes jóvenes de Quito respecto a la integridad del proceso electoral
-                    posterior a las elecciones presidenciales de 2025.
+                <div class="card-title">Hipótesis del estudio</div>
+
+                <div class="hypothesis-grid">
+                    <div class="hypothesis-box h1-box">
+                        <div class="hypothesis-label">H1 · Exposición y confianza</div>
+                        <div class="hypothesis-text">
+                            A mayor exposición percibida a contenidos generados o potenciados por IA,
+                            menor nivel de confianza electoral en la comunidad universitaria UCE.
+                        </div>
+                    </div>
+
+                    <div class="hypothesis-box h2-box">
+                        <div class="hypothesis-label">H2 · Verificación informativa</div>
+                        <div class="hypothesis-text">
+                            La alfabetización mediática modera esta relación: quienes verifican más información
+                            presentan menor reducción de confianza frente a bots, deepfakes o microsegmentación.
+                        </div>
+                    </div>
                 </div>
             </div>
-            """,
-            unsafe_allow_html=True,
+            """
         )
-
         method_html = """
             <div class="method-grid">
                 <div class="method-card">
@@ -432,11 +468,11 @@ def render_resumen_general(
                 </div>
                 <div class="method-card">
                     <div class="method-title">Variables independientes</div>
-                    <div class="method-text">Conocimiento de IA, exposición digital, percepción de IA y perfil sociodemográfico.</div>
+                    <div class="method-text">Exposición percibida a IA, automatización, percepción de bots, alfabetización mediática y perfil sociodemográfico.</div>
                 </div>
                 <div class="method-card">
                     <div class="method-title">Metodología</div>
-                    <div class="method-text">CRISP-DM, enfoque cuantitativo descriptivo y análisis complementario con GDELT.</div>
+                    <div class="method-text">CRISP-DM, enfoque cuantitativo descriptivo-exploratorio, modelado predictivo y evidencia digital contextual.</div>
                 </div>
             </div>
             """
@@ -510,13 +546,13 @@ def render_resumen_general(
                 empty_state("No se encontró columna de género en el archivo de encuestas.")
 
     
-    st.markdown('<div class="summary-section-gap"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
 
     # =========================================================
     # ACEPTACIÓN + CONFIANZA
     # =========================================================
 
-    chart1, chart2 = st.columns(2, gap="large")
+    chart1, chart2 = st.columns(2, gap="small")
 
     with chart1:
         with st.container(border=True, key="card_aceptacion"):
@@ -624,7 +660,7 @@ def render_resumen_general(
     # =========================================================
     # REGULACIÓN
     # =========================================================
-    st.markdown('<div class="section-gap-small"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
 
     with st.container(border=True, key="card_regulacion"):
         st.markdown(
@@ -693,10 +729,13 @@ def render_resumen_general(
         else:
             empty_state("No se encontró columna de regulación de IA.") 
         
-      
 
-
-    st.caption(
-        "Nota metodológica: la encuesta es la fuente principal del análisis. "
-        "Las noticias GDELT se interpretan como evidencia digital complementaria, no como prueba causal."
+    st.markdown(
+    """
+    <div class="method-note">
+        <strong>Nota metodológica:</strong> la encuesta es la fuente principal del análisis.
+        Los registros de redes y medios se interpretan como evidencia digital complementaria, no como prueba causal.
+    </div>
+    """,
+    unsafe_allow_html=True,
     )

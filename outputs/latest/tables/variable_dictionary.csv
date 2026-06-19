@@ -1,0 +1,47 @@
+﻿Variable,Tipo inferido,Constructo asociado,Uso en la plataforma,Valores no nulos,Valores nulos,Valores únicos
+Marca temporal,Texto / categórica abierta,Variable complementaria,Análisis descriptivo,575,0,574
+edad,Categórica,Perfil sociodemográfico,Segmentación / filtro,575,0,5
+genero,Categórica,Perfil sociodemográfico,Segmentación / filtro,575,0,3
+rol_uce,Categórica,Perfil sociodemográfico,Segmentación / filtro,575,0,4
+¿A qué facultad o unidad académica pertenece?,Texto / categórica abierta,Perfil sociodemográfico,Segmentación / filtro,575,0,22
+reside_quito,Categórica,Perfil sociodemográfico,Segmentación / filtro,575,0,1
+¿Con qué frecuencia utiliza redes sociales?,Categórica,Percepción sobre IA en campañas,Predictora perceptual,575,0,5
+¿A través de qué dispositivos accede principalmente a Internet?,Texto / categórica abierta,Variable complementaria,Análisis descriptivo,575,0,16
+"Durante la campaña presidencial entre Luisa González y Daniel Noboa, ¿con qué frecuencia vio o recibió contenido político en redes sociales o plataformas digitales?",Categórica,Perfil sociodemográfico,Segmentación / filtro,575,0,5
+¿Qué tipo de interacción tuvo con el contenido político digital relacionado a la campaña Noboa vs. González?,Categórica,Variable complementaria,Análisis descriptivo,575,0,6
+conoce_ia,Categórica,Percepción sobre IA en campañas,Predictora perceptual,575,0,3
+percibe_automatizacion,Categórica,Variable complementaria,Análisis descriptivo,575,0,3
+identifica_ia,Categórica,Percepción sobre IA en campañas,Predictora perceptual,575,0,3
+"¿Vio alguna vez un video, imagen, audio o noticia política de la campaña entre Luisa González y Daniel Noboa que le pareció “falso”, “manipulado” o generado con IA?",Categórica,Percepción sobre IA en campañas,Predictora perceptual,575,0,4
+Percepción sobre el uso de IA en campañas políticas [El uso de inteligencia artificial en campañas políticas digitales mejora la comunicación entre partidos y ciudadanos.],Categórica,Percepción sobre IA en campañas,Predictora perceptual,575,0,5
+Percepción sobre el uso de IA en campañas políticas [Los partidos pueden manipular mi opinión mediante mensajes personalizados creados con IA.],Categórica,Percepción sobre IA en campañas,Predictora perceptual,575,0,5
+Percepción sobre el uso de IA en campañas políticas [La presencia de bots o cuentas falsas en redes sociales reduce mi confianza en la información política digital.],Categórica,Confianza electoral,Variable dependiente / indicador principal,575,0,5
+Percepción sobre el uso de IA en campañas políticas [La inteligencia artificial puede mejorar la transparencia del proceso electoral.],Categórica,Confianza electoral,Predictora perceptual,575,0,5
+Percepción sobre el uso de IA en campañas políticas [La existencia de deepfakes o contenido manipulado me hace desconfiar más de las campañas políticas digitales.],Categórica,Percepción sobre IA en campañas,Predictora perceptual,575,0,5
+Percepción sobre el uso de IA en campañas políticas [Considero que el uso de inteligencia artificial en campañas políticas debería estar regulado por la ley.],Categórica,Percepción sobre IA en campañas,Predictora perceptual,575,0,5
+confianza_limpieza,Categórica,Confianza electoral,Variable dependiente / indicador principal,575,0,5
+confianza_fraude,Categórica,Confianza electoral,Variable dependiente / indicador principal,575,0,5
+¿Por quién votó en la segunda vuelta presidencial de 2025?,Categórica,Perfil sociodemográfico,Segmentación / filtro,575,0,5
+¿Considera que el uso de IA en campañas digitales influyó en su decisión de voto en las elecciones presidenciales de 2025?,Categórica,Perfil sociodemográfico,Segmentación / filtro,575,0,5
+"¿Ha cambiado su confianza en el proceso electoral al saber que existen bots, deepfakes o manipulación mediante IA?",Categórica,Confianza electoral,Variable dependiente / indicador principal,575,0,4
+"¿Realiza alguna verificación (chequea fuentes, busca noticias, consulta otras personas) de la información política digital antes de compartirla?",Categórica,Percepción sobre IA en campañas,Predictora perceptual,575,0,4
+"¿Conoce alguna medida, ley o regulación sobre el uso de IA en campañas políticas en Ecuador?",Categórica,Percepción sobre IA en campañas,Predictora perceptual,575,0,3
+¿Cree que debería regularse el uso de IA en campañas políticas digitales en el país?,Categórica,Percepción sobre IA en campañas,Predictora perceptual,575,0,3
+¿Participó activamente en redes sociales o medios digitales durantes las ultimas elecciones presidenciales de 2025?,Categórica,Perfil sociodemográfico,Segmentación / filtro,575,0,3
+"¿Qué recomendaciones haría para garantizar un uso responsable y transparente de la inteligencia artificial en campañas políticas digitales en Ecuador, considerando la experiencia de la campaña entre Luisa González y Daniel Noboa?",Texto / categórica abierta,Percepción sobre IA en campañas,Predictora perceptual,571,4,361
+Unnamed: 30,Categórica,Variable complementaria,Análisis descriptivo,0,575,0
+Unnamed: 31,Categórica,Variable complementaria,Análisis descriptivo,0,575,0
+limpieza_num,Ordinal / discreta,Variable complementaria,Análisis descriptivo,575,0,5
+fraude_num,Ordinal / discreta,Confianza electoral,Análisis descriptivo,575,0,5
+fraude_rev,Ordinal / discreta,Confianza electoral,Análisis descriptivo,575,0,5
+confianza_idx,Numérica,Confianza electoral,Variable dependiente / indicador principal,575,0,9
+confianza_idx_round,Ordinal / discreta,Confianza electoral,Variable dependiente / indicador principal,575,0,5
+confianza_3,Ordinal / discreta,Confianza electoral,Variable dependiente / indicador principal,575,0,3
+Percepción sobre el uso de IA en campañas políticas [El uso de inteligencia artificial en campañas políticas digitales mejora la comunicación entre partidos y ciudadanos.]_num,Ordinal / discreta,Percepción sobre IA en campañas,Predictora perceptual,575,0,5
+Percepción sobre el uso de IA en campañas políticas [Los partidos pueden manipular mi opinión mediante mensajes personalizados creados con IA.]_num,Ordinal / discreta,Percepción sobre IA en campañas,Predictora perceptual,575,0,5
+Percepción sobre el uso de IA en campañas políticas [La presencia de bots o cuentas falsas en redes sociales reduce mi confianza en la información política digital.]_num,Ordinal / discreta,Confianza electoral,Variable dependiente / indicador principal,575,0,5
+Percepción sobre el uso de IA en campañas políticas [La inteligencia artificial puede mejorar la transparencia del proceso electoral.]_num,Ordinal / discreta,Confianza electoral,Predictora perceptual,575,0,5
+Percepción sobre el uso de IA en campañas políticas [La existencia de deepfakes o contenido manipulado me hace desconfiar más de las campañas políticas digitales.]_num,Ordinal / discreta,Percepción sobre IA en campañas,Predictora perceptual,575,0,5
+Percepción sobre el uso de IA en campañas políticas [Considero que el uso de inteligencia artificial en campañas políticas debería estar regulado por la ley.]_num,Ordinal / discreta,Percepción sobre IA en campañas,Predictora perceptual,575,0,5
+longitud_recomendacion,Numérica,Variable complementaria,Análisis descriptivo,575,0,174
+palabras_recomendacion,Numérica,Variable complementaria,Análisis descriptivo,575,0,55

@@ -4,6 +4,8 @@ import streamlit as st
 
 
 def safe_text(value) -> str:
+    if value is None:
+        return ""
     return html.escape(str(value))
 
 

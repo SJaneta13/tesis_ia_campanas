@@ -1,194 +1,113 @@
 # dashboard/sections/perfil_muestra.py
 import pandas as pd
 import streamlit as st
-import plotly.express as px
 
 from dashboard.components import topbar, kpi_card
+from dashboard.common import (
+    PLOTLY_CONFIG,
+    find_first_existing_column,
+    empty_state,
+    clean_category_series,
+    make_category_distribution,
+    donut_chart,
+    horizontal_bar_chart,
+    render_card_header,
+)
 
 
-def find_first_existing_column(df: pd.DataFrame, candidates: list[str]):
-    if df.empty:
-        return None
-
-    normalized = {c.lower().strip(): c for c in df.columns}
-
-    for candidate in candidates:
-        key = candidate.lower().strip()
-        if key in normalized:
-            return normalized[key]
-
-    for col in df.columns:
-        col_l = col.lower().strip()
-        for candidate in candidates:
-            if candidate.lower().strip() in col_l:
-                return col
-
-    return None
 
 
-def empty_state(message: str):
-    st.markdown(
-        f"""
-        <div class="empty-state">
-            {message}
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+def normalize_age_range(value):
+    text = str(value).strip()
+    text = text.replace("–", "-").replace("—", "-")
+    text = text.replace(" ", "")
+    return text
 
 
-def clean_category_series(series: pd.Series, default: str = "No especificado"):
-    return (
-        series.fillna(default)
-        .astype(str)
-        .str.strip()
-        .replace("", default)
-    )
+def normalize_yes_no(value):
+    text = str(value).strip().lower()
+    text = text.replace("í", "i")
 
+    if text in ["si", "s", "sí"]:
+        return "Sí"
+    if text in ["no", "n"]:
+        return "No"
 
-def make_category_distribution(
+    return str(value).strip() or "No especificado"
+
+def short_faculty_label(value: str) -> str:
+    text = str(value).strip()
+
+    replacements = {
+        "Facultad de Ingeniería y Ciencias Aplicadas": "Ingeniería Aplicadas",
+        "Facultad de Ciencias Administrativas": "Ciencias Administrativas",
+        "Facultad de Ingeniería en Geología, Minas, Petróleos y Ambiental": "Geología Minas",
+        "Facultad de Filosofía, Letras y Ciencias de la Educación": "Filosofía Educación",
+        "Facultad de Comunicación Social": "Comunicación Social",
+        "Facultad de Ciencias Económicas": "Ciencias Económicas",
+        "Facultad de Ciencias Psicológicas": "Ciencias Psicológicas",
+        "Facultad de Jurisprudencia, Ciencias Políticas y Sociales": "Jurisprudencia Política",
+        "Facultad de Arquitectura y Urbanismo": "Arquitectura Urbanismo",
+        "Facultad de Derecho": "Derecho",
+        "Facultad de Odontología": "Odontología",
+        "Facultad de Cultura Física": "Cultura Física",
+        "Facultad de Ciencias Químicas": "Ciencias Químicas",
+        "Facultad de Ciencias Agrícolas": "Ciencias Agrícolas",
+        "Centro de Investigación": "Investigación",
+        "Facultad de Artes": "Artes",
+        "Facultad de Ciencias Biológicas": "Ciencias Biológicas",
+        "Instituto de Posgrado": "Posgrado",
+        "No pertenece a ninguna facultad / área administrativa": "Área administrativa",
+        "Facultad de Ciencias Médicas": "Ciencias Médicas",
+        "Enfermería": "Enfermería",
+        "Facultad de Ciencias de la Discapacidad": "Discapacidad",
+    }
+
+    if text in replacements:
+        return replacements[text]
+
+    text = text.replace("Facultad de ", "")
+    text = text.replace("Facultad del ", "")
+    text = text.replace("Facultad ", "")
+    text = text.replace("Ciencias de la ", "")
+    text = text.replace("Ciencias del ", "")
+
+    words = [w for w in text.split() if w.lower() not in ["de", "la", "las", "los", "y", "en"]]
+
+    return " ".join(words[:2]) if words else "No registrado"
+
+def collapse_top_categories(
     df: pd.DataFrame,
-    col: str,
-    label_name: str,
-    order: list[str] | None = None,
+    label_col: str,
+    top_n: int = 8,
+    other_label: str = "Otras unidades",
 ) -> pd.DataFrame:
-    if df.empty or not col or col not in df.columns:
-        return pd.DataFrame(columns=[label_name, "Cantidad", "Porcentaje"])
+    if df is None or df.empty or label_col not in df.columns or "Cantidad" not in df.columns:
+        return pd.DataFrame(columns=[label_col, "Cantidad", "Porcentaje"])
 
-    temp = clean_category_series(df[col])
+    temp = df.copy()
+    temp["Cantidad"] = pd.to_numeric(temp["Cantidad"], errors="coerce").fillna(0).astype(int)
+    temp = temp.sort_values("Cantidad", ascending=False)
 
-    counts = temp.value_counts()
+    if len(temp) <= top_n:
+        return temp.sort_values("Cantidad", ascending=True)
 
-    if order:
-        counts = counts.reindex(order).fillna(0).astype(int)
-        counts = counts[counts > 0]
+    top = temp.head(top_n).copy()
+    rest = temp.iloc[top_n:].copy()
 
-    out = counts.reset_index()
-    out.columns = [label_name, "Cantidad"]
+    total = temp["Cantidad"].sum()
+    other_count = int(rest["Cantidad"].sum())
 
-    total = out["Cantidad"].sum()
-
-    if total == 0:
-        return pd.DataFrame(columns=[label_name, "Cantidad", "Porcentaje"])
-
-    out["Porcentaje"] = (out["Cantidad"] / total * 100).round(1)
-
-    return out
-
-
-def donut_chart(df: pd.DataFrame, names_col: str, values_col: str, height: int = 315):
-    if df.empty:
-        return None
-
-
-    fig = px.pie(
-        df,
-        names=names_col,
-        values=values_col,
-        hole=0.52,
-        color_discrete_sequence=[
-            "#0f6fc9",
-            "#7cc4f8",
-            "#ff2d2d",
-            "#2cb6a4",
-            "#facc15",
-        ],
+    other_row = pd.DataFrame(
+        {
+            label_col: [other_label],
+            "Cantidad": [other_count],
+            "Porcentaje": [round(other_count / total * 100, 1) if total else 0.0],
+        }
     )
 
-    fig.update_traces(
-        textposition="inside",
-        textinfo="percent",
-        hovertemplate=(
-            "<b>%{label}</b><br>"
-            "Cantidad: %{value}<br>"
-            "Porcentaje: %{percent}<extra></extra>"
-        ),
-    )
-
-    fig.update_layout(
-        height=height,
-        paper_bgcolor="#ffffff",
-        plot_bgcolor="#ffffff",
-        margin=dict(l=0, r=0, t=0, b=0),
-        legend_title_text="",
-        legend=dict(
-            orientation="v",
-            y=0.72,
-            x=1.02,
-            font=dict(size=11),
-        ),
-    )
-
-    return fig
-
-
-def horizontal_bar_chart(
-    df: pd.DataFrame,
-    x_col: str,
-    y_col: str,
-    text_col: str = "Porcentaje",
-    height: int = 320,
-):
-    if df.empty:
-        return None
-
-    plot_df = df.sort_values(x_col, ascending=True)
-
-    fig = px.bar(
-        plot_df,
-        x=x_col,
-        y=y_col,
-        orientation="h",
-        text=text_col,
-        color=y_col,
-        color_discrete_sequence=[
-            "#0f6fc9",
-            "#7cc4f8",
-            "#2cb6a4",
-            "#facc15",
-            "#fb7185",
-            "#94a3b8",
-        ],
-    )
-
-    fig.update_traces(
-        texttemplate="%{text:.1f}%",
-        textposition="outside",
-        hovertemplate=(
-            "<b>%{y}</b><br>"
-            "Cantidad: %{x}<br>"
-            "Porcentaje: %{text:.1f}%<extra></extra>"
-        ),
-    )
-
-    fig.update_layout(
-        height=height,
-        paper_bgcolor="#ffffff",
-        plot_bgcolor="#ffffff",
-        margin=dict(l=0, r=35, t=5, b=5),
-        xaxis=dict(
-            title="",
-            showgrid=True,
-            gridcolor="#e5e7eb",
-            zeroline=False,
-        ),
-        yaxis=dict(title=""),
-        showlegend=False,
-        font=dict(size=11),
-    )
-
-    return fig
-
-
-def render_card_header(title: str, subtitle: str):
-    st.markdown(
-        f"""
-        <div class="section-title-card">{title}</div>
-        <div class="section-subtitle-card">{subtitle}</div>
-        """,
-        unsafe_allow_html=True,
-    )
-
+    out = pd.concat([top, other_row], ignore_index=True)
+    return out.sort_values("Cantidad", ascending=True)
 
 def render_perfil_muestra(survey_df: pd.DataFrame):
     n_survey = len(survey_df) if not survey_df.empty else 0
@@ -261,18 +180,6 @@ def render_perfil_muestra(survey_df: pd.DataFrame):
         ],
     )
 
-    # =========================================================
-    # KPI superiores
-    # =========================================================
-    total_vars = sum(
-        [
-            bool(edad_col),
-            bool(genero_col),
-            bool(rol_col),
-            bool(facultad_col),
-            bool(quito_col),
-        ]
-    )
 
     residentes_quito = 0
     if quito_col:
@@ -295,9 +202,9 @@ def render_perfil_muestra(survey_df: pd.DataFrame):
 
     with c2:
         kpi_card(
-            "Variables detectadas",
-            f"{total_vars}/5",
-            "Campos de caracterización encontrados",
+            "Rango etario",
+            "18–64",
+            "Participantes dentro del criterio de inclusión",
             "green",
         )
 
@@ -317,12 +224,12 @@ def render_perfil_muestra(survey_df: pd.DataFrame):
             "blue",
         )
 
-    st.markdown('<div class="profile-section-gap"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
 
     # =========================================================
     # Edad + género
     # =========================================================
-    col1, col2 = st.columns(2, gap="large")
+    col1, col2 = st.columns(2, gap="medium")
 
     with col1:
         with st.container(border=True, key="card_pm_edad"):
@@ -332,11 +239,17 @@ def render_perfil_muestra(survey_df: pd.DataFrame):
             )
 
             if edad_col:
-                edad_order = ["18–24", "18-24", "25–34", "25-34", "35–44", "35-44", "45–54", "45-54", "55–64", "55-64"]
+                edad_order = ["18-24", "25-34", "35-44", "45-54", "55-64"]
+
+
+                edad_temp = survey_df.copy()
+                edad_temp[edad_col] = edad_temp[edad_col].apply(normalize_age_range)
+
                 edad_df = make_category_distribution(
-                    survey_df,
+                    edad_temp,
                     edad_col,
                     "Edad",
+                    order=edad_order,
                 )
 
                 fig = horizontal_bar_chart(
@@ -345,10 +258,10 @@ def render_perfil_muestra(survey_df: pd.DataFrame):
                     y_col="Edad",
                     text_col="Porcentaje",
                     height=315,
-                )
+                )    
 
                 if fig:
-                    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+                    st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
                 else:
                     empty_state("No existen datos suficientes para graficar edad.")
             else:
@@ -377,18 +290,18 @@ def render_perfil_muestra(survey_df: pd.DataFrame):
                 )
 
                 if fig:
-                    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+                    st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
                 else:
                     empty_state("No existen datos suficientes para graficar género.")
             else:
                 empty_state("No se encontró la columna de género.")
 
-    st.markdown('<div class="section-gap-small"></div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
 
     # =========================================================
     # Rol + residencia
     # =========================================================
-    col3, col4 = st.columns(2, gap="large")
+    col3, col4 = st.columns([0.82, 1.35], gap="medium")
 
     with col3:
         with st.container(border=True, key="card_pm_rol"):
@@ -419,75 +332,87 @@ def render_perfil_muestra(survey_df: pd.DataFrame):
                 )
 
                 if fig:
-                    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+                    st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
                 else:
                     empty_state("No existen datos suficientes para graficar el rol.")
             else:
                 empty_state("No se encontró la columna de rol dentro de la UCE.")
 
     with col4:
-        with st.container(border=True, key="card_pm_quito"):
+        with st.container(border=True, key="card_pm_facultad"):
             render_card_header(
-                "Residencia en Quito",
-                "Participantes que declararon residir actualmente en la ciudad de Quito.",
+                "Unidad académica",
+                "Principales unidades representadas en la muestra.",
             )
 
-            if quito_col:
-                quito_df = make_category_distribution(
+            if facultad_col:
+                facultad_df = make_category_distribution(
                     survey_df,
-                    quito_col,
-                    "Residencia en Quito",
-                    order=["Sí", "Si", "No"],
+                    facultad_col,
+                    "Facultad",
                 )
 
-                fig = donut_chart(
-                    quito_df,
-                    names_col="Residencia en Quito",
-                    values_col="Cantidad",
-                    height=315,
-                )
-
-                if fig:
-                    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+                if facultad_df.empty:
+                    empty_state("No existen datos suficientes para graficar unidades académicas.")
                 else:
-                    empty_state("No existen datos suficientes para graficar residencia en Quito.")
+                    facultad_df = facultad_df.sort_values("Cantidad", ascending=False)
+
+                    facultad_plot_df = collapse_top_categories(
+                        facultad_df,
+                        label_col="Facultad",
+                        top_n=8,
+                        other_label="Otras unidades",
+                    )
+
+                    facultad_plot_df["Unidad"] = facultad_plot_df["Facultad"].apply(short_faculty_label)
+
+                    fig = horizontal_bar_chart(
+                        facultad_plot_df,
+                        x_col="Cantidad",
+                        y_col="Unidad",
+                        text_col="Porcentaje",
+                        height=315,
+                    )
+
+                    if fig:
+                        st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
+                    else:
+                        empty_state("No existen datos suficientes para graficar unidades académicas.")
             else:
-                empty_state("No se encontró la columna de residencia en Quito.")
+                empty_state("No se encontró la columna de facultad o unidad académica.")
 
-    st.markdown('<div class="section-gap-small"></div>', unsafe_allow_html=True)
-
-    # =========================================================
-    # Facultad
-    # =========================================================
-    with st.container(border=True, key="card_pm_facultad"):
-        render_card_header(
-            "Facultad o unidad académica",
-            "Distribución de la muestra según la facultad o unidad de pertenencia.",
+    if facultad_col:
+        facultad_full_df = make_category_distribution(
+            survey_df,
+            facultad_col,
+            "Facultad",
         )
 
-        if facultad_col:
-            facultad_df = make_category_distribution(
-                survey_df,
-                facultad_col,
-                "Facultad o unidad",
-            )
+        if not facultad_full_df.empty:
+            facultad_full_df = facultad_full_df.sort_values("Cantidad", ascending=False)
+            facultad_full_df["Etiqueta visual"] = facultad_full_df["Facultad"].apply(short_faculty_label)
+            facultad_full_df["Porcentaje"] = facultad_full_df["Porcentaje"].map(lambda x: f"{float(x):.1f}%")
 
-            fig = horizontal_bar_chart(
-                facultad_df,
-                x_col="Cantidad",
-                y_col="Facultad o unidad",
-                text_col="Porcentaje",
-                height=520,
-            )
+            with st.expander("Ver distribución completa por unidad académica"):
+                st.dataframe(
+                    facultad_full_df[
+                        ["Facultad", "Etiqueta visual", "Cantidad", "Porcentaje"]
+                    ],
+                    width="stretch",
+                    hide_index=True,
+                    height=420,
+                )
+    st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
 
-            if fig:
-                st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
-            else:
-                empty_state("No existen datos suficientes para graficar facultades.")
-        else:
-            empty_state("No se encontró la columna de facultad o unidad académica.")
+    
 
-    st.caption(
-        "Nota metodológica: esta sección describe la composición de la muestra encuestada. "
-        "Estos datos permiten contextualizar los resultados sobre conocimiento, percepción y confianza frente al uso de IA electoral."
+    st.markdown(
+        """
+        <div class="method-note">
+            <strong>Nota metodológica:</strong> esta sección describe la composición de la muestra encuestada.
+            La distribución por unidad académica evidencia una mayor concentración en determinadas facultades;
+            por ello, los resultados no deben interpretarse como representación proporcional de toda la UCE.
+        </div>
+        """,
+        unsafe_allow_html=True,
     )

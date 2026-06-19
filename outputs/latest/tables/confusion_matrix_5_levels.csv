@@ -1,0 +1,26 @@
+﻿Real,Predicho,Cantidad
+Muy baja,Muy baja,13
+Muy baja,Baja,12
+Muy baja,Media,5
+Muy baja,Alta,6
+Muy baja,Muy alta,1
+Baja,Muy baja,8
+Baja,Baja,126
+Baja,Media,35
+Baja,Alta,35
+Baja,Muy alta,2
+Media,Muy baja,0
+Media,Baja,52
+Media,Media,88
+Media,Alta,22
+Media,Muy alta,3
+Alta,Muy baja,2
+Alta,Baja,65
+Alta,Media,34
+Alta,Alta,49
+Alta,Muy alta,2
+Muy alta,Muy baja,3
+Muy alta,Baja,5
+Muy alta,Media,2
+Muy alta,Alta,2
+Muy alta,Muy alta,3

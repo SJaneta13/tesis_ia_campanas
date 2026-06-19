@@ -1,0 +1,7 @@
+﻿Indicador,Valor,Interpretación
+Registros válidos cargados,575,Número de observaciones disponibles en la base procesada.
+Variables disponibles,46,Número de columnas disponibles para análisis descriptivo y modelado.
+Registros duplicados exactos,0,Filas idénticas detectadas en la base procesada.
+Completitud general de la base (%),95.64,Porcentaje de celdas no vacías en la base procesada.
+Variable de edad detectada,edad,La población del estudio se interpreta bajo el alcance 18 a 64 años.
+Registros con índice de confianza válido,575,Casos utilizables para análisis de confianza electoral.

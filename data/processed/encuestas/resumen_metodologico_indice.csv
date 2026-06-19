@@ -1,0 +1,2 @@
+﻿indice,tipo,metodo,escala_original,versiones_generadas,nota
+confianza_idx,Índice operativo ordinal,Promedio entre limpieza_num y fraude_rev,Likert 1-5,5 niveles y 3 clases,La versión de 3 clases se utilizó para estabilizar el modelado predictivo.

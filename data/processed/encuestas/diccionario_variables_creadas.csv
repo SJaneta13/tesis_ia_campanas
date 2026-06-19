@@ -1,0 +1,7 @@
+﻿variable,descripcion,escala
+limpieza_num,Codificación numérica del ítem sobre transparencia electoral,Likert 1-5
+fraude_num,Codificación numérica del ítem sobre percepción de fraude,Likert 1-5
+fraude_rev,Codificación inversa del ítem de fraude,Likert invertida 1-5
+confianza_idx,Índice operativo de confianza electoral calculado como promedio de limpieza_num y fraude_rev,Continua ordinal 1-5
+confianza_idx_round,Índice de confianza electoral redondeado a cinco niveles,Ordinal 1-5
+confianza_3,"Variable agregada de confianza electoral: baja, media y alta",Ordinal 1-3
