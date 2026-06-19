@@ -203,7 +203,7 @@ def render_likert_card(
     fig = make_stacked_bar(dist, y_label, height=96)
 
     if fig:
-        st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
+        st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
 
     render_note(note, note_color)
 
@@ -381,7 +381,7 @@ def render_percepcion_ciudadana(survey_df: pd.DataFrame):
         fig = make_likert_matrix(perception_items, height=440)
 
         if fig:
-            st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
+            st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
         else:
             empty_state("No se encontraron columnas suficientes para construir la matriz de percepción.")
 
@@ -483,7 +483,7 @@ def render_percepcion_ciudadana(survey_df: pd.DataFrame):
                     font=dict(size=11),
                 )
 
-                st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
+                st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
 
                 render_note(
                     "Bots y deepfakes concentran uno componente relevante de desconfianza asociado al ecosistema digital electoral.",
@@ -744,7 +744,7 @@ def _render_exposure_dot_chart(df: pd.DataFrame):
 
     st.plotly_chart(
         fig,
-        width="stretch",
+        use_container_width=True,
         config=PLOTLY_CONFIG,
     )
 
@@ -864,7 +864,7 @@ def render_risk_index_by_age():
 
     st.plotly_chart(
         fig,
-        width="stretch",
+        use_container_width=True,
         config=PLOTLY_CONFIG,
     )
 
@@ -1014,7 +1014,7 @@ def render_deepfake_distrust_by_age():
 
     st.plotly_chart(
         fig,
-        width="stretch",
+        use_container_width=True,
         config=PLOTLY_CONFIG,
     )
 

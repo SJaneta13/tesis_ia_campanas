@@ -53,7 +53,7 @@ def _download_button(df: pd.DataFrame, filename: str, label: str, key: str):
         data=csv,
         file_name=filename,
         mime="text/csv",
-        width="stretch",
+        use_container_width=True,
         key=key,
     )
 
@@ -78,7 +78,7 @@ def _render_construct_chart(variable_dictionary: pd.DataFrame):
     )
 
     if fig:
-        st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
+        st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
     else:
         empty_state("No existen datos suficientes para graficar constructos.")
 
@@ -102,7 +102,7 @@ def _render_type_chart(variable_dictionary: pd.DataFrame):
     )
 
     if fig:
-        st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
+        st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
     else:
         empty_state("No existen datos suficientes para graficar tipos de variables.")
 
@@ -345,7 +345,7 @@ def render_datos_artefactos(
 
                 st.dataframe(
                     data_quality[quality_cols],
-                    width="stretch",
+                    use_container_width=True,
                     hide_index=True,
                     height=300,
                     column_config={
@@ -464,7 +464,7 @@ def render_datos_artefactos(
 
                 st.dataframe(
                     filtered_dict[compact_cols],
-                    width="stretch",
+                    use_container_width=True,
                     hide_index=True,
                     height=390,
                     column_config={
@@ -478,7 +478,7 @@ def render_datos_artefactos(
                 with st.expander("Ver diccionario completo con conteos"):
                     st.dataframe(
                         variable_dictionary,
-                        width="stretch",
+                        use_container_width=True,
                         hide_index=True,
                         height=460,
                     )
@@ -535,7 +535,7 @@ def render_datos_artefactos(
 
                 st.dataframe(
                     filtered_map[compact_cols],
-                    width="stretch",
+                    use_container_width=True,
                     hide_index=True,
                     height=360,
                     column_config={

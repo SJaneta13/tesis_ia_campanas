@@ -541,7 +541,7 @@ def render_resumen_general(
                     ),
                 )
 
-                st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
+                st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
             else:
                 empty_state("No se encontró columna de género en el archivo de encuestas.")
 
@@ -588,7 +588,7 @@ def render_resumen_general(
                 fig = make_stacked_bar(values, "Aceptación", height=165)
 
                 if fig is not None:
-                    st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
+                    st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
                 else:
                     empty_state(
                         "La columna detectada no contiene una escala válida de aceptación."
@@ -640,7 +640,7 @@ def render_resumen_general(
                 fig = make_stacked_bar(conf_df, "Confianza", height=165)
 
                 if fig is not None:
-                    st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
+                    st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
                 else:
                     empty_state(
                         "La columna de confianza electoral no contiene una escala 1-5 válida."

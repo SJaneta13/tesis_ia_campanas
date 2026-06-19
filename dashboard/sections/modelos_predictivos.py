@@ -1,4 +1,4 @@
-# dashboard/sections/modelos_predictivos.py
+﻿# dashboard/sections/modelos_predictivos.py
 
 from __future__ import annotations
 
@@ -278,7 +278,13 @@ def _render_method_warning(n_survey: int) -> None:
 def _render_kpi_row(summary_df: pd.DataFrame, n_survey: int) -> None:
     df = _normalize_metrics_df(summary_df)
 
-    main_df = df[df.get("Configuración", pd.Series(dtype=str)).astype(str).eq(MAIN_CONFIG)].copy()
+    if "Configuración" in df.columns:
+        mask = df["Configuración"].astype(str).eq(MAIN_CONFIG)
+    else:
+        mask = pd.Series(False, index=df.index)
+
+    main_df = df.loc[mask].copy()
+    
     if main_df.empty:
         main_df = df.copy()
 
@@ -466,7 +472,7 @@ def _render_model_comparison(summary_df: pd.DataFrame) -> None:
         "responsive": True,
     }
 
-    st.plotly_chart(fig, width="stretch", config=chart_config)
+    st.plotly_chart(fig, use_container_width=True, config=chart_config)
 
     legend_html = "".join(
         f"""
@@ -589,7 +595,7 @@ def _render_config_comparison(summary_df: pd.DataFrame) -> None:
     )
 
     _plotly_base_layout(fig, height=315, margin=dict(l=15, r=15, t=10, b=30))
-    st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
+    st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
 
     conclusion = _build_config_conclusion(df)
     _render_html(
@@ -707,7 +713,7 @@ def _render_feature_importance(feature_df: pd.DataFrame) -> None:
         showlegend=False,
     )
     _plotly_base_layout(fig, height=max(310, int(top_n) * 42 + 90), margin=dict(l=5, r=65, t=10, b=10))
-    st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
+    st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
 
     top3 = df.head(3)
     top3_sum = top3["Importancia_pct"].sum()
@@ -1085,7 +1091,7 @@ def _render_seed_stability(seed_df: pd.DataFrame) -> None:
         "modeBarButtonsToRemove": ["lasso2d", "select2d"],
     }
 
-    st.plotly_chart(fig, width="stretch", config=stability_config)
+    st.plotly_chart(fig, use_container_width=True, config=stability_config)
 
     if partial_metrics:
         st.caption("Nota de datos: " + " · ".join(partial_metrics))
@@ -1538,7 +1544,7 @@ def _render_simulator_base(schema_df: pd.DataFrame, feature_df: pd.DataFrame) ->
                         key=f"mp_sim_{scenario_key}_{i}",
                     )
 
-            submitted = st.form_submit_button("⚡ Estimar escenario", type="primary")
+            submitted = st.form_submit_button("Estimar escenario", type="primary")
 
     if submitted:
         result = predict_simulator(values)
@@ -1609,7 +1615,7 @@ def _render_simulator_base(schema_df: pd.DataFrame, feature_df: pd.DataFrame) ->
                     """
                     <div class='mp-result-card'>
                         <div class='mp-result-title'>Escenario estimado</div>
-                        <div style='font-size:.86rem;color:#94a3b8;font-style:italic;'>Selecciona un escenario, ajusta las variables y presiona “Estimar escenario”.</div>
+                        <div style='font-size:.86rem;color:#94a3b8;font-style:italic;'>Selecciona un escenario, ajusta las variables y presiona "Estimar escenario".</div>
                     </div>
                     """
                 )
@@ -1735,7 +1741,7 @@ def render_modelos_predictivos(survey_df: pd.DataFrame) -> None:
             with st.expander("Ver tabla completa de importancia"):
                 st.dataframe(
                     _prepare_feature_df(feature_df),
-                    width="stretch",
+                    use_container_width=True,
                     hide_index=True,
                     height=360,
                 )    
@@ -1757,7 +1763,7 @@ def render_modelos_predictivos(survey_df: pd.DataFrame) -> None:
             active_cm = cm3_df if selected_config == "3 niveles" else cm5_df
             _render_confusion_matrix(active_cm, selected_config)
             with st.expander("Ver tabla de matriz de confusión"):
-                st.dataframe(active_cm, width="stretch", hide_index=True, height=320)
+                st.dataframe(active_cm, use_container_width=True, hide_index=True, height=320)
 
     with tabs[2]:
         with st.container(border=True, key="card_mp_estabilidad"):
@@ -1767,7 +1773,7 @@ def render_modelos_predictivos(survey_df: pd.DataFrame) -> None:
             )
             _render_seed_stability(seed_df)
             with st.expander("Ver métricas por semilla"):
-                st.dataframe(_normalize_seed_df(seed_df), width="stretch", hide_index=True, height=360)
+                st.dataframe(_normalize_seed_df(seed_df), use_container_width=True, hide_index=True, height=360)
 
     with tabs[3]:
         with st.container(border=True, key="card_mp_simulador_base"):

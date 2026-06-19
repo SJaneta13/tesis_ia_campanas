@@ -1,4 +1,4 @@
-# dashboard/sections/conocimiento_ia.py
+﻿# dashboard/sections/conocimiento_ia.py
 
 
 import plotly.express as px
@@ -87,7 +87,7 @@ def render_conocimiento_ia(survey_df: pd.DataFrame):
         survey_df,
 
         [
-            "¿Vio alguna vez un video, imagen, audio o noticia política de la campaña entre Luisa González y Daniel Noboa que le pareció “falso”, “manipulado” o generado con IA?",
+            '¿Vio alguna vez un video, imagen, audio o noticia política de la campaña entre Luisa González y Daniel Noboa que le pareció "falso", "manipulado" o generado con IA?',
             "falso",
             "manipulado",
             "generado con IA",
@@ -186,7 +186,7 @@ def render_conocimiento_ia(survey_df: pd.DataFrame):
                 )
 
                 if fig:
-                    st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
+                    st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
                 else:
                     empty_state("No existen datos suficientes para graficar conocimiento de IA.")
             else:
@@ -220,7 +220,7 @@ def render_conocimiento_ia(survey_df: pd.DataFrame):
                 )
 
                 if fig:
-                    st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
+                    st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
                 else:
                     empty_state("No existen datos suficientes para graficar reconocimiento de automatización.")
             else:
@@ -261,7 +261,7 @@ def render_conocimiento_ia(survey_df: pd.DataFrame):
                 )
 
                 if fig:
-                    st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
+                    st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
                 else:
                     empty_state("No existen datos suficientes para graficar identificación de IA.")
             else:
@@ -296,7 +296,7 @@ def render_conocimiento_ia(survey_df: pd.DataFrame):
                 )
 
                 if fig:
-                    st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
+                    st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
                 else:
                     empty_state("No existen datos suficientes para graficar exposición a contenido sospechoso.")
             else:

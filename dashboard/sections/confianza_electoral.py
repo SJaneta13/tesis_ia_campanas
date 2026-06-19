@@ -1487,7 +1487,7 @@ def _render_summary_tab(survey_df: pd.DataFrame, cols: dict[str, str | None], me
 
         fig = make_likert_matrix(confianza_items, height=300)
         if fig:
-            st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
+            st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
         else:
             empty_state("No se encontraron columnas suficientes para construir la matriz de confianza electoral.")
 
@@ -1504,7 +1504,7 @@ def _render_summary_tab(survey_df: pd.DataFrame, cols: dict[str, str | None], me
             if limpieza_col:
                 fig = make_stacked_bar(make_likert_distribution(survey_df, limpieza_col), "Limpieza electoral", height=155)
                 if fig:
-                    st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
+                    st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
                 st.markdown(
                     """
                     <div class="alert-info-blue">
@@ -1525,7 +1525,7 @@ def _render_summary_tab(survey_df: pd.DataFrame, cols: dict[str, str | None], me
             if fraude_col:
                 fig = make_stacked_bar(make_likert_distribution(survey_df, fraude_col), "Fraude/manipulación", height=155)
                 if fig:
-                    st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
+                    st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
                 st.markdown(
                     """
                     <div class="alert-danger">
@@ -1562,7 +1562,7 @@ def _render_summary_tab(survey_df: pd.DataFrame, cols: dict[str, str | None], me
                     },
                 )
                 if fig:
-                    st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
+                    st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
                 st.markdown(
                     """
                     <div class="alert-warning">
@@ -1594,7 +1594,7 @@ def _render_summary_tab(survey_df: pd.DataFrame, cols: dict[str, str | None], me
                     },
                 )
                 if fig:
-                    st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
+                    st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
                 st.markdown(
                     """
                     <div class="alert-danger">
@@ -1657,7 +1657,7 @@ def _render_exposure_tab(analysis_df: pd.DataFrame, cols: dict[str, str | None])
         )
         fig = make_heatmap_exposure_confidence(analysis_df, height=400)
         if fig:
-            st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
+            st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
             render_note(
                 "Lectura de H1: la exposición digital general se concentra en niveles medios y altos. El sustento negativo se observa con mayor claridad cuando la exposición se interpreta como riesgo percibido por IA —bots, deepfakes y manipulación personalizada—. Por ello, H1 se reporta como sustento parcial y descriptivo, no como causalidad.",
                 "blue",
@@ -1686,7 +1686,7 @@ def _render_exposure_tab(analysis_df: pd.DataFrame, cols: dict[str, str | None])
             fig = make_scatter_exposure_confidence(analysis_df, cols, height=395)
 
         if fig:
-            st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
+            st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
             render_note(
                 "Las variables Likert generan pocas posiciones posibles; por eso la burbuja resume frecuencia y la dispersión usa jitter solo para separar puntos superpuestos.",
                 "blue",
@@ -1765,7 +1765,7 @@ def _render_h2_tab(analysis_df: pd.DataFrame):
             )
             fig, grouped = make_moderation_line_chart(analysis_df, height=420)
             if fig:
-                st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
+                st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
                 render_note(
                     "El eje X resume bots, deepfakes y mensajes personalizados con IA. El eje Y muestra la confianza electoral promedio. Los tamaños de grupo y valores exactos se reportan en la tabla técnica inferior.",
                     "blue",
@@ -1781,7 +1781,7 @@ def _render_h2_tab(analysis_df: pd.DataFrame):
             )
             fig = make_moderation_heatmap(analysis_df, height=365)
             if fig:
-                st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
+                st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
                 render_note(
                     "Lectura: valores más altos indican mayor confianza promedio. Cada celda muestra el promedio de confianza y el tamaño del grupo.",
                     "blue",
@@ -1845,7 +1845,7 @@ def _render_association_tab(analysis_df: pd.DataFrame, cols: dict[str, str | Non
             )
             fig = make_age_boxplot(analysis_df, height=390)
             if fig:
-                st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
+                st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
                 html = _age_summary_html(analysis_df)
                 if html:
                     st.markdown(html, unsafe_allow_html=True)
@@ -1860,7 +1860,7 @@ def _render_association_tab(analysis_df: pd.DataFrame, cols: dict[str, str | Non
             )
             fig, corr_df = make_spearman_chart(analysis_df, cols, height=390)
             if fig:
-                st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
+                st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
                 render_note(
                     "Interpretación: rho positivo indica asociación con mayor confianza; rho negativo indica asociación con menor confianza. No equivale a causalidad.",
                     "yellow",

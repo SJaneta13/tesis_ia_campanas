@@ -261,7 +261,7 @@ def render_perfil_muestra(survey_df: pd.DataFrame):
                 )    
 
                 if fig:
-                    st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
+                    st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
                 else:
                     empty_state("No existen datos suficientes para graficar edad.")
             else:
@@ -290,7 +290,7 @@ def render_perfil_muestra(survey_df: pd.DataFrame):
                 )
 
                 if fig:
-                    st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
+                    st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
                 else:
                     empty_state("No existen datos suficientes para graficar género.")
             else:
@@ -332,7 +332,7 @@ def render_perfil_muestra(survey_df: pd.DataFrame):
                 )
 
                 if fig:
-                    st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
+                    st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
                 else:
                     empty_state("No existen datos suficientes para graficar el rol.")
             else:
@@ -375,7 +375,7 @@ def render_perfil_muestra(survey_df: pd.DataFrame):
                     )
 
                     if fig:
-                        st.plotly_chart(fig, width="stretch", config=PLOTLY_CONFIG)
+                        st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
                     else:
                         empty_state("No existen datos suficientes para graficar unidades académicas.")
             else:
@@ -398,7 +398,7 @@ def render_perfil_muestra(survey_df: pd.DataFrame):
                     facultad_full_df[
                         ["Facultad", "Etiqueta visual", "Cantidad", "Porcentaje"]
                     ],
-                    width="stretch",
+                    use_container_width=True,
                     hide_index=True,
                     height=420,
                 )

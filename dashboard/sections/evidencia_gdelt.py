@@ -1,4 +1,4 @@
-import re
+﻿import re
 import textwrap
 from collections import Counter
 
@@ -269,7 +269,7 @@ def render_platform_sentiment_chart(gdelt_df: pd.DataFrame):
 
     fig.update_traces(hovertemplate="<b>%{x}</b><br>Sentimiento: %{fullData.name}<br>Registros: %{y}<extra></extra>")
 
-    st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
+    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
 
 def gdelt_date_column(gdelt_df: pd.DataFrame):
@@ -520,7 +520,7 @@ def render_gdelt_timeline(gdelt_df: pd.DataFrame):
         line=dict(width=3),
     )
 
-    st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
+    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
 
 
@@ -717,7 +717,7 @@ def render_evidencia_digital(
     falso_col = find_first_existing_column(
         survey_df,
         [
-            "¿Vio alguna vez un video, imagen, audio o noticia política de la campaña entre Luisa González y Daniel Noboa que le pareció “falso”, “manipulado” o generado con IA?",
+            '¿Vio alguna vez un video, imagen, audio o noticia política de la campaña entre Luisa González y Daniel Noboa que le pareció "falso", "manipulado" o generado con IA?',
             "falso",
             "manipulado",
             "generado con IA",
@@ -1307,7 +1307,7 @@ def render_evidencia_digital(
                 with st.expander("Ver matriz técnica completa"):
                     st.dataframe(
                         triangulation_df,
-                        width="stretch",
+                        use_container_width=True,
                         hide_index=True,
                         height=420,
                     )
@@ -1319,7 +1319,7 @@ def render_evidencia_digital(
                     data=csv,
                     file_name="triangulation_matrix.csv",
                     mime="text/csv",
-                    width="stretch",
+                    use_container_width=True,
                     key="download_ed_triangulation_matrix",
                 )
 
@@ -1364,6 +1364,6 @@ def render_evidencia_digital(
                         data=csv_rec,
                         file_name="recommendation_rules.csv",
                         mime="text/csv",
-                        width="stretch",
+                        use_container_width=True,
                         key="download_ed_recommendation_rules",
                     )
