@@ -3057,8 +3057,8 @@ table.mp-matrix td.cell {
     color: #ffffff !important;
 }   
 
-                /* =========================================================
-   Streamlit Cloud · base responsive estable
+/* =========================================================
+   Cloud safe layout · contención sin romper Plotly
    ========================================================= */
 
 html,
@@ -3072,19 +3072,18 @@ body,
 
 .block-container {
     width: 100% !important;
-    max-width: 1380px !important;
-    padding-left: clamp(0.85rem, 1.4vw, 1.25rem) !important;
-    padding-right: clamp(0.85rem, 1.4vw, 1.25rem) !important;
+    max-width: 1420px !important;
+    padding-left: clamp(0.85rem, 1.35vw, 1.25rem) !important;
+    padding-right: clamp(0.85rem, 1.35vw, 1.25rem) !important;
     box-sizing: border-box !important;
 }
 
-/* Columnas Streamlit: evita que Cloud calcule anchos rígidos */
+/* Columnas Streamlit */
 div[data-testid="stHorizontalBlock"] {
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
     box-sizing: border-box !important;
-    overflow: visible !important;
     gap: 0.85rem !important;
     align-items: stretch !important;
 }
@@ -3092,14 +3091,13 @@ div[data-testid="stHorizontalBlock"] {
 div[data-testid="column"],
 div[data-testid="stVerticalBlock"],
 div[data-testid="stElementContainer"],
-div[data-testid="stMarkdownContainer"],
-div[data-testid="stPlotlyChart"] {
+div[data-testid="stMarkdownContainer"] {
     min-width: 0 !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
 }
 
-/* Quita el borde externo duplicado de st.container(border=True) */
+/* Quitar borde duplicado de st.container(border=True) */
 div[data-testid="stVerticalBlockBorderWrapper"]:has([class*="st-key-card_"]) {
     border: none !important;
     border-radius: 0 !important;
@@ -3108,50 +3106,51 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has([class*="st-key-card_"]) {
     box-shadow: none !important;
 }
 
-/* Tarjetas globales: no recortar verticalmente */
+/* Tarjetas: crecen verticalmente, no fuerzan altura fija */
 [class*="st-key-card_"] {
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
+    height: auto !important;
+    max-height: none !important;
     box-sizing: border-box !important;
-    overflow: visible !important;
 }
 
+/* Contenido interno */
 [class*="st-key-card_"] > div,
 [class*="st-key-card_"] [data-testid="stVerticalBlock"],
 [class*="st-key-card_"] [data-testid="stElementContainer"],
 [class*="st-key-card_"] [data-testid="stMarkdownContainer"],
 [class*="st-key-card_"] [data-testid="stPlotlyChart"] {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Plotly: solo se contiene el wrapper, no se modifica el SVG interno */
+[data-testid="stPlotlyChart"] {
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
     box-sizing: border-box !important;
     overflow: visible !important;
+    position: relative !important;
+    z-index: 1 !important;
 }
 
-/* Plotly contenido dentro del contenedor */
-div[data-testid="stPlotlyChart"],
-div[data-testid="stPlotlyChart"] > div,
-[class*="st-key-card_"] .js-plotly-plot,
-[class*="st-key-card_"] .plotly,
-[class*="st-key-card_"] .plot-container,
-[class*="st-key-card_"] .svg-container,
-[class*="st-key-card_"] .main-svg {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    box-sizing: border-box !important;
+/* Mantener fondo blanco sin tocar trazos internos de Plotly */
+[data-testid="stPlotlyChart"],
+[class*="st-key-card_"] [data-testid="stPlotlyChart"] {
     background: #ffffff !important;
 }
 
-/* Textos largos: que bajen de línea, no que empujen el contenedor */
+/* Textos largos: bajar de línea, no empujar tarjetas */
 .section-title-card,
 .section-subtitle-card,
 .card-title,
 .card-title-large,
 .hypothesis-box,
 .hypothesis-text,
-.method-card,
 .method-title,
 .method-text,
 .alert-info-blue,
@@ -3176,7 +3175,161 @@ div[data-testid="stPlotlyChart"] > div,
 }
 
 /* =========================================================
-   Resumen General · KPIs
+   Conocimiento de IA · corrección Cloud
+   ========================================================= */
+
+.st-key-card_ia_escucho,
+.st-key-card_ia_reconocio,
+.st-key-card_ia_identifica,
+.st-key-card_ia_falso {
+    min-height: 390px !important;
+    height: auto !important;
+    max-height: none !important;
+    padding: 18px 20px 24px 20px !important;
+    overflow: visible !important;
+}
+
+.st-key-card_ia_escucho [data-testid="stPlotlyChart"],
+.st-key-card_ia_reconocio [data-testid="stPlotlyChart"],
+.st-key-card_ia_identifica [data-testid="stPlotlyChart"],
+.st-key-card_ia_falso [data-testid="stPlotlyChart"] {
+    min-height: 285px !important;
+    margin-top: 4px !important;
+}
+
+.st-key-card_ia_interpretacion {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+/* Encabezados de Conocimiento de IA */
+.ia-card-header-soft {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-wrap: anywhere !important;
+}
+
+/* =========================================================
+   Perfil de muestra · gráficos
+   ========================================================= */
+
+.st-key-card_pm_edad,
+.st-key-card_pm_genero,
+.st-key-card_pm_rol,
+.st-key-card_pm_quito,
+.st-key-card_pm_facultad {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding-bottom: 24px !important;
+}
+
+.st-key-card_pm_edad [data-testid="stPlotlyChart"],
+.st-key-card_pm_genero [data-testid="stPlotlyChart"],
+.st-key-card_pm_rol [data-testid="stPlotlyChart"],
+.st-key-card_pm_quito [data-testid="stPlotlyChart"],
+.st-key-card_pm_facultad [data-testid="stPlotlyChart"] {
+    min-height: 285px !important;
+}
+
+/* =========================================================
+   Percepción ciudadana · gráficos y notas
+   ========================================================= */
+
+.st-key-card_pc_matriz,
+.st-key-card_pc_aceptacion,
+.st-key-card_pc_manipulacion,
+.st-key-card_pc_desconfianza,
+.st-key-card_pc_regulacion,
+.st-key-card_pc_edad_riesgo {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding-bottom: 26px !important;
+}
+
+.st-key-card_pc_matriz [data-testid="stPlotlyChart"],
+.st-key-card_pc_aceptacion [data-testid="stPlotlyChart"],
+.st-key-card_pc_manipulacion [data-testid="stPlotlyChart"],
+.st-key-card_pc_desconfianza [data-testid="stPlotlyChart"],
+.st-key-card_pc_regulacion [data-testid="stPlotlyChart"],
+.st-key-card_pc_edad_riesgo [data-testid="stPlotlyChart"] {
+    min-height: 280px !important;
+}
+
+/* =========================================================
+   Confianza electoral · gráficos con aire inferior
+   ========================================================= */
+
+[class*="st-key-card_ce_"] {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding-bottom: 28px !important;
+}
+
+[class*="st-key-card_ce_"] [data-testid="stPlotlyChart"] {
+    min-height: 285px !important;
+}
+
+.st-key-card_ce_limpieza,
+.st-key-card_ce_fraude,
+.st-key-card_ce_influencia_voto,
+.st-key-card_ce_cambio_confianza {
+    min-height: 380px !important;
+}
+
+/* =========================================================
+   Modelos predictivos · gráficos, tablas y simulador
+   ========================================================= */
+
+[class*="st-key-card_mp_"] {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding-bottom: 28px !important;
+}
+
+[class*="st-key-card_mp_"] [data-testid="stPlotlyChart"] {
+    min-height: 300px !important;
+}
+
+.st-key-card_mp_metricas,
+.st-key-card_mp_configuracion {
+    min-height: 500px !important;
+}
+
+.st-key-card_mp_clases {
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+}
+
+/* =========================================================
+   Evidencia digital · gráficos y barras
+   ========================================================= */
+
+[class*="st-key-card_ed_"] {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding-bottom: 28px !important;
+}
+
+[class*="st-key-card_ed_"] [data-testid="stPlotlyChart"] {
+    min-height: 285px !important;
+}
+
+.ed-bar-row,
+.progress-row {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* =========================================================
+   Resumen General · KPIs y tarjetas
    ========================================================= */
 
 .rg-kpi-grid {
@@ -3190,204 +3343,48 @@ div[data-testid="stPlotlyChart"] > div,
 }
 
 .rg-kpi {
-    border: 1px solid #e5e7eb !important;
-    border-radius: 16px !important;
-    padding: 14px 15px !important;
     min-height: 122px !important;
     height: auto !important;
     max-height: none !important;
-    box-shadow: 0 1px 5px rgba(15, 23, 42, 0.04) !important;
-    box-sizing: border-box !important;
     overflow: visible !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: center !important;
-}
-
-.rg-kpi.blue {
-    background: #eff6ff !important;
-    border-color: #bfdbfe !important;
-}
-
-.rg-kpi.purple {
-    background: #f5f3ff !important;
-    border-color: #ddd6fe !important;
-}
-
-.rg-kpi.yellow {
-    background: #fffbeb !important;
-    border-color: #fde68a !important;
-}
-
-.rg-kpi.green {
-    background: #ecfdf5 !important;
-    border-color: #a7f3d0 !important;
-}
-
-.rg-kpi.cyan {
-    background: #ecfeff !important;
-    border-color: #a5f3fc !important;
-}
-
-.rg-kpi-label {
-    color: #64748b !important;
-    font-size: 0.68rem !important;
-    font-weight: 850 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.04em !important;
-    line-height: 1.25 !important;
-    margin-bottom: 6px !important;
 }
 
 .rg-kpi-value {
-    color: #0f172a !important;
-    font-size: clamp(1.25rem, 1.7vw, 1.42rem) !important;
-    font-weight: 850 !important;
+    font-size: clamp(1.22rem, 1.6vw, 1.42rem) !important;
     line-height: 1.08 !important;
 }
 
 .rg-kpi-value.small {
-    font-size: clamp(0.92rem, 1.1vw, 1.04rem) !important;
+    font-size: clamp(0.9rem, 1.05vw, 1.04rem) !important;
     line-height: 1.18 !important;
-    overflow-wrap: anywhere !important;
 }
-
-.rg-kpi-help {
-    color: #64748b !important;
-    font-size: 0.78rem !important;
-    margin-top: 6px !important;
-    line-height: 1.28 !important;
-}
-
-/* =========================================================
-   Resumen General · tarjetas principales
-   ========================================================= */
 
 .st-key-card_rg_perfil,
 .st-key-card_rg_aceptacion,
 .st-key-card_rg_confianza,
 .st-key-card_rg_regulacion {
-    background: #ffffff !important;
-    border: 1px solid #d1d5db !important;
-    border-radius: 16px !important;
-    padding: 18px 20px 22px 20px !important;
     height: auto !important;
-    min-height: auto !important;
     max-height: none !important;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.055) !important;
     overflow: visible !important;
-    box-sizing: border-box !important;
-    width: 100% !important;
-    max-width: 100% !important;
-}
-
-.st-key-card_rg_perfil *,
-.st-key-card_rg_aceptacion *,
-.st-key-card_rg_confianza *,
-.st-key-card_rg_regulacion * {
-    box-sizing: border-box !important;
-}
-
-.st-key-card_rg_perfil,
-.st-key-card_rg_perfil > div,
-.st-key-card_rg_perfil [data-testid="stVerticalBlock"],
-.st-key-card_rg_perfil [data-testid="stElementContainer"],
-.st-key-card_rg_perfil [data-testid="stPlotlyChart"],
-.st-key-card_rg_aceptacion,
-.st-key-card_rg_aceptacion > div,
-.st-key-card_rg_aceptacion [data-testid="stVerticalBlock"],
-.st-key-card_rg_aceptacion [data-testid="stElementContainer"],
-.st-key-card_rg_aceptacion [data-testid="stPlotlyChart"],
-.st-key-card_rg_confianza,
-.st-key-card_rg_confianza > div,
-.st-key-card_rg_confianza [data-testid="stVerticalBlock"],
-.st-key-card_rg_confianza [data-testid="stElementContainer"],
-.st-key-card_rg_confianza [data-testid="stPlotlyChart"],
-.st-key-card_rg_regulacion,
-.st-key-card_rg_regulacion > div,
-.st-key-card_rg_regulacion [data-testid="stVerticalBlock"],
-.st-key-card_rg_regulacion [data-testid="stElementContainer"],
-.st-key-card_rg_regulacion [data-testid="stMarkdownContainer"] {
-    background-color: #ffffff !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    overflow: visible !important;
-}
-
-.st-key-card_rg_perfil .js-plotly-plot,
-.st-key-card_rg_perfil .plotly,
-.st-key-card_rg_perfil .plot-container,
-.st-key-card_rg_perfil .svg-container,
-.st-key-card_rg_aceptacion .js-plotly-plot,
-.st-key-card_rg_aceptacion .plotly,
-.st-key-card_rg_aceptacion .plot-container,
-.st-key-card_rg_aceptacion .svg-container,
-.st-key-card_rg_confianza .js-plotly-plot,
-.st-key-card_rg_confianza .plotly,
-.st-key-card_rg_confianza .plot-container,
-.st-key-card_rg_confianza .svg-container {
-    width: 100% !important;
-    max-width: 100% !important;
-    background: #ffffff !important;
+    padding-bottom: 26px !important;
 }
 
 .st-key-card_rg_perfil {
-    min-height: 380px !important;
+    min-height: 390px !important;
 }
 
 .st-key-card_rg_aceptacion,
 .st-key-card_rg_confianza {
-    min-height: 330px !important;
-    display: block !important;
+    min-height: 340px !important;
 }
 
-.st-key-card_rg_aceptacion .alert-warning,
-.st-key-card_rg_confianza .alert-danger {
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-    overflow-wrap: anywhere !important;
-    margin-top: 8px !important;
-    margin-bottom: 0 !important;
+.st-key-card_rg_perfil [data-testid="stPlotlyChart"],
+.st-key-card_rg_aceptacion [data-testid="stPlotlyChart"],
+.st-key-card_rg_confianza [data-testid="stPlotlyChart"] {
+    min-height: 285px !important;
 }
 
-/* Hipótesis y metodología */
-.custom-card {
-    overflow: visible !important;
-}
-
-.method-grid {
-    display: grid !important;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
-    gap: 14px !important;
-    align-items: stretch !important;
-    margin-top: 14px !important;
-}
-
-.method-card {
-    min-height: 132px !important;
-    height: auto !important;
-    max-height: none !important;
-    overflow: visible !important;
-}
-
-.method-text {
-    overflow-wrap: anywhere !important;
-}
-
-/* Regulación */
-.st-key-card_rg_regulacion {
-    padding-bottom: 26px !important;
-}
-
-.st-key-card_rg_regulacion .progress-row {
-    width: 100% !important;
-    max-width: 100% !important;
-    padding-right: 0 !important;
-    margin-bottom: 15px !important;
-    box-sizing: border-box !important;
-}
-
+/* Regulación en resumen */
 .st-key-card_rg_regulacion .progress-row-header {
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) auto !important;
@@ -3404,44 +3401,52 @@ div[data-testid="stPlotlyChart"] > div,
 .st-key-card_rg_regulacion .progress-row-header span:last-child {
     white-space: nowrap !important;
     text-align: right !important;
-    font-size: clamp(0.78rem, 1vw, 0.95rem) !important;
 }
 
 .st-key-card_rg_regulacion .progress-track {
     width: 100% !important;
     max-width: 100% !important;
-    background: #e5e7eb !important;
-    overflow: hidden !important;
-}
-
-.st-key-card_rg_regulacion .progress-fill {
-    background: #2563eb !important;
 }
 
 /* =========================================================
-   Responsive Resumen General
+   Grillas responsive
    ========================================================= */
 
 @media (max-width: 1400px) {
     .rg-kpi-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     }
+
+    .ed-kpi-grid,
+    .interpretation-grid,
+    .ce-h2-grid,
+    .ce-summary-reading {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 1050px) {
     .rg-kpi-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     }
 
     div[data-testid="stHorizontalBlock"]:has(.st-key-card_rg_perfil),
     div[data-testid="stHorizontalBlock"]:has(.st-key-card_rg_aceptacion),
-    div[data-testid="stHorizontalBlock"]:has(.st-key-card_rg_confianza) {
+    div[data-testid="stHorizontalBlock"]:has(.st-key-card_rg_confianza),
+    div[data-testid="stHorizontalBlock"]:has(.st-key-card_ia_escucho),
+    div[data-testid="stHorizontalBlock"]:has(.st-key-card_ia_reconocio),
+    div[data-testid="stHorizontalBlock"]:has(.st-key-card_ia_identifica),
+    div[data-testid="stHorizontalBlock"]:has(.st-key-card_ia_falso) {
         flex-wrap: wrap !important;
     }
 
     div[data-testid="stHorizontalBlock"]:has(.st-key-card_rg_perfil) > div[data-testid="column"],
     div[data-testid="stHorizontalBlock"]:has(.st-key-card_rg_aceptacion) > div[data-testid="column"],
-    div[data-testid="stHorizontalBlock"]:has(.st-key-card_rg_confianza) > div[data-testid="column"] {
+    div[data-testid="stHorizontalBlock"]:has(.st-key-card_rg_confianza) > div[data-testid="column"],
+    div[data-testid="stHorizontalBlock"]:has(.st-key-card_ia_escucho) > div[data-testid="column"],
+    div[data-testid="stHorizontalBlock"]:has(.st-key-card_ia_reconocio) > div[data-testid="column"],
+    div[data-testid="stHorizontalBlock"]:has(.st-key-card_ia_identifica) > div[data-testid="column"],
+    div[data-testid="stHorizontalBlock"]:has(.st-key-card_ia_falso) > div[data-testid="column"] {
         flex: 1 1 100% !important;
         width: 100% !important;
         max-width: 100% !important;
@@ -3449,7 +3454,11 @@ div[data-testid="stPlotlyChart"] > div,
 
     .st-key-card_rg_perfil,
     .st-key-card_rg_aceptacion,
-    .st-key-card_rg_confianza {
+    .st-key-card_rg_confianza,
+    .st-key-card_ia_escucho,
+    .st-key-card_ia_reconocio,
+    .st-key-card_ia_identifica,
+    .st-key-card_ia_falso {
         min-height: auto !important;
     }
 }
@@ -3460,38 +3469,54 @@ div[data-testid="stPlotlyChart"] > div,
         padding-right: 0.8rem !important;
     }
 
-    .rg-kpi-grid {
-        grid-template-columns: 1fr !important;
-        gap: 12px !important;
-    }
-
-    .rg-kpi {
-        min-height: auto !important;
-        padding: 13px 14px !important;
-    }
-
-    .st-key-card_rg_perfil,
-    .st-key-card_rg_aceptacion,
-    .st-key-card_rg_confianza,
-    .st-key-card_rg_regulacion {
-        padding: 15px !important;
-        border-radius: 14px !important;
-    }
-
+    .rg-kpi-grid,
+    .ed-kpi-grid,
+    .interpretation-grid,
+    .ce-h2-grid,
+    .ce-summary-reading,
+    .mp-mini-grid,
+    .mp-stability-grid,
+    .mp-rule-grid,
     .method-grid {
         grid-template-columns: 1fr !important;
     }
 
-    .st-key-card_rg_regulacion .progress-row-header {
+    .rg-kpi {
+        min-height: auto !important;
+    }
+
+    .st-key-card_ia_escucho,
+    .st-key-card_ia_reconocio,
+    .st-key-card_ia_identifica,
+    .st-key-card_ia_falso,
+    .st-key-card_rg_perfil,
+    .st-key-card_rg_aceptacion,
+    .st-key-card_rg_confianza,
+    .st-key-card_rg_regulacion,
+    [class*="st-key-card_ce_"],
+    [class*="st-key-card_mp_"],
+    [class*="st-key-card_ed_"] {
+        padding: 15px !important;
+        border-radius: 14px !important;
+    }
+
+    [data-testid="stPlotlyChart"] {
+        min-height: 260px !important;
+    }
+
+    .st-key-card_rg_regulacion .progress-row-header,
+    .ed-bar-head {
         grid-template-columns: 1fr !important;
         gap: 4px !important;
     }
 
-    .st-key-card_rg_regulacion .progress-row-header span:last-child {
+    .st-key-card_rg_regulacion .progress-row-header span:last-child,
+    .ed-bar-head span:last-child {
         text-align: left !important;
         white-space: normal !important;
     }
 }
+
                              
 </style>
 """, unsafe_allow_html=True)
