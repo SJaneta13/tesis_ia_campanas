@@ -307,14 +307,14 @@ def make_stacked_bar(values: pd.DataFrame, title_y: str, height: int = 190):
             range=[0, 100],
         ),
         yaxis=dict(visible=False),
-        margin=dict(l=0, r=0, t=4, b=52),
+        margin=dict(l=4, r=8, t=4, b=46),
         legend_title_text="",
         legend=dict(
             orientation="h",
             yanchor="top",
-            y=-0.08,
-            xanchor="left",
-            x=0,
+            y=-0.10,
+            xanchor="center",
+            x=0.5,
             font=dict(size=10),
         ),
     
@@ -383,50 +383,43 @@ def render_resumen_general(
     # =========================================================
     # KPI CARDS
     # =========================================================
-    c1, c2, c3, c4, c5 = st.columns(5)
+    score_label = f"{best_score:.3f}" if best_score is not None else "N/D"
 
-    with c1:
-        kpi_card(
-            "Encuestas válidas",
-            f"{n_survey:,}",
-            "Registros procesados de la muestra",
-            "blue",
-        )
+    render_html(
+        f"""
+        <div class="rg-kpi-grid">
+            <div class="rg-kpi blue">
+                <div class="rg-kpi-label">Encuestas válidas</div>
+                <div class="rg-kpi-value">{n_survey:,}</div>
+                <div class="rg-kpi-help">Registros procesados de la muestra.</div>
+            </div>
 
-    with c2:
-        kpi_card(
-            "Corpus analíticos",
-            f"{n_cases:,}",
-            "Casos o fuentes de evidencia digital agrupada",
-            "purple",
-        )
+            <div class="rg-kpi purple">
+                <div class="rg-kpi-label">Corpus analíticos</div>
+                <div class="rg-kpi-value">{n_cases:,}</div>
+                <div class="rg-kpi-help">Casos o fuentes de evidencia digital agrupada.</div>
+            </div>
 
-    with c3:
-        kpi_card(
-            "Registros digitales",
-            f"{n_news:,}",
-            "Registros de GDELT, medios o redes procesadas",
-            "yellow",
-        )
+            <div class="rg-kpi yellow">
+                <div class="rg-kpi-label">Registros digitales</div>
+                <div class="rg-kpi-value">{n_news:,}</div>
+                <div class="rg-kpi-help">Registros de GDELT, medios o redes procesadas.</div>
+            </div>
 
-    with c4:
-        kpi_card(
-            "Dominios",
-            f"{n_domains:,}",
-            "Fuentes informativas únicas",
-            "green",
-        )
+            <div class="rg-kpi green">
+                <div class="rg-kpi-label">Dominios</div>
+                <div class="rg-kpi-value">{n_domains:,}</div>
+                <div class="rg-kpi-help">Fuentes informativas únicas.</div>
+            </div>
 
-    with c5:
-        score_label = f"{best_score:.3f}" if best_score is not None else "N/D"
-        kpi_card(
-            "Mejor modelo",
-            best_model,
-            f"F1 ponderado: {score_label}",
-            "cyan",
-        )
-
-    st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
+            <div class="rg-kpi cyan">
+                <div class="rg-kpi-label">Mejor modelo</div>
+                <div class="rg-kpi-value small">{best_model}</div>
+                <div class="rg-kpi-help">F1 ponderado: {score_label}</div>
+            </div>
+        </div>
+        """
+    )
 
     # =========================================================
     # HIPÓTESIS + PERFIL
@@ -480,7 +473,7 @@ def render_resumen_general(
         st.markdown(method_html, unsafe_allow_html=True)
 
     with right:
-        with st.container(key="card_perfil"):
+        with st.container(key="card_rg_perfil"):
 
             st.markdown(
                 '<div class="section-title-card">Perfil de la muestra</div>', 
@@ -529,7 +522,7 @@ def render_resumen_general(
                     height=285,
                     paper_bgcolor="#ffffff",
                     plot_bgcolor="#ffffff",
-                    margin=dict(l=0, r=0, t=0, b=48),
+                    margin=dict(l=8, r=8, t=0, b=48),
                     legend_title_text="",
                     legend=dict(
                         orientation="h",
@@ -555,7 +548,7 @@ def render_resumen_general(
     chart1, chart2 = st.columns(2, gap="small")
 
     with chart1:
-        with st.container(key="card_aceptacion"):
+        with st.container(key="card_rg_aceptacion"):
             st.markdown(
                 '<div class="section-title-card">Aceptación general del uso de IA en política</div>',
                 unsafe_allow_html=True,
@@ -608,7 +601,7 @@ def render_resumen_general(
 
 
     with chart2:
-        with st.container(key="card_confianza"):
+        with st.container(key="card_rg_confianza"):
             st.markdown(
                 '<div class="section-title-card">Nivel de confianza electoral</div>',
                 unsafe_allow_html=True,
@@ -662,7 +655,7 @@ def render_resumen_general(
     # =========================================================
     st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
 
-    with st.container(key="card_regulacion"):
+    with st.container(key="card_rg_regulacion"):
         st.markdown(
             '<div class="section-title-card">Demanda ciudadana de regulación de IA en campañas</div>',
             unsafe_allow_html=True,
