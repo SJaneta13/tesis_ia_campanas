@@ -163,10 +163,10 @@ def make_likert_matrix(items: list[dict], height: int = 420):
             yanchor="top",
             y=-0.18,
             xanchor="center",
-            x=0,
             x=0.5,
+            font=dict(size=10),
         ),
-        font=dict(size=11),
+        
     )
 
     return fig
