@@ -419,7 +419,7 @@ div[data-testid="stVerticalBlock"] {
 .st-key-card_perfil [data-testid="stVerticalBlock"],
 .st-key-card_perfil [data-testid="stElementContainer"],
 .st-key-card_perfil [data-testid="stPlotlyChart"] {
-    overflow: visible !important;
+    
 }                
 .st-key-card_aceptacion,
 .st-key-card_aceptacion > div,
@@ -1855,7 +1855,7 @@ div[data-testid="stElementContainer"]:has(.ce-section-gap) {
     border-radius: 18px !important;
     box-shadow: 0 2px 8px rgba(15, 23, 42, 0.055) !important;
     box-sizing: border-box !important;
-    overflow: visible !important;
+   
 }
 
 [class*="st-key-card_mp_"],
@@ -2395,7 +2395,7 @@ table.mp-matrix td.cell {
     margin-top: 0 !important;
     margin-bottom: 0 !important;
     box-shadow: 0 2px 8px rgba(15, 23, 42, 0.055) !important;
-    overflow: visible !important;
+    
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
@@ -2867,7 +2867,7 @@ table.mp-matrix td.cell {
     .st-key-card_ed_encuesta_verificacion {
         min-height: unset !important;
         height: auto !important;
-        overflow: visible !important;
+        
     }
 
     .st-key-card_ed_encuesta_exposicion [data-testid="stVerticalBlock"],
@@ -2887,275 +2887,6 @@ table.mp-matrix td.cell {
     }
 }
                                                          
-/* =========================================================
-   FIX LIMPIO STREAMLIT CLOUD
-   Mantiene tarjetas cerradas, evita cortes y no altera local
-   ========================================================= */
-
-/* Ancho general igual al diseño local */
-.block-container {
-    max-width: 1320px !important;
-    padding-left: 1.4rem !important;
-    padding-right: 1.4rem !important;
-}
-
-/* Las columnas no deben forzar desbordes */
-[data-testid="column"] {
-    min-width: 0 !important;
-}
-                
-/* Reduce espacio horizontal global entre columnas */
-[data-testid="stHorizontalBlock"] {
-    gap: 0.65rem !important;
-}                
-
-/* Plotly siempre dentro del contenedor */
-[data-testid="stPlotlyChart"],
-[data-testid="stPlotlyChart"] > div,
-.js-plotly-plot,
-.plot-container,
-.svg-container {
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-}
-
-/* Tarjetas: cerradas, pero con espacio interno para no cortar textos */
-[class*="st-key-card_"] {
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-    overflow: hidden !important;
-}
-                
-[class*="st-key-card_ed_"],
-[class*="st-key-card_ed_"] > div,
-[class*="st-key-card_ed_"] [data-testid="stVerticalBlock"],
-[class*="st-key-card_ed_"] [data-testid="stElementContainer"],
-[class*="st-key-card_ed_"] [data-testid="stMarkdownContainer"],
-[class*="st-key-card_ed_"] [data-testid="stPlotlyChart"] {
-    overflow: visible !important;
-}             
-
-/* Contenido interno sin ancho mínimo extraño */
-[class*="st-key-card_"] > div,
-[class*="st-key-card_"] [data-testid="stVerticalBlock"],
-[class*="st-key-card_"] [data-testid="stElementContainer"],
-[class*="st-key-card_"] [data-testid="stMarkdownContainer"] {
-    max-width: 100% !important;
-    min-width: 0 !important;
-    box-sizing: border-box !important;
-}
-
-/* Barras HTML: dejar margen derecho para que no se corten valores */
-.progress-row,
-.mp-bar-row {
-    width: 100% !important;
-    max-width: 100% !important;
-    padding-right: 22px !important;
-    box-sizing: border-box !important;
-}
-
-.ed-bar-row {
-    width: 100% !important;
-    max-width: 100% !important;
-    padding-right: 18px !important;
-    box-sizing: border-box !important;
-}
-
-.progress-row-header,
-.mp-bar-head,
-.ed-bar-head {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) auto !important;
-    gap: 12px !important;
-    align-items: center !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-}
-
-.progress-row-header span:first-child,
-.mp-bar-head span:first-child,
-.ed-bar-head span:first-child {
-    min-width: 0 !important;
-    overflow-wrap: anywhere !important;
-}
-
-.progress-row-header span:last-child,
-.mp-bar-head span:last-child,
-.ed-bar-head span:last-child {
-    white-space: nowrap !important;
-    text-align: right !important;
-}
-
-/* Tracks de barras dentro del margen seguro */
-.progress-track,
-.mp-track,
-.mp-mini-track,
-.ed-track {
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow: hidden !important;
-    box-sizing: border-box !important;
-}
-
-/* Notas dentro de tarjetas, sin salirse */
-.alert-warning,
-.alert-danger,
-.alert-info-blue,
-.alert-info-green,
-.mp-note-green,
-.mp-note-blue,
-.ed-note-blue,
-.ed-note-green,
-.ed-note-yellow,
-.ed-note-red {
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-    overflow-wrap: break-word !important;
-}
-
-                
-
-/* Tarjetas de percepción ciudadana: compactas y sin espacio sobrante */
-.st-key-card_pc_aceptacion,
-.st-key-card_pc_manipulacion,
-.st-key-card_pc_desconfianza,
-.st-key-card_pc_regulacion {
-    height: auto !important;
-    min-height: auto !important;
-    max-height: none !important;
-    padding: 16px 18px 18px 18px !important;
-}
-
-
-/* Tarjetas de confianza electoral compactas */
-.st-key-card_ce_limpieza,
-.st-key-card_ce_fraude,
-.st-key-card_ce_influencia_voto,
-.st-key-card_ce_cambio_confianza {
-    height: auto !important;
-    min-height: 340px !important;
-    max-height: none !important;
-}               
-
-/* Tabla de modelos: evitar desborde horizontal */
-.st-key-card_mp_metricas {
-    overflow-x: auto !important;
-}
-
-.mp-table {
-    width: 100% !important;
-    table-layout: fixed !important;
-    font-size: 0.78rem !important;
-}
-
-.mp-table th,
-.mp-table td {
-    padding: 10px 6px !important;
-    overflow-wrap: break-word !important;
-}
-
-/* =========================================================
-   Evidencia digital · ajuste final de resumen de sentimiento
-   ========================================================= */
-
-.st-key-card_ed_gdelt_tono {
-    overflow: hidden !important;
-}
-
-/* Reserva espacio interno para que valores y barras no lleguen al borde */
-.st-key-card_ed_gdelt_tono .ed-bar-row {
-    padding-right: 42px !important;
-    margin-bottom: 10px !important;
-}
-
-.st-key-card_ed_gdelt_tono .ed-bar-row:last-child {
-    margin-bottom: 6px !important;
-}
-
-/* Mini tarjetas superiores más compactas */
-.st-key-card_ed_gdelt_tono .ed-tone-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    gap: 10px !important;
-    margin: 2px 0 14px 0 !important;
-}
-
-.st-key-card_ed_gdelt_tono .ed-tone-card {
-    min-height: 104px !important;
-    padding: 12px 14px !important;
-    overflow: hidden !important;
-}
-
-.st-key-card_ed_gdelt_tono .ed-tone-title {
-    font-size: 0.74rem !important;
-    line-height: 1.22 !important;
-}
-
-.st-key-card_ed_gdelt_tono .ed-tone-value {
-    font-size: clamp(1.14rem, 1.55vw, 1.34rem) !important;
-    line-height: 1.05 !important;
-}
-
-.st-key-card_ed_gdelt_tono .ed-tone-text {
-    font-size: 0.72rem !important;
-    line-height: 1.32 !important;
-}
-
-/* Nota inferior más pegada al contenido y sin espacio sobrante */
-.st-key-card_ed_gdelt_tono .ed-note-yellow {
-    margin-top: 10px !important;
-    margin-bottom: 0 !important;
-    padding: 12px 14px !important;
-    font-size: 0.8rem !important;
-    line-height: 1.38 !important;
-}
-
-/* Ajuste en pantallas medianas */
-@media (max-width: 1180px) {
-    .st-key-card_ed_gdelt_tono .ed-tone-grid {
-        grid-template-columns: 1fr !important;
-    }
-
-    .st-key-card_ed_gdelt_tono .ed-tone-card {
-        min-height: auto !important;
-    }
-}                
-
-/* Ajuste suave en pantallas de Cloud/laptop */
-@media (max-width: 1250px) {
-    .block-container {
-        padding-left: 1rem !important;
-        padding-right: 1rem !important;
-    }
-
-    .kpi-value,
-    .mp-kpi-value,
-    .ed-kpi-value {
-        font-size: 1.35rem !important;
-    }
-
-    .section-title-card {
-        font-size: 1.12rem !important;
-    }
-
-    .section-subtitle-card {
-        font-size: 0.82rem !important;
-    }
-
-    .method-grid {
-        grid-template-columns: 1fr !important;
-        gap: 12px !important;
-    }
-
-    .method-card {
-        height: auto !important;
-        min-height: auto !important;
-    }            
-                            
-}
 
 /* =========================================================
    Triangulación y Datos / Artefactos
@@ -3326,27 +3057,43 @@ table.mp-matrix td.cell {
     color: #ffffff !important;
 }   
 
-
-
-
 /* =========================================================
-   Ajuste Streamlit Cloud: una sola tarjeta y gráficos completos
-   ========================================================= */
-/* =========================================================
-   Streamlit Cloud · contención horizontal estable
+   Streamlit Cloud · contención final anti-desborde
    ========================================================= */
 
 html,
 body,
 .stApp,
+[data-testid="stAppViewContainer"],
+[data-testid="stMain"],
 .block-container {
+    max-width: 100vw !important;
     overflow-x: hidden !important;
 }
 
-div[data-testid="stHorizontalBlock"],
+.block-container {
+    width: 100% !important;
+    max-width: 1320px !important;
+    padding-left: 1.15rem !important;
+    padding-right: 1.15rem !important;
+    box-sizing: border-box !important;
+}
+
+/* Columnas Streamlit */
+div[data-testid="stHorizontalBlock"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+    gap: 0.75rem !important;
+}
+
 div[data-testid="column"],
 div[data-testid="stVerticalBlock"],
-div[data-testid="stElementContainer"] {
+div[data-testid="stElementContainer"],
+div[data-testid="stMarkdownContainer"],
+div[data-testid="stPlotlyChart"] {
     min-width: 0 !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
@@ -3361,7 +3108,7 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has([class*="st-key-card_"]) {
     box-shadow: none !important;
 }
 
-/* Tarjetas: contienen horizontalmente el contenido */
+/* Tarjetas generales */
 [class*="st-key-card_"] {
     width: 100% !important;
     max-width: 100% !important;
@@ -3371,32 +3118,39 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has([class*="st-key-card_"]) {
     overflow-y: visible !important;
 }
 
-/* Contenido interno de tarjetas */
+/* Contenido interno */
 [class*="st-key-card_"] > div,
 [class*="st-key-card_"] [data-testid="stVerticalBlock"],
 [class*="st-key-card_"] [data-testid="stElementContainer"],
-[class*="st-key-card_"] [data-testid="stPlotlyChart"],
-[class*="st-key-card_"] [data-testid="stMarkdownContainer"] {
+[class*="st-key-card_"] [data-testid="stMarkdownContainer"],
+[class*="st-key-card_"] [data-testid="stPlotlyChart"] {
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
     box-sizing: border-box !important;
 }
 
-/* Plotly: no debe empujar el ancho de la tarjeta */
+/* Plotly no debe empujar el ancho */
 [class*="st-key-card_"] .js-plotly-plot,
 [class*="st-key-card_"] .plotly,
 [class*="st-key-card_"] .plot-container,
 [class*="st-key-card_"] .svg-container,
-[class*="st-key-card_"] .main-svg {
+[class*="st-key-card_"] .main-svg,
+[data-testid="stPlotlyChart"] .js-plotly-plot,
+[data-testid="stPlotlyChart"] .plotly,
+[data-testid="stPlotlyChart"] .plot-container,
+[data-testid="stPlotlyChart"] .svg-container,
+[data-testid="stPlotlyChart"] .main-svg {
+    width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
     box-sizing: border-box !important;
 }
 
-/* Headers internos: evita que el título sobresalga */
+/* Headers internos */
 .profile-card-header-soft,
 .ia-card-header-soft,
+.card-header-soft,
 .section-card-header {
     width: 100% !important;
     max-width: 100% !important;
@@ -3405,7 +3159,7 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has([class*="st-key-card_"]) {
     overflow-wrap: anywhere !important;
 }
 
-/* Textos largos dentro de notas y tarjetas */
+/* Textos largos, notas y alertas */
 .alert-info-blue,
 .alert-info-green,
 .alert-warning,
@@ -3417,28 +3171,92 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has([class*="st-key-card_"]) {
 .hypothesis-box,
 .method-note,
 .ia-method-note,
-.analysis-method-note {
+.analysis-method-note,
+.mp-insight,
+.ed-note-blue,
+.ed-note-green,
+.ed-note-yellow,
+.ed-note-red {
+    width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
     overflow-wrap: anywhere !important;
 }
 
-@media (max-width: 1250px) {
+/* Grillas que se salían en Cloud */
+.interpretation-grid,
+.ed-kpi-grid,
+.ed-source-grid,
+.ed-tone-grid,
+.ce-h2-grid,
+.ce-summary-reading,
+.mp-mini-grid,
+.mp-stability-grid,
+.mp-rule-grid {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+}
+
+/* Con sidebar visible, 4 columnas pueden desbordar */
+@media (max-width: 1500px) {
+    .interpretation-grid,
+    .ce-h2-grid,
+    .ce-summary-reading,
+    .ed-kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .interpretation-grid,
+    .ed-kpi-grid,
+    .ed-source-grid,
+    .ed-tone-grid,
+    .ce-h2-grid,
+    .ce-summary-reading,
+    .mp-mini-grid,
+    .mp-stability-grid,
+    .mp-rule-grid {
+        grid-template-columns: 1fr !important;
+    }
+
     .block-container {
         padding-left: 0.85rem !important;
         padding-right: 0.85rem !important;
     }
-
-    .st-key-card_pc_matriz,
-    .st-key-card_pc_edad_riesgo,
-    .st-key-card_ce_heatmap,
-    .st-key-card_ce_dispersion,
-    .st-key-card_mp_estabilidad {
-        padding-left: 16px !important;
-        padding-right: 16px !important;
-    }
 }
-             
+
+/* Aire inferior extra en Confianza electoral */
+[class*="st-key-card_ce_"] {
+    padding-bottom: 30px !important;
+}
+
+.st-key-card_ce_edad_boxplot,
+.st-key-card_ce_spearman,
+.st-key-card_ce_h2_lineas,
+.st-key-card_ce_h2_heatmap,
+.st-key-card_ce_matriz,
+.st-key-card_ce_heatmap,
+.st-key-card_ce_dispersion {
+    padding-bottom: 38px !important;
+}
+
+.ce-age-grid {
+    margin-bottom: 16px !important;
+}
+
+/* Aire inferior en módulos con lectura debajo */
+[class*="st-key-card_pc_edad_riesgo"],
+[class*="st-key-card_mp_"],
+[class*="st-key-card_ed_"],
+[class*="st-key-card_art_"],
+[class*="st-key-card_tri_"] {
+    padding-bottom: 28px !important;
+}
+                             
 </style>
 """, unsafe_allow_html=True)
     
