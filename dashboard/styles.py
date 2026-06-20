@@ -3332,7 +3332,27 @@ table.mp-matrix td.cell {
 /* =========================================================
    Ajuste Streamlit Cloud: una sola tarjeta y gráficos completos
    ========================================================= */
+/* =========================================================
+   Streamlit Cloud · contención horizontal estable
+   ========================================================= */
 
+html,
+body,
+.stApp,
+.block-container {
+    overflow-x: hidden !important;
+}
+
+div[data-testid="stHorizontalBlock"],
+div[data-testid="column"],
+div[data-testid="stVerticalBlock"],
+div[data-testid="stElementContainer"] {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Quita visualmente el borde externo de st.container(border=True) */
 div[data-testid="stVerticalBlockBorderWrapper"]:has([class*="st-key-card_"]) {
     border: none !important;
     border-radius: 0 !important;
@@ -3341,32 +3361,66 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has([class*="st-key-card_"]) {
     box-shadow: none !important;
 }
 
+/* Tarjetas: contienen horizontalmente el contenido */
 [class*="st-key-card_"] {
     width: 100% !important;
     max-width: 100% !important;
+    min-width: 0 !important;
     box-sizing: border-box !important;
-    overflow: visible !important;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
 }
 
+/* Contenido interno de tarjetas */
 [class*="st-key-card_"] > div,
 [class*="st-key-card_"] [data-testid="stVerticalBlock"],
 [class*="st-key-card_"] [data-testid="stElementContainer"],
 [class*="st-key-card_"] [data-testid="stPlotlyChart"],
 [class*="st-key-card_"] [data-testid="stMarkdownContainer"] {
+    width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
     box-sizing: border-box !important;
-    overflow: visible !important;
 }
 
+/* Plotly: no debe empujar el ancho de la tarjeta */
 [class*="st-key-card_"] .js-plotly-plot,
 [class*="st-key-card_"] .plotly,
 [class*="st-key-card_"] .plot-container,
 [class*="st-key-card_"] .svg-container,
 [class*="st-key-card_"] .main-svg {
-    overflow: visible !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+}
+
+/* Headers internos: evita que el título sobresalga */
+.profile-card-header-soft,
+.ia-card-header-soft,
+.section-card-header {
     width: 100% !important;
     max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    overflow-wrap: anywhere !important;
+}
+
+/* Textos largos dentro de notas y tarjetas */
+.alert-info-blue,
+.alert-info-green,
+.alert-warning,
+.alert-danger,
+.analysis-note-compact,
+.analysis-note-compact-green,
+.analysis-note-compact-yellow,
+.analysis-note-compact-red,
+.hypothesis-box,
+.method-note,
+.ia-method-note,
+.analysis-method-note {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-wrap: anywhere !important;
 }
 
 @media (max-width: 1250px) {
