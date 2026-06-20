@@ -269,60 +269,100 @@ def make_distribution_from_scale(
 
     return out[out["Cantidad"] > 0].copy()
 
-
 def make_stacked_bar(values: pd.DataFrame, title_y: str, height: int = 190):
     """
-    Barra apilada compacta para escalas ordinales.
+    Barra apilada compacta y estable para Streamlit Cloud.
+    Usa etiquetas cortas en leyenda para evitar recortes en contenedores estrechos.
     """
     if values.empty or values["Porcentaje"].sum() <= 0:
         return None
 
+    short_labels = {
+        "Totalmente en desacuerdo": "T. desacuerdo",
+        "En desacuerdo": "Desacuerdo",
+        "Ni de acuerdo ni en desacuerdo": "Neutral",
+        "De acuerdo": "Acuerdo",
+        "Totalmente de acuerdo": "T. acuerdo",
+        "Muy baja confianza": "Muy baja",
+        "Baja confianza": "Baja",
+        "Confianza moderada": "Moderada",
+        "Alta confianza": "Alta",
+        "Muy alta confianza": "Muy alta",
+    }
+
+    color_map_short = {
+        short_labels.get(label, label): color
+        for label, color in SCALE_COLORS.items()
+    }
+
+    plot_df = values.copy()
+    plot_df["Respuesta_full"] = plot_df["Respuesta"].astype(str)
+    plot_df["Respuesta_plot"] = plot_df["Respuesta_full"].map(short_labels).fillna(
+        plot_df["Respuesta_full"]
+    )
+
     fig = px.bar(
-        values,
+        plot_df,
         x="Porcentaje",
-        y=[title_y] * len(values),
-        color="Respuesta",
+        y=[title_y] * len(plot_df),
+        color="Respuesta_plot",
         orientation="h",
         text="Porcentaje",
-        category_orders={"Respuesta": values["Respuesta"].tolist()},
-        color_discrete_map=SCALE_COLORS,
+        category_orders={
+            "Respuesta_plot": [
+                short_labels.get(label, label)
+                for label in values["Respuesta"].tolist()
+            ]
+        },
+        color_discrete_map=color_map_short,
     )
 
     fig.update_traces(
         texttemplate="%{text:.1f}%",
         textposition="inside",
         insidetextanchor="middle",
-        hovertemplate="<b>%{customdata}</b><br>Porcentaje: %{x:.1f}%<extra></extra>",
-        customdata=values["Respuesta"],
+        textfont=dict(size=11),
+        cliponaxis=False,
+        customdata=plot_df[["Respuesta_full", "Cantidad"]],
+        hovertemplate=(
+            "<b>%{customdata[0]}</b><br>"
+            "Cantidad: %{customdata[1]}<br>"
+            "Porcentaje: %{x:.1f}%<extra></extra>"
+        ),
     )
-
 
     fig.update_layout(
         barmode="stack",
-        height=height,
+        autosize=True,
+        height=max(height, 190),
         paper_bgcolor="#ffffff",
         plot_bgcolor="#ffffff",
         xaxis=dict(
             visible=False,
             range=[0, 100],
+            fixedrange=True,
         ),
-        yaxis=dict(visible=False),
-        margin=dict(l=4, r=8, t=4, b=46),
+        yaxis=dict(
+            visible=False,
+            fixedrange=True,
+        ),
+        margin=dict(l=0, r=0, t=4, b=58),
         legend_title_text="",
         legend=dict(
             orientation="h",
             yanchor="top",
-            y=-0.10,
+            y=-0.18,
             xanchor="center",
             x=0.5,
-            font=dict(size=10),
+            font=dict(size=9),
+            itemclick=False,
+            itemdoubleclick=False,
         ),
-    
-
+        uniformtext_minsize=8,
+        uniformtext_mode="show",
     )
 
     return fig
-
 
 def empty_state(message: str):
     st.markdown(
@@ -578,7 +618,7 @@ def render_resumen_general(
                     order,
                 )
 
-                fig = make_stacked_bar(values, "Aceptación", height=165)
+                fig = make_stacked_bar(values, "Aceptación", height=190)
 
                 if fig is not None:
                     st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
@@ -630,7 +670,7 @@ def render_resumen_general(
                     order,
                 )
 
-                fig = make_stacked_bar(conf_df, "Confianza", height=165)
+                fig = make_stacked_bar(conf_df, "Confianza", height=190)
 
                 if fig is not None:
                     st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
