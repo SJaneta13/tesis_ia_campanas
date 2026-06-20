@@ -193,38 +193,112 @@ def render_bars(
 
 
 def social_platform_sentiment_summary(gdelt_df: pd.DataFrame):
+    """
+    Resume sentimiento por plataforma/fuente.
+    Primero usa registros sociales si existen; si no existen, usa el corpus digital completo
+    para que la pestaña de Evidencia digital no quede vacía cuando solo hay GDELT/medios.
+    """
     if gdelt_df is None or gdelt_df.empty:
         return pd.DataFrame(columns=["plataforma", "sentimiento", "registros"])
 
-    if "case_id" not in gdelt_df.columns:
+    df = gdelt_df.copy()
+
+    if "case_id" in df.columns:
+        social_df = df[
+            df["case_id"].astype(str).str.contains("social", case=False, na=False)
+        ].copy()
+
+        if not social_df.empty:
+            df = social_df
+
+    label_col = find_first_existing_column(
+        df,
+        [
+            "sentiment_label_std",
+            "sentiment_label",
+            "sentiment_raw_label",
+            "label",
+            "tone_label",
+        ],
+    )
+
+    platform_col = find_first_existing_column(
+        df,
+        [
+            "platform",
+            "source",
+            "domain",
+            "sourcecommonname",
+            "case_id",
+            "corpus_type",
+        ],
+    )
+
+    if not label_col:
         return pd.DataFrame(columns=["plataforma", "sentimiento", "registros"])
 
-    social_df = gdelt_df[gdelt_df["case_id"].astype(str).str.contains("social", case=False, na=False)].copy()
+    temp = df.copy()
 
-    if social_df.empty or "platform" not in social_df.columns or "sentiment_label" not in social_df.columns:
-        return pd.DataFrame(columns=["plataforma", "sentimiento", "registros"])
+    if platform_col:
+        temp["plataforma"] = (
+            temp[platform_col]
+            .fillna("Corpus digital")
+            .astype(str)
+            .str.strip()
+        )
+    else:
+        temp["plataforma"] = "Corpus digital"
 
-    social_df = social_df[["platform", "sentiment_label"]].copy()
-    social_df["plataforma"] = social_df["platform"].fillna("No registrado").astype(str).str.strip().str.title()
-    social_df["sentimiento"] = (
-        social_df["sentiment_label"]
-        .fillna("neutral")
+    temp["plataforma"] = (
+        temp["plataforma"]
+        .replace("", "Corpus digital")
+        .replace(
+            {
+                "news_gdelt": "GDELT / medios",
+                "social_media": "Redes sociales",
+                "social_x": "X / Twitter",
+            }
+        )
+        .astype(str)
+        .str.replace("_", " ", regex=False)
+        .str.title()
+    )
+
+    temp["sentimiento"] = (
+        temp[label_col]
+        .fillna("No clasificado")
         .astype(str)
         .str.strip()
         .str.lower()
-        .replace({"positivo": "Positivo", "positive": "Positivo", "pos": "Positivo",
-                  "neutral": "Neutral", "neu": "Neutral", "negativo": "Negativo",
-                  "negative": "Negativo", "neg": "Negativo"})
+        .replace(
+            {
+                "positivo": "Positivo",
+                "positive": "Positivo",
+                "pos": "Positivo",
+                "neutral": "Neutral",
+                "neu": "Neutral",
+                "negativo": "Negativo",
+                "negative": "Negativo",
+                "neg": "Negativo",
+                "no clasificado": "No clasificado",
+                "nan": "No clasificado",
+                "": "No clasificado",
+            }
+        )
     )
 
+    temp = temp[temp["sentimiento"].isin(["Positivo", "Neutral", "Negativo"])]
+
+    if temp.empty:
+        return pd.DataFrame(columns=["plataforma", "sentimiento", "registros"])
+
     summary = (
-        social_df.groupby(["plataforma", "sentimiento"], sort=False)
+        temp.groupby(["plataforma", "sentimiento"], sort=False)
         .size()
         .reset_index(name="registros")
     )
 
     return summary
-
 
 def render_platform_sentiment_chart(gdelt_df: pd.DataFrame):
     summary = social_platform_sentiment_summary(gdelt_df)
@@ -250,22 +324,20 @@ def render_platform_sentiment_chart(gdelt_df: pd.DataFrame):
 
 
     fig.update_layout(
-        height=295,
-        paper_bgcolor="#ffffff",
-        plot_bgcolor="#ffffff",
-        margin=dict(l=45, r=16, t=18, b=42),
+        height=285,
+        margin=dict(l=52, r=34, t=34, b=54),
         legend=dict(
             title=None,
             orientation="h",
             yanchor="bottom",
-            y=1.02,
-            xanchor="right",
-            x=1,
+            y=1.06,
+            xanchor="center",
+            x=0.5,
+            font=dict(size=10),
         ),
-        xaxis=dict(title="", showgrid=False),
-        yaxis=dict(title="Registros", gridcolor="#e5e7eb"),
-        font=dict(size=11),
-    )
+        xaxis=dict(title="", showgrid=False, automargin=True),
+        yaxis=dict(title="Registros", gridcolor="#e5e7eb", automargin=True),
+    )    
 
     fig.update_traces(hovertemplate="<b>%{x}</b><br>Sentimiento: %{fullData.name}<br>Registros: %{y}<extra></extra>")
 
@@ -811,7 +883,7 @@ def render_evidencia_digital(
     # TAB 1: DISEÑO METODOLÓGICO
     # =====================================================
     with tab_diseno:
-        with st.container(border=True, key="card_ed_fuentes"):
+        with st.container(key="card_ed_fuentes"):
             html_block(
                 """
                 <div class="section-title-card">Diseño de triangulación digital</div>
@@ -824,7 +896,7 @@ def render_evidencia_digital(
 
         st.markdown('<div class="ed-section-gap"></div>', unsafe_allow_html=True)
 
-        with st.container(border=True, key="card_ed_alcance"):
+        with st.container(key="card_ed_alcance"):
             html_block(
                 """
                 <div class="section-title-card">Alcance del módulo</div>
@@ -879,7 +951,7 @@ def render_evidencia_digital(
         col1, col2 = st.columns(2, gap="large")
 
         with col1:
-            with st.container(border=True, key="card_ed_encuesta_exposicion"):
+            with st.container(key="card_ed_encuesta_exposicion"):
                 html_block(
                     """
                     <div class="section-title-card">Encuesta · exposición política digital</div>
@@ -907,7 +979,7 @@ def render_evidencia_digital(
                 )
 
         with col2:
-            with st.container(border=True, key="card_ed_encuesta_falso"):
+            with st.container(key="card_ed_encuesta_falso"):
                 html_block(
                     """
                     <div class="section-title-card">Encuesta · contenido percibido como falso, manipulado o generado con IA</div>
@@ -938,7 +1010,7 @@ def render_evidencia_digital(
         col3, col4 = st.columns(2, gap="large")
 
         with col3:
-            with st.container(border=True, key="card_ed_encuesta_automatizacion"):
+            with st.container(key="card_ed_encuesta_automatizacion"):
                 html_block(
                     """
                     <div class="section-title-card">Encuesta · automatización percibida</div>
@@ -964,7 +1036,7 @@ def render_evidencia_digital(
                 )
 
         with col4:
-            with st.container(border=True, key="card_ed_encuesta_verificacion"):
+            with st.container(key="card_ed_encuesta_verificacion"):
                 html_block(
                     """
                     <div class="section-title-card">Encuesta · verificación informativa</div>
@@ -992,7 +1064,7 @@ def render_evidencia_digital(
         col5, col6 = st.columns(2, gap="large")
 
         with col5:
-            with st.container(border=True, key="card_ed_social_sentimiento"):
+            with st.container(key="card_ed_social_sentimiento"):
                 html_block(
                     """
                     <div class="section-title-card">Redes sociales procesados · sentimiento por plataforma</div>
@@ -1013,7 +1085,7 @@ def render_evidencia_digital(
                 )
 
         with col6:
-            with st.container(border=True, key="card_ed_gdelt_tono"):
+            with st.container(key="card_ed_gdelt_tono"):
                 html_block(
                     """
                     <div class="section-title-card">Evidencia digital · resumen de sentimiento</div>
@@ -1040,7 +1112,7 @@ def render_evidencia_digital(
         col7, col8 = st.columns(2, gap="large")
 
         with col7:
-            with st.container(border=True, key="card_ed_gdelt_fuentes"):
+            with st.container(key="card_ed_gdelt_fuentes"):
                 html_block(
                     """
                     <div class="section-title-card">Evidencia digital · principales fuentes</div>
@@ -1063,7 +1135,7 @@ def render_evidencia_digital(
                     empty_state("No se ha cargado una base digital con fuentes, dominios o URLs.")
 
         with col8:
-            with st.container(border=True, key="card_ed_gdelt_keywords"):
+            with st.container(key="card_ed_gdelt_keywords"):
                 html_block(
                     """
                     <div class="section-title-card">Evidencia digital · términos recurrentes</div>
@@ -1087,7 +1159,7 @@ def render_evidencia_digital(
 
         st.markdown('<div class="ed-section-gap"></div>', unsafe_allow_html=True)
 
-        with st.container(border=True, key="card_ed_gdelt_evolucion"):
+        with st.container(key="card_ed_gdelt_evolucion"):
             html_block(
                 """
                 <div class="section-title-card">Evidencia digital · evolución temporal</div>
@@ -1115,7 +1187,7 @@ def render_evidencia_digital(
     # TAB 4: TRIANGULACIÓN E INTERPRETACIÓN
     # =====================================================
     with tab_interpretacion:
-        with st.container(border=True, key="card_ed_triangulacion"):
+        with st.container(key="card_ed_triangulacion"):
             html_block(
                 """
                 <div class="section-title-card">Triangulación entre encuesta y evidencia digital</div>
@@ -1160,7 +1232,7 @@ def render_evidencia_digital(
 
         st.markdown('<div class="ed-section-gap"></div>', unsafe_allow_html=True)
 
-        with st.container(border=True, key="card_ed_interpretacion"):
+        with st.container(key="card_ed_interpretacion"):
             html_block(
                 """
                 <div class="section-title-card">Lectura interpretativa</div>
@@ -1291,7 +1363,7 @@ def render_evidencia_digital(
                 if col in filtered_matrix_df.columns
             ]
 
-            with st.container(border=True, key="card_ed_matriz_tecnica"):
+            with st.container(key="card_ed_matriz_tecnica"):
                 html_block(
                     """
                     <div class="section-title-card">Matriz técnica de triangulación</div>
@@ -1325,7 +1397,7 @@ def render_evidencia_digital(
 
             st.markdown('<div class="ed-section-gap"></div>', unsafe_allow_html=True)
 
-            with st.container(border=True, key="card_ed_recomendaciones"):
+            with st.container(key="card_ed_recomendaciones"):
                 html_block(
                     """
                     <div class="section-title-card">Recomendaciones derivadas</div>
@@ -1342,7 +1414,7 @@ def render_evidencia_digital(
 
                     for idx, row in recommendation_rules.reset_index(drop=True).iterrows():
                         with rec_cols[idx % 2]:
-                            with st.container(border=True, key=f"card_ed_rec_{idx}"):
+                            with st.container(key=f"card_ed_rec_{idx}"):
                                 html_block(
                                     f"""
                                     <div class="section-title-card" style="font-size:1rem;">

@@ -164,7 +164,7 @@ def render_conocimiento_ia(survey_df: pd.DataFrame):
     col1, col2 = st.columns(2, gap="medium")
 
     with col1:
-        with st.container(border=True, key="card_ia_escucho"):
+        with st.container(key="card_ia_escucho"):
             render_card_header(
                 "Conocimiento declarado sobre IA electoral",
                 "Participantes que han escuchado hablar sobre inteligencia artificial aplicada a campañas políticas digitales.",
@@ -193,7 +193,7 @@ def render_conocimiento_ia(survey_df: pd.DataFrame):
                 empty_state("No se encontró la columna sobre conocimiento de IA electoral.")
 
     with col2:
-        with st.container(border=True, key="card_ia_reconocio"):
+        with st.container(key="card_ia_reconocio"):
             render_card_header(
                 "Reconocimiento de automatización en campaña",
                 "Percepción sobre bots, anuncios personalizados, deepfakes u otras herramientas automatizadas.",
@@ -234,7 +234,7 @@ def render_conocimiento_ia(survey_df: pd.DataFrame):
     col3, col4 = st.columns(2, gap="medium")
 
     with col3:
-        with st.container(border=True, key="card_ia_identifica"):
+        with st.container(key="card_ia_identifica"):
             render_card_header(
                 "Capacidad percibida para identificar IA",
                 "Nivel declarado para distinguir mensajes, imágenes, videos o audios políticos generados por IA.",
@@ -268,7 +268,7 @@ def render_conocimiento_ia(survey_df: pd.DataFrame):
                 empty_state("No se encontró la columna sobre identificación de contenido generado por IA.")
 
     with col4:
-        with st.container(border=True, key="card_ia_falso"):
+        with st.container(key="card_ia_falso"):
             render_card_header(
                 "Exposición a contenido político sospechoso",
                 "Experiencia con videos, imágenes, audios o noticias percibidas como falsas, manipuladas o generadas con IA.",
@@ -307,7 +307,7 @@ def render_conocimiento_ia(survey_df: pd.DataFrame):
     # =========================================================
     # Lectura interpretativa
     # =========================================================
-    with st.container(border=True, key="card_ia_interpretacion"):
+    with st.container(key="card_ia_interpretacion"):
         st.markdown(
             """
             <div class="section-title-card">Lectura interpretativa</div>

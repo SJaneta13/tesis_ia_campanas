@@ -1,4 +1,4 @@
-# dashboard/sections/percepcion_ciudadana.py
+﻿# dashboard/sections/percepcion_ciudadana.py
 import pandas as pd
 import streamlit as st
 import plotly.express as px
@@ -147,7 +147,7 @@ def make_likert_matrix(items: list[dict], height: int = 420):
         height=height,
         paper_bgcolor="#ffffff",
         plot_bgcolor="#ffffff",
-        margin=dict(l=0, r=8, t=8, b=68),
+        margin=dict(l=18, r=32, t=10, b=82),
         xaxis=dict(
             visible=False,
             range=[0, 100],
@@ -161,10 +161,10 @@ def make_likert_matrix(items: list[dict], height: int = 420):
         legend=dict(
             orientation="h",
             yanchor="top",
-            y=-0.12,
-            xanchor="left",
+            y=-0.18,
+            xanchor="center",
             x=0,
-            font=dict(size=10),
+            x=0.5,
         ),
         font=dict(size=11),
     )
@@ -372,7 +372,7 @@ def render_percepcion_ciudadana(survey_df: pd.DataFrame):
     # =========================================================
     # Matriz general
     # =========================================================
-    with st.container(border=True, key="card_pc_matriz"):
+    with st.container(key="card_pc_matriz"):
         render_card_header(
             "Mapa general de percepción ciudadana",
             "Distribución comparativa de respuestas en escala Likert para los principales indicadores de percepción sobre IA electoral.",
@@ -393,7 +393,7 @@ def render_percepcion_ciudadana(survey_df: pd.DataFrame):
     col1, col2 = st.columns(2, gap="medium")
 
     with col1:
-        with st.container(border=True, key="card_pc_aceptacion"):
+        with st.container(key="card_pc_aceptacion"):
             render_likert_card(
                 title="Aceptación del uso de IA",
                 subtitle="Percepción sobre si la IA mejora la comunicación política entre partidos y ciudadanía.",
@@ -406,7 +406,7 @@ def render_percepcion_ciudadana(survey_df: pd.DataFrame):
             )
 
     with col2:
-        with st.container(border=True, key="card_pc_manipulacion"):
+        with st.container(key="card_pc_manipulacion"):
             render_likert_card(
                 title="Riesgo de manipulación personalizada",
                 subtitle="Percepción sobre la influencia mediante mensajes personalizados creados con IA.",
@@ -423,7 +423,7 @@ def render_percepcion_ciudadana(survey_df: pd.DataFrame):
     col3, col4 = st.columns(2, gap="medium")
 
     with col3:
-        with st.container(border=True, key="card_pc_desconfianza"):
+        with st.container(key="card_pc_desconfianza"):
             render_card_header(
                 "Desconfianza por bots y deepfakes",
                 "Comparación del acuerdo agregado frente a bots, cuentas falsas y contenido manipulado.",
@@ -493,7 +493,7 @@ def render_percepcion_ciudadana(survey_df: pd.DataFrame):
                 empty_state("No se encontraron columnas suficientes sobre bots y deepfakes.")
 
     with col4:
-        with st.container(border=True, key="card_pc_regulacion"):
+        with st.container(key="card_pc_regulacion"):
             render_likert_card(
                 title="Demanda ciudadana de regulación",
                 subtitle="Nivel de acuerdo con que el uso de IA en campañas políticas debería estar regulado por la ley.",
@@ -511,7 +511,7 @@ def render_percepcion_ciudadana(survey_df: pd.DataFrame):
     # =========================================================
     # Síntesis interpretativa
     # =========================================================
-    with st.container(border=True, key="card_pc_interpretacion"):
+    with st.container(key="card_pc_interpretacion"):
         st.markdown(
             """
             <div class="section-title-card">Lectura interpretativa</div>
@@ -565,7 +565,7 @@ def render_percepcion_ciudadana(survey_df: pd.DataFrame):
     # =========================================================
     # Análisis por rangos de edad
     # =========================================================
-    with st.container(border=True, key="card_pc_edad_riesgo"):
+    with st.container(key="card_pc_edad_riesgo"):
         render_card_header(
             "Análisis por rangos de edad",
             "Exposición digital, riesgo percibido y desconfianza frente a deepfakes.",
@@ -982,27 +982,30 @@ def render_deepfake_distrust_by_age():
     )
 
     fig.update_layout(
-        height=300,
-        margin=dict(l=8, r=24, t=8, b=24),
+        height=315,
+        margin=dict(l=18, r=54, t=44, b=50),
         paper_bgcolor="#ffffff",
         plot_bgcolor="#ffffff",
         legend_title_text="Respuesta agrupada",
         legend=dict(
             orientation="h",
             yanchor="bottom",
-            y=1.03,
+            y=1.05,
             xanchor="right",
             x=1,
+            font=dict(size=11),
         ),
         xaxis=dict(
-            range=[0, 100],
+            range=[0, 101],
             ticksuffix="%",
             gridcolor="#E5E7EB",
             title="Porcentaje de respuestas",
+            automargin=True,
         ),
         yaxis=dict(
             title="Rango de edad",
             autorange="reversed",
+            automargin=True,
         ),
         font=dict(size=13),
     )

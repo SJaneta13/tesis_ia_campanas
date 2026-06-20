@@ -1,4 +1,4 @@
-# dashboard/sections/perfil_muestra.py
+﻿# dashboard/sections/perfil_muestra.py
 import pandas as pd
 import streamlit as st
 
@@ -232,7 +232,7 @@ def render_perfil_muestra(survey_df: pd.DataFrame):
     col1, col2 = st.columns(2, gap="medium")
 
     with col1:
-        with st.container(border=True, key="card_pm_edad"):
+        with st.container(key="card_pm_edad"):
             render_card_header(
                 "Distribución por edad",
                 "Rangos etarios declarados por los participantes.",
@@ -268,7 +268,7 @@ def render_perfil_muestra(survey_df: pd.DataFrame):
                 empty_state("No se encontró la columna de edad.")
 
     with col2:
-        with st.container(border=True, key="card_pm_genero"):
+        with st.container(key="card_pm_genero"):
             render_card_header(
                 "Distribución por género",
                 "Composición de participantes según género declarado.",
@@ -304,7 +304,7 @@ def render_perfil_muestra(survey_df: pd.DataFrame):
     col3, col4 = st.columns([0.82, 1.35], gap="medium")
 
     with col3:
-        with st.container(border=True, key="card_pm_rol"):
+        with st.container(key="card_pm_rol"):
             render_card_header(
                 "Rol dentro de la UCE",
                 "Participación según vínculo institucional con la universidad.",
@@ -339,7 +339,7 @@ def render_perfil_muestra(survey_df: pd.DataFrame):
                 empty_state("No se encontró la columna de rol dentro de la UCE.")
 
     with col4:
-        with st.container(border=True, key="card_pm_facultad"):
+        with st.container(key="card_pm_facultad"):
             render_card_header(
                 "Unidad académica",
                 "Principales unidades representadas en la muestra.",

@@ -1,4 +1,4 @@
-# dashboard/sections/resumen_general.py
+﻿# dashboard/sections/resumen_general.py
 import pandas as pd
 import streamlit as st
 import plotly.express as px
@@ -480,7 +480,7 @@ def render_resumen_general(
         st.markdown(method_html, unsafe_allow_html=True)
 
     with right:
-        with st.container(border=True, key="card_perfil"):
+        with st.container(key="card_perfil"):
 
             st.markdown(
                 '<div class="section-title-card">Perfil de la muestra</div>', 
@@ -555,7 +555,7 @@ def render_resumen_general(
     chart1, chart2 = st.columns(2, gap="small")
 
     with chart1:
-        with st.container(border=True, key="card_aceptacion"):
+        with st.container(key="card_aceptacion"):
             st.markdown(
                 '<div class="section-title-card">Aceptación general del uso de IA en política</div>',
                 unsafe_allow_html=True,
@@ -608,7 +608,7 @@ def render_resumen_general(
 
 
     with chart2:
-        with st.container(border=True, key="card_confianza"):
+        with st.container(key="card_confianza"):
             st.markdown(
                 '<div class="section-title-card">Nivel de confianza electoral</div>',
                 unsafe_allow_html=True,
@@ -662,7 +662,7 @@ def render_resumen_general(
     # =========================================================
     st.markdown('<div class="section-gap"></div>', unsafe_allow_html=True)
 
-    with st.container(border=True, key="card_regulacion"):
+    with st.container(key="card_regulacion"):
         st.markdown(
             '<div class="section-title-card">Demanda ciudadana de regulación de IA en campañas</div>',
             unsafe_allow_html=True,

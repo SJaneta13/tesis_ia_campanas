@@ -1,4 +1,4 @@
-# dashboard/styles.py
+﻿# dashboard/styles.py
 import streamlit as st
 
 
@@ -10,11 +10,13 @@ def inject_global_css():
 }
 
 .block-container {
-    padding-top: 1.4rem;
-    padding-bottom: 2rem;
-    max-width: 1320px;
+    padding-top: 1.4rem !important;
+    padding-bottom: 2rem !important;
+    padding-left: 1.25rem !important;
+    padding-right: 1.25rem !important;
+    max-width: 1480px !important;
 }
-
+                
 /* Sidebar */
 section[data-testid="stSidebar"] {
     background: #ffffff;
@@ -3322,7 +3324,66 @@ table.mp-matrix td.cell {
 [class*="st-key-card_"] div[data-testid="stFormSubmitButton"] button[kind="primary"] p,
 [class*="st-key-card_"] div[data-testid="stFormSubmitButton"] button[kind="primary"] span {
     color: #ffffff !important;
-}                 
+}   
+
+
+
+
+/* =========================================================
+   Ajuste Streamlit Cloud: una sola tarjeta y gráficos completos
+   ========================================================= */
+
+div[data-testid="stVerticalBlockBorderWrapper"]:has([class*="st-key-card_"]) {
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+[class*="st-key-card_"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+}
+
+[class*="st-key-card_"] > div,
+[class*="st-key-card_"] [data-testid="stVerticalBlock"],
+[class*="st-key-card_"] [data-testid="stElementContainer"],
+[class*="st-key-card_"] [data-testid="stPlotlyChart"],
+[class*="st-key-card_"] [data-testid="stMarkdownContainer"] {
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+}
+
+[class*="st-key-card_"] .js-plotly-plot,
+[class*="st-key-card_"] .plotly,
+[class*="st-key-card_"] .plot-container,
+[class*="st-key-card_"] .svg-container,
+[class*="st-key-card_"] .main-svg {
+    overflow: visible !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+@media (max-width: 1250px) {
+    .block-container {
+        padding-left: 0.85rem !important;
+        padding-right: 0.85rem !important;
+    }
+
+    .st-key-card_pc_matriz,
+    .st-key-card_pc_edad_riesgo,
+    .st-key-card_ce_heatmap,
+    .st-key-card_ce_dispersion,
+    .st-key-card_mp_estabilidad {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+    }
+}
              
 </style>
 """, unsafe_allow_html=True)

@@ -1,4 +1,4 @@
-import numpy as np
+﻿import numpy as np
 import pandas as pd
 import streamlit as st
 import plotly.express as px
@@ -427,26 +427,19 @@ def make_stacked_bar(values: pd.DataFrame, title_y: str, height: int = 165):
         customdata=values["Respuesta"],
     )
 
+
     fig.update_layout(
         barmode="stack",
+
         height=height,
         paper_bgcolor="#ffffff",
         plot_bgcolor="#ffffff",
         xaxis=dict(visible=False, range=[0, 100]),
         yaxis=dict(visible=False),
-        margin=dict(l=0, r=0, t=4, b=50),
-        legend_title_text="",
-        legend=dict(
-            orientation="h",
-            yanchor="top",
-            y=-0.10,
-            xanchor="left",
-            x=0,
-            font=dict(size=10),
-        ),
+        margin=dict(l=8, r=18, t=4, b=10),
+        showlegend=False,
         font=dict(size=11),
     )
-
     return fig
 
 
@@ -1081,15 +1074,27 @@ def make_moderation_line_chart(analysis_df: pd.DataFrame, height: int = 410):
         height=height,
         paper_bgcolor="#ffffff",
         plot_bgcolor="#ffffff",
-        margin=dict(l=8, r=8, t=12, b=54),
-        xaxis=dict(title="Riesgo/exposición percibida por IA", gridcolor="#e5e7eb"),
+        margin=dict(l=56, r=42, t=14, b=70),
+        xaxis=dict(
+            title="Riesgo/exposición percibida por IA",
+            gridcolor="#e5e7eb",
+            automargin=True,
+        ),
         yaxis=dict(
             title="Confianza electoral promedio (1-5)",
             range=[1, 5],
             gridcolor="#e5e7eb",
             zeroline=False,
+            automargin=True,
         ),
-        legend=dict(orientation="h", yanchor="top", y=-0.18, xanchor="left", x=0),
+        legend=dict(
+            orientation="h",
+            yanchor="top",
+            y=-0.22,
+            xanchor="left",
+            x=0,
+            font=dict(size=10),
+        ),
         legend_title_text="Nivel de verificación",
         font=dict(size=11),
     )
@@ -1474,7 +1479,7 @@ def _render_summary_tab(survey_df: pd.DataFrame, cols: dict[str, str | None], me
     cambio_confianza_col = cols.get("cambio_confianza")
 
 
-    with st.container(border=True, key="card_ce_matriz"):
+    with st.container(key="card_ce_matriz"):
         render_card_header(
             "Mapa de confianza electoral",
             "Distribución comparativa de los indicadores Likert: limpieza/transparencia electoral y riesgo de fraude o manipulación.",
@@ -1496,7 +1501,7 @@ def _render_summary_tab(survey_df: pd.DataFrame, cols: dict[str, str | None], me
     col1, col2 = st.columns(2, gap="large")
 
     with col1:
-        with st.container(border=True, key="card_ce_limpieza"):
+        with st.container(key="card_ce_limpieza"):
             render_card_header(
                 "Confianza en la limpieza electoral",
                 "Nivel de acuerdo con una percepción positiva sobre la limpieza o transparencia del proceso electoral.",
@@ -1517,7 +1522,7 @@ def _render_summary_tab(survey_df: pd.DataFrame, cols: dict[str, str | None], me
                 empty_state("No se encontró la columna de confianza en limpieza electoral.")
 
     with col2:
-        with st.container(border=True, key="card_ce_fraude"):
+        with st.container(key="card_ce_fraude"):
             render_card_header(
                 "Percepción de fraude o manipulación",
                 "Nivel de acuerdo con la posibilidad de fraude, manipulación o alteración del proceso electoral.",
@@ -1542,7 +1547,7 @@ def _render_summary_tab(survey_df: pd.DataFrame, cols: dict[str, str | None], me
     col3, col4 = st.columns(2, gap="large")
 
     with col3:
-        with st.container(border=True, key="card_ce_influencia_voto"):
+        with st.container(key="card_ce_influencia_voto"):
             render_card_header(
                 "Influencia de IA en la decisión de voto",
                 "Percepción ciudadana sobre si el uso de IA en campañas digitales influyó en su decisión electoral.",
@@ -1575,7 +1580,7 @@ def _render_summary_tab(survey_df: pd.DataFrame, cols: dict[str, str | None], me
                 empty_state("No se encontró la columna sobre influencia de IA en la decisión de voto.")
 
     with col4:
-        with st.container(border=True, key="card_ce_cambio_confianza"):
+        with st.container(key="card_ce_cambio_confianza"):
             render_card_header(
                 "Cambio de confianza por bots/deepfakes/IA",
                 "Variación de la confianza al conocer la existencia de bots, deepfakes o manipulación mediante IA.",
@@ -1608,7 +1613,7 @@ def _render_summary_tab(survey_df: pd.DataFrame, cols: dict[str, str | None], me
 
     st.markdown('<div class="ce-section-gap"></div>', unsafe_allow_html=True)
 
-    with st.container(border=True, key="card_ce_interpretacion"):
+    with st.container(key="card_ce_interpretacion"):
         render_card_header(
             "Síntesis interpretativa",
             "Lectura integrada de los indicadores de confianza electoral.",
@@ -1650,7 +1655,7 @@ def _render_summary_tab(survey_df: pd.DataFrame, cols: dict[str, str | None], me
 
 
 def _render_exposure_tab(analysis_df: pd.DataFrame, cols: dict[str, str | None]):
-    with st.container(border=True, key="card_ce_heatmap"):
+    with st.container(key="card_ce_heatmap"):
         render_card_header(
             "Contraste H1: exposición digital vs confianza electoral",
             "Densidad de encuestados por combinación Likert. Valores más oscuros indican mayor concentración de respuestas.",
@@ -1667,7 +1672,7 @@ def _render_exposure_tab(analysis_df: pd.DataFrame, cols: dict[str, str | None])
 
     st.markdown('<div class="ce-section-gap"></div>', unsafe_allow_html=True)
 
-    with st.container(border=True, key="card_ce_dispersion"):
+    with st.container(key="card_ce_dispersion"):
         render_card_header(
             "Relación entre exposición digital y confianza electoral",
             "Modo burbuja para frecuencia exacta y modo dispersión para observar casos individuales con jitter visual.",
@@ -1739,7 +1744,7 @@ def _h2_detail_table_html(group_stats: pd.DataFrame) -> str:
 
 
 def _render_h2_tab(analysis_df: pd.DataFrame):
-    with st.container(border=True, key="card_ce_h2_definicion"):
+    with st.container(key="card_ce_h2_definicion"):
         render_card_header(
             "H2: verificación informativa y confianza electoral",
             "Se analiza si la práctica de verificar información política digital reduce la pérdida de confianza frente al riesgo percibido por bots, deepfakes y microsegmentación política.",
@@ -1758,7 +1763,7 @@ def _render_h2_tab(analysis_df: pd.DataFrame):
     col1, col2 = st.columns([1.35, 1], gap="large")
 
     with col1:
-        with st.container(border=True, key="card_ce_h2_lineas"):
+        with st.container(key="card_ce_h2_lineas"):
             render_card_header(
                 "Riesgo percibido por IA y confianza según verificación",
                 "Gráfico de interacción: si la línea de alta verificación cae menos que la de baja verificación, se observa un posible efecto amortiguador.",
@@ -1774,7 +1779,7 @@ def _render_h2_tab(analysis_df: pd.DataFrame):
                 empty_state("No hay datos suficientes para graficar la interacción H2.")
 
     with col2:
-        with st.container(border=True, key="card_ce_h2_heatmap"):
+        with st.container(key="card_ce_h2_heatmap"):
             render_card_header(
                 "Matriz de confianza promedio",
                 "Cruce entre nivel de verificación y riesgo percibido por IA.",
@@ -1794,7 +1799,7 @@ def _render_h2_tab(analysis_df: pd.DataFrame):
     group_stats = compute_moderation_group_stats(analysis_df)
     model = compute_interaction_model(analysis_df)
 
-    with st.container(border=True, key="card_ce_h2_resumen"):
+    with st.container(key="card_ce_h2_resumen"):
         render_card_header(
             "Lectura interpretativa de H2",
             "Resumen de la tendencia observada por nivel de verificación. Los indicadores técnicos se usan como apoyo y no como afirmación causal.",
@@ -1819,7 +1824,7 @@ def _render_h2_tab(analysis_df: pd.DataFrame):
 
 
     with st.expander("Ver detalle técnico de H2"):
-        with st.container(border=True, key="card_ce_h2_tabla"):
+        with st.container(key="card_ce_h2_tabla"):
             render_card_header(
                 "Detalle técnico de H2",
                 "Tabla de apoyo: Spearman y pendiente lineal dentro de cada grupo de verificación.",
@@ -1838,7 +1843,7 @@ def _render_association_tab(analysis_df: pd.DataFrame, cols: dict[str, str | Non
     col1, col2 = st.columns(2, gap="large")
 
     with col1:
-        with st.container(border=True, key="card_ce_edad_boxplot"):
+        with st.container(key="card_ce_edad_boxplot"):
             render_card_header(
                 "Confianza electoral por rango de edad",
                 "Boxplot con mediana, IQR y rango completo. Se conserva el rango etario 18–64 años.",
@@ -1853,7 +1858,7 @@ def _render_association_tab(analysis_df: pd.DataFrame, cols: dict[str, str | Non
                 empty_state("No hay datos de edad y confianza suficientes para construir el boxplot.")
 
     with col2:
-        with st.container(border=True, key="card_ce_spearman"):
+        with st.container(key="card_ce_spearman"):
             render_card_header(
                 "Correlaciones de Spearman con confianza electoral",
                 "Asociaciones ordinales exploratorias. Spearman es apropiado para variables Likert y rangos categóricos.",
@@ -1870,7 +1875,7 @@ def _render_association_tab(analysis_df: pd.DataFrame, cols: dict[str, str | Non
 
     st.markdown('<div class="ce-section-gap"></div>', unsafe_allow_html=True)
 
-    with st.container(border=True, key="card_ce_metodologia"):
+    with st.container(key="card_ce_metodologia"):
         st.markdown(
             "<div class='ce-method-panel'>"
             "<div class='ce-method-title'>Lectura metodológica</div>"

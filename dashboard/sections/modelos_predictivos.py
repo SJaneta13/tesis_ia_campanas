@@ -284,7 +284,7 @@ def _render_kpi_row(summary_df: pd.DataFrame, n_survey: int) -> None:
         mask = pd.Series(False, index=df.index)
 
     main_df = df.loc[mask].copy()
-    
+
     if main_df.empty:
         main_df = df.copy()
 
@@ -1705,11 +1705,11 @@ def render_modelos_predictivos(survey_df: pd.DataFrame) -> None:
     col1, col2 = st.columns([1.18, 1], gap="medium")
 
     with col1:
-        with st.container(border=True, key="card_mp_metricas"):
+        with st.container(key="card_mp_metricas"):
             _render_model_comparison(summary_df)
 
     with col2:
-        with st.container(border=True, key="card_mp_configuracion"):
+        with st.container(key="card_mp_configuracion"):
             render_card_header(
                 "Validación complementaria 3 vs 5 niveles",
                 "Comparación metodológica frente a la configuración principal de 5 niveles.",
@@ -1728,7 +1728,7 @@ def render_modelos_predictivos(survey_df: pd.DataFrame) -> None:
     )
 
     with tabs[0]:
-        with st.container(border=True, key="card_mp_importancia"):
+        with st.container(key="card_mp_importancia"):
             render_card_header(
                 "Importancia de variables",
                 "Contribución relativa de cada predictor al modelo final.",
@@ -1747,7 +1747,7 @@ def render_modelos_predictivos(survey_df: pd.DataFrame) -> None:
                 )    
 
     with tabs[1]:
-        with st.container(border=True, key="card_mp_clases"):
+        with st.container(key="card_mp_clases"):
             render_card_header(
                 "Matriz de confusión",
                 "Comparación entre predicciones del modelo y clases reales.",
@@ -1766,7 +1766,7 @@ def render_modelos_predictivos(survey_df: pd.DataFrame) -> None:
                 st.dataframe(active_cm, use_container_width=True, hide_index=True, height=320)
 
     with tabs[2]:
-        with st.container(border=True, key="card_mp_estabilidad"):
+        with st.container(key="card_mp_estabilidad"):
             render_card_header(
                 "Estabilidad por semilla aleatoria",
                 "Variación del rendimiento al cambiar la partición entrenamiento/prueba.",
@@ -1776,7 +1776,7 @@ def render_modelos_predictivos(survey_df: pd.DataFrame) -> None:
                 st.dataframe(_normalize_seed_df(seed_df), use_container_width=True, hide_index=True, height=360)
 
     with tabs[3]:
-        with st.container(border=True, key="card_mp_simulador_base"):
+        with st.container(key="card_mp_simulador_base"):
             render_card_header(
                 "Simulador exploratorio de confianza electoral",
                 "Prototipo interactivo basado en el modelo final Random Forest de 5 niveles.",
