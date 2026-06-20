@@ -3438,6 +3438,297 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has([class*="st-key-card_"]) {
         padding-right: 16px !important;
     }
 }
+
+/* =========================================================
+   Resumen General · restauración visual aislada
+   Solo afecta clases rg-* y contenedores card_rg_*
+   ========================================================= */
+
+/* ---------- KPIs superiores ---------- */
+
+.rg-kpi-grid {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 14px !important;
+    margin: 6px 0 18px 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.rg-kpi {
+    border: 1px solid #e5e7eb !important;
+    border-radius: 16px !important;
+    padding: 13px 15px !important;
+    min-height: 112px !important;
+    height: auto !important;
+    max-height: none !important;
+    box-shadow: 0 1px 5px rgba(15, 23, 42, 0.04) !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+}
+
+.rg-kpi.blue {
+    background: #eff6ff !important;
+    border-color: #bfdbfe !important;
+}
+
+.rg-kpi.purple {
+    background: #f5f3ff !important;
+    border-color: #ddd6fe !important;
+}
+
+.rg-kpi.yellow {
+    background: #fffbeb !important;
+    border-color: #fde68a !important;
+}
+
+.rg-kpi.green {
+    background: #ecfdf5 !important;
+    border-color: #a7f3d0 !important;
+}
+
+.rg-kpi.cyan {
+    background: #ecfeff !important;
+    border-color: #a5f3fc !important;
+}
+
+.rg-kpi-label {
+    color: #64748b !important;
+    font-size: 0.68rem !important;
+    font-weight: 850 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    line-height: 1.25 !important;
+    margin-bottom: 5px !important;
+}
+
+.rg-kpi-value {
+    color: #0f172a !important;
+    font-size: 1.42rem !important;
+    font-weight: 850 !important;
+    line-height: 1.08 !important;
+    letter-spacing: 0 !important;
+}
+
+.rg-kpi-value.small {
+    font-size: 1.02rem !important;
+    line-height: 1.18 !important;
+    overflow-wrap: anywhere !important;
+}
+
+.rg-kpi-help {
+    color: #64748b !important;
+    font-size: 0.78rem !important;
+    margin-top: 6px !important;
+    line-height: 1.25 !important;
+}
+
+/* ---------- Contenedores propios del Resumen General ---------- */
+
+.st-key-card_rg_perfil,
+.st-key-card_rg_aceptacion,
+.st-key-card_rg_confianza,
+.st-key-card_rg_regulacion {
+    background: #ffffff !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 16px !important;
+    padding: 18px 20px 20px 20px !important;
+    height: auto !important;
+    min-height: auto !important;
+    max-height: none !important;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.055) !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Fondo blanco interno solo en tarjetas rg */
+.st-key-card_rg_perfil,
+.st-key-card_rg_perfil > div,
+.st-key-card_rg_perfil [data-testid="stVerticalBlock"],
+.st-key-card_rg_perfil [data-testid="stElementContainer"],
+.st-key-card_rg_perfil [data-testid="stPlotlyChart"],
+.st-key-card_rg_aceptacion,
+.st-key-card_rg_aceptacion > div,
+.st-key-card_rg_aceptacion [data-testid="stVerticalBlock"],
+.st-key-card_rg_aceptacion [data-testid="stElementContainer"],
+.st-key-card_rg_aceptacion [data-testid="stPlotlyChart"],
+.st-key-card_rg_confianza,
+.st-key-card_rg_confianza > div,
+.st-key-card_rg_confianza [data-testid="stVerticalBlock"],
+.st-key-card_rg_confianza [data-testid="stElementContainer"],
+.st-key-card_rg_confianza [data-testid="stPlotlyChart"],
+.st-key-card_rg_regulacion,
+.st-key-card_rg_regulacion > div,
+.st-key-card_rg_regulacion [data-testid="stVerticalBlock"],
+.st-key-card_rg_regulacion [data-testid="stElementContainer"],
+.st-key-card_rg_regulacion [data-testid="stMarkdownContainer"] {
+    background-color: #ffffff !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* No tocar SVG interno de Plotly; solo contenedor */
+.st-key-card_rg_perfil [data-testid="stPlotlyChart"],
+.st-key-card_rg_aceptacion [data-testid="stPlotlyChart"],
+.st-key-card_rg_confianza [data-testid="stPlotlyChart"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    background: #ffffff !important;
+}
+
+/* Alturas controladas para que las cards vuelvan a verse como dashboard */
+.st-key-card_rg_perfil {
+    min-height: 360px !important;
+}
+
+.st-key-card_rg_aceptacion,
+.st-key-card_rg_confianza {
+    min-height: 305px !important;
+    display: block !important;
+}
+
+/* Alertas dentro de gráficos rg */
+.st-key-card_rg_aceptacion .alert-warning,
+.st-key-card_rg_confianza .alert-danger {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-wrap: anywhere !important;
+    margin-top: 8px !important;
+    margin-bottom: 0 !important;
+}
+
+/* ---------- Regulación del resumen ---------- */
+
+.st-key-card_rg_regulacion {
+    padding-bottom: 24px !important;
+}
+
+.st-key-card_rg_regulacion .progress-row {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-right: 0 !important;
+    margin-bottom: 15px !important;
+    box-sizing: border-box !important;
+}
+
+.st-key-card_rg_regulacion .progress-row-header {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    gap: 12px !important;
+    align-items: center !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.st-key-card_rg_regulacion .progress-row-header span:first-child {
+    min-width: 0 !important;
+    overflow-wrap: anywhere !important;
+}
+
+.st-key-card_rg_regulacion .progress-row-header span:last-child {
+    white-space: nowrap !important;
+    text-align: right !important;
+}
+
+.st-key-card_rg_regulacion .progress-track {
+    width: 100% !important;
+    max-width: 100% !important;
+    background: #e5e7eb !important;
+    overflow: hidden !important;
+}
+
+.st-key-card_rg_regulacion .progress-fill {
+    background: #2563eb !important;
+}
+
+/* ---------- Ajuste específico del bloque hipótesis/metodología del resumen ---------- */
+
+.rg-kpi-grid + div {
+    max-width: 100% !important;
+}
+
+.method-grid {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+.method-card {
+    box-sizing: border-box !important;
+}
+
+/* ---------- Responsive solo del Resumen General ---------- */
+
+@media (max-width: 1400px) {
+    .rg-kpi-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+}
+
+@media (max-width: 1050px) {
+    .rg-kpi-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    div[data-testid="stHorizontalBlock"]:has(.st-key-card_rg_perfil),
+    div[data-testid="stHorizontalBlock"]:has(.st-key-card_rg_aceptacion),
+    div[data-testid="stHorizontalBlock"]:has(.st-key-card_rg_confianza) {
+        flex-wrap: wrap !important;
+    }
+
+    div[data-testid="stHorizontalBlock"]:has(.st-key-card_rg_perfil) > div[data-testid="column"],
+    div[data-testid="stHorizontalBlock"]:has(.st-key-card_rg_aceptacion) > div[data-testid="column"],
+    div[data-testid="stHorizontalBlock"]:has(.st-key-card_rg_confianza) > div[data-testid="column"] {
+        flex: 1 1 100% !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    .st-key-card_rg_perfil,
+    .st-key-card_rg_aceptacion,
+    .st-key-card_rg_confianza {
+        min-height: auto !important;
+    }
+}
+
+@media (max-width: 760px) {
+    .rg-kpi-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+
+    .rg-kpi {
+        min-height: auto !important;
+        padding: 13px 14px !important;
+    }
+
+    .st-key-card_rg_perfil,
+    .st-key-card_rg_aceptacion,
+    .st-key-card_rg_confianza,
+    .st-key-card_rg_regulacion {
+        padding: 15px !important;
+        border-radius: 14px !important;
+    }
+
+    .st-key-card_rg_regulacion .progress-row-header {
+        grid-template-columns: 1fr !important;
+        gap: 4px !important;
+    }
+
+    .st-key-card_rg_regulacion .progress-row-header span:last-child {
+        text-align: left !important;
+        white-space: normal !important;
+    }
+}
                              
 </style>
 """, unsafe_allow_html=True)
