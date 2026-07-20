@@ -1,10 +1,10 @@
-﻿Real,Predicho,Cantidad
-Baja,Baja,173
-Baja,Media,28
-Baja,Alta,42
-Media,Baja,59
-Media,Media,84
-Media,Alta,22
-Alta,Baja,75
-Alta,Media,31
-Alta,Alta,61
+﻿Real,Predicho,Cantidad,Modelo,Configuración
+Baja,Baja,51,Random Forest,3 niveles
+Baja,Media,12,Random Forest,3 niveles
+Baja,Alta,10,Random Forest,3 niveles
+Media,Baja,25,Random Forest,3 niveles
+Media,Media,17,Random Forest,3 niveles
+Media,Alta,8,Random Forest,3 niveles
+Alta,Baja,24,Random Forest,3 niveles
+Alta,Media,6,Random Forest,3 niveles
+Alta,Alta,20,Random Forest,3 niveles

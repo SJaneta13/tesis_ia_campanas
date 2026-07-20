@@ -173,6 +173,9 @@ def main():
     # Ajusta patrones a tu naming real
     patterns = [
         ("x_campaign_*.csv", "x"),
+        ("dataset_tweet-scraper_*.csv", "x"),
+        ("tweet-scraper_*.csv", "x"),
+        ("twitter_*.csv", "x"),
         ("dataset_facebook-posts-scraper_*.csv", "facebook"),
         ("dataset_facebook-search-scraper_*.csv", "facebook"),
         ("facebook_*.csv", "facebook"),

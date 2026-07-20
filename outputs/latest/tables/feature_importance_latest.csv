@@ -1,19 +1,28 @@
 ﻿Variable,Importancia,Importancia_pct,Etiqueta
-Percepción sobre el uso de IA en campañas políticas [La inteligencia artificial puede mejorar la transparencia del proceso electoral.],0.12089062032008929,12.089062032008929,Transparencia electoral
-Percepción sobre el uso de IA en campañas políticas [El uso de inteligencia artificial en campañas políticas digitales mejora la comunicación entre partidos y ciudadanos.],0.09737097338851358,9.737097338851358,Comunicación política con IA
-Percepción sobre el uso de IA en campañas políticas [Considero que el uso de inteligencia artificial en campañas políticas debería estar regulado por la ley.],0.09271733546090831,9.27173354609083,Regulación y transparencia
-Percepción sobre el uso de IA en campañas políticas [La presencia de bots o cuentas falsas en redes sociales reduce mi confianza en la información política digital.],0.08518734093103143,8.518734093103143,Percepción de bots
-¿Por quién votó en la segunda vuelta presidencial de 2025?,0.06819757796437434,6.819757796437434,¿por quién votó en la segunda vuelta presidencial de 2025?
-¿Considera que el uso de IA en campañas digitales influyó en su decisión de voto en las elecciones presidenciales de 2025?,0.0645511732325153,6.45511732325153,Influencia percibida de IA en el voto
-"¿Realiza alguna verificación (chequea fuentes, busca noticias, consulta otras personas) de la información política digital antes de compartirla?",0.05831677337654431,5.8316773376544315,Verificación de fuentes
-¿A qué facultad o unidad académica pertenece?,0.05163874307840069,5.163874307840069,¿a qué facultad o unidad académica pertenece?
-"Durante la campaña presidencial entre Luisa González y Daniel Noboa, ¿con qué frecuencia vio o recibió contenido político en redes sociales o plataformas digitales?",0.051540309485427135,5.154030948542713,"Durante la campaña presidencial entre luisa gonzález y daniel noboa, ¿con qué frecuencia vio o recibió contenido político en redes sociales o plataformas digitales?"
-identifica_ia,0.04482700364021565,4.482700364021565,Identifica ia
-edad,0.040242622276228976,4.024262227622898,Edad
-"¿Conoce alguna medida, ley o regulación sobre el uso de IA en campañas políticas en Ecuador?",0.04020825272473872,4.020825272473872,"¿conoce alguna medida, ley o regulación sobre el uso de ia en campañas políticas en ecuador?"
-percibe_automatizacion,0.040119051039590105,4.011905103959011,Percibe automatizacion
-genero,0.037813730564184835,3.7813730564184835,Genero
-conoce_ia,0.036757198041878776,3.6757198041878776,Conoce ia
-¿Con qué frecuencia utiliza redes sociales?,0.028687520447567665,2.8687520447567665,¿con qué frecuencia utiliza redes sociales?
-rol_uce,0.023081187272369845,2.3081187272369843,Rol uce
-¿Cree que debería regularse el uso de IA en campañas políticas digitales en el país?,0.017852586755421087,1.7852586755421087,¿cree que debería regularse el uso de ia en campañas políticas digitales en el país?
+¿Considera que el uso de IA en campañas digitales influyó en su decisión de voto en las elecciones presidenciales de 2025?,0.14153182679503,14.153182679503,Influencia percibida de IA en el voto
+"Durante la campaña presidencial entre Luisa González y Daniel Noboa, ¿con qué frecuencia vio o recibió contenido político en redes sociales o plataformas digitales?",0.13265998186477035,13.265998186477034,Frecuencia de exposición política digital
+Percepción sobre el uso de IA en campañas políticas [El uso de inteligencia artificial en campañas políticas digitales mejora la comunicación entre partidos y ciudadanos.],0.12950357516482808,12.950357516482807,Percepción sobre el uso de ia en campañas políticas [el uso de inteligencia artificial en campañas políticas digitales mejora la comunicación entre partidos y ciudadanos.]
+¿Participó activamente en redes sociales o medios digitales durantes las ultimas elecciones presidenciales de 2025?,0.11010078221189937,11.010078221189938,¿participó activamente en redes sociales o medios digitales durantes las ultimas elecciones presidenciales de 2025?
+Percepción sobre el uso de IA en campañas políticas [Considero que el uso de inteligencia artificial en campañas políticas debería estar regulado por la ley.],0.08440681280360272,8.440681280360272,Necesidad de regulación
+identifica_ia,0.07081932708562516,7.081932708562516,Identificación de contenido con IA
+¿Qué tipo de interacción tuvo con el contenido político digital relacionado a la campaña Noboa vs. González?,0.0538962671880527,5.38962671880527,¿qué tipo de interacción tuvo con el contenido político digital relacionado a la campaña noboa vs. gonzález?
+percibe_automatizacion,0.05046398154817823,5.046398154817823,Percepción de automatización
+Percepción sobre el uso de IA en campañas políticas [Los partidos pueden manipular mi opinión mediante mensajes personalizados creados con IA.],0.048120401448891695,4.81204014488917,Riesgo de manipulación personalizada
+genero,0.03424610768870119,3.424610768870119,Genero
+Percepción sobre el uso de IA en campañas políticas [La existencia de deepfakes o contenido manipulado me hace desconfiar más de las campañas políticas digitales.]_num,0.034231123881473195,3.4231123881473193,Percepción sobre el uso de ia en campañas políticas [la existencia de deepfakes o contenido manipulado me hace desconfiar más de las campañas políticas digitales.] num
+"¿Vio alguna vez un video, imagen, audio o noticia política de la campaña entre Luisa González y Daniel Noboa que le pareció “falso”, “manipulado” o generado con IA?",0.02681184622208782,2.6811846222087823,"¿vio alguna vez un video, imagen, audio o noticia política de la campaña entre luisa gonzález y daniel noboa que le pareció “falso”, “manipulado” o generado con ia?"
+rol_uce,0.026180094459400158,2.618009445940016,Rol uce
+¿Con qué frecuencia utiliza redes sociales?,0.02474552551568803,2.474552551568803,¿con qué frecuencia utiliza redes sociales?
+"¿Realiza alguna verificación (chequea fuentes, busca noticias, consulta otras personas) de la información política digital antes de compartirla?",0.013496644750520956,1.3496644750520956,Verificación de fuentes
+conoce_ia,0.010733671240191379,1.0733671240191378,Conocimiento declarado de IA
+Percepción sobre el uso de IA en campañas políticas [El uso de inteligencia artificial en campañas políticas digitales mejora la comunicación entre partidos y ciudadanos.]_num,0.008052030131058902,0.8052030131058902,Percepción sobre el uso de ia en campañas políticas [el uso de inteligencia artificial en campañas políticas digitales mejora la comunicación entre partidos y ciudadanos.] num
+¿A través de qué dispositivos accede principalmente a Internet?,0.0,0.0,¿a través de qué dispositivos accede principalmente a internet?
+edad,0.0,0.0,Edad
+reside_quito,0.0,0.0,Reside quito
+¿A qué facultad o unidad académica pertenece?,0.0,0.0,¿a qué facultad o unidad académica pertenece?
+¿Por quién votó en la segunda vuelta presidencial de 2025?,0.0,0.0,¿por quién votó en la segunda vuelta presidencial de 2025?
+Percepción sobre el uso de IA en campañas políticas [La existencia de deepfakes o contenido manipulado me hace desconfiar más de las campañas políticas digitales.],0.0,0.0,Percepción sobre el uso de ia en campañas políticas [la existencia de deepfakes o contenido manipulado me hace desconfiar más de las campañas políticas digitales.]
+¿Cree que debería regularse el uso de IA en campañas políticas digitales en el país?,0.0,0.0,¿cree que debería regularse el uso de ia en campañas políticas digitales en el país?
+"¿Conoce alguna medida, ley o regulación sobre el uso de IA en campañas políticas en Ecuador?",0.0,0.0,"¿conoce alguna medida, ley o regulación sobre el uso de ia en campañas políticas en ecuador?"
+Percepción sobre el uso de IA en campañas políticas [Los partidos pueden manipular mi opinión mediante mensajes personalizados creados con IA.]_num,0.0,0.0,Percepción sobre el uso de ia en campañas políticas [los partidos pueden manipular mi opinión mediante mensajes personalizados creados con ia.] num
+Percepción sobre el uso de IA en campañas políticas [Considero que el uso de inteligencia artificial en campañas políticas debería estar regulado por la ley.]_num,0.0,0.0,Percepción sobre el uso de ia en campañas políticas [considero que el uso de inteligencia artificial en campañas políticas debería estar regulado por la ley.] num

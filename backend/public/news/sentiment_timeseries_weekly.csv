@@ -1,0 +1,46 @@
+﻿case_id,week,ai_group,sentiment_label,count,total,pct
+case1_es,2025-01-27,No IA,negativo,4,4,100.0
+case1_es,2025-02-03,IA,negativo,1,2,50.0
+case1_es,2025-02-03,No IA,negativo,5,10,50.0
+case1_es,2025-02-10,No IA,negativo,7,9,77.8
+case1_es,2025-02-17,No IA,negativo,6,18,33.3
+case1_es,2025-02-24,No IA,negativo,3,17,17.6
+case1_es,2025-03-03,IA,negativo,1,2,50.0
+case1_es,2025-03-03,No IA,negativo,12,18,66.7
+case1_es,2025-03-10,No IA,negativo,4,13,30.8
+case1_es,2025-03-17,IA,negativo,1,2,50.0
+case1_es,2025-03-17,No IA,negativo,5,15,33.3
+case1_es,2025-03-24,IA,negativo,1,5,20.0
+case1_es,2025-03-24,No IA,negativo,5,9,55.6
+case1_es,2025-03-31,No IA,negativo,2,26,7.7
+case1_es,2025-04-07,IA,negativo,1,7,14.3
+case1_es,2025-04-07,No IA,negativo,1,17,5.9
+case1_es,2025-04-14,No IA,negativo,6,14,42.9
+case1_es,2025-04-21,No IA,negativo,6,17,35.3
+case1_es,2025-04-28,IA,negativo,1,2,50.0
+case1_es,2025-04-28,No IA,negativo,3,12,25.0
+case2_en,2025-02-03,No IA,negativo,32,45,71.1
+case2_en,2025-02-10,IA,negativo,2,2,100.0
+case2_en,2025-02-10,No IA,negativo,16,32,50.0
+case2_en,2025-02-17,No IA,negativo,10,10,100.0
+case2_en,2025-02-24,No IA,negativo,2,4,50.0
+case2_en,2025-03-03,No IA,negativo,20,21,95.2
+case2_en,2025-03-10,No IA,negativo,10,20,50.0
+case2_en,2025-03-17,No IA,negativo,7,22,31.8
+case2_en,2025-03-24,No IA,negativo,3,8,37.5
+case2_en,2025-03-31,IA,negativo,2,2,100.0
+case2_en,2025-03-31,No IA,negativo,6,14,42.9
+case2_en,2025-04-07,No IA,negativo,47,106,44.3
+case2_en,2025-04-14,No IA,negativo,28,75,37.3
+case2_en,2025-04-21,No IA,negativo,7,13,53.8
+case2_en,2025-04-28,No IA,negativo,3,6,50.0
+case3_ec_media,2025-02-03,No IA,negativo,1,4,25.0
+case3_ec_media,2025-02-24,No IA,negativo,1,7,14.3
+case3_ec_media,2025-03-10,No IA,negativo,1,7,14.3
+case3_ec_media,2025-03-17,IA,negativo,1,1,100.0
+case3_ec_media,2025-03-17,No IA,negativo,3,19,15.8
+case3_ec_media,2025-03-31,IA,negativo,1,9,11.1
+case3_ec_media,2025-03-31,No IA,negativo,1,5,20.0
+case3_ec_media,2025-04-07,IA,negativo,1,4,25.0
+case3_ec_media,2025-04-07,No IA,negativo,1,5,20.0
+case3_ec_media,2025-04-21,IA,negativo,1,1,100.0

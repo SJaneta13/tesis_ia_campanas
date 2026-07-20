@@ -1,0 +1,2 @@
+﻿input,text_col,lang,n_docs,n_tokens,top_n
+data/processed/news_gdelt/cases/case3_ec_media/run_final_tesis/digital_content_clean.csv,text,Spanish,116,37285,30

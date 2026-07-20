@@ -52,12 +52,34 @@ import argparse
 # CONFIG
 # =========================
 parser = argparse.ArgumentParser()
-parser.add_argument("--target", choices=["5", "3"], default="5")
-parser.add_argument("--input", default="data/processed/encuestas/model_ready_no_text.csv")
+
+parser.add_argument(
+    "--target",
+    choices=["5", "3"],
+    default="5",
+    help="Configuración de la variable objetivo: 5 niveles o 3 clases.",
+)
+
+parser.add_argument(
+    "--input",
+    default="data/processed/encuestas/model_ready_no_text.csv",
+    help="Ruta del conjunto de datos preparado para modelado.",
+)
+
+parser.add_argument(
+    "--sensitivity",
+    action="store_true",
+    help=(
+        "Ejecuta el análisis de sensibilidad excluyendo predictores "
+        "conceptualmente relacionados con confianza o transparencia electoral."
+    ),
+)
+
 args = parser.parse_args()
 
 INPUT_PATH = args.input
 USE_TARGET_3 = (args.target == "3")
+SENSITIVITY_ANALYSIS = bool(args.sensitivity)
 
 #pruebas 
 FAST_DEBUG = False  # True = prueba rápida; False = corrida final tesis
@@ -90,7 +112,11 @@ USE_FS_MODELS = {"random_forest"}  # puedes añadir "voting_ensemble" si quieres
 
 # Guardado por run
 RUN_ID = datetime.now().strftime("%Y%m%d_%H%M%S")
-RUN_DIR = Path("outputs") / "runs" / f"run_{RUN_ID}"
+
+RUN_SUFFIX = "_sensitivity" if SENSITIVITY_ANALYSIS else "_complete"
+
+RUN_DIR = Path("outputs") / "runs" / f"run_{RUN_ID}{RUN_SUFFIX}"
+
 DIR_FIGURES = RUN_DIR / "figures"
 DIR_TABLES  = RUN_DIR / "tables"
 DIR_MODELS  = RUN_DIR / "models"
@@ -275,11 +301,70 @@ else:
 # =========================
 # FEATURE SELECTION (DROP)
 # =========================
+
+# Predictores conceptualmente solapados con la variable objetivo.
+#
+# No contienen directamente confianza_idx, pero sus enunciados ya incorporan
+# juicios sobre confianza o transparencia electoral. Se excluyen únicamente
+# en el análisis de sensibilidad.
+CONCEPTUAL_OVERLAP_COLS = [
+    (
+        "Percepción sobre el uso de IA en campañas políticas "
+        "[La presencia de bots o cuentas falsas en redes sociales "
+        "reduce mi confianza en la información política digital.]"
+    ),
+    (
+        "Percepción sobre el uso de IA en campañas políticas "
+        "[La presencia de bots o cuentas falsas en redes sociales "
+        "reduce mi confianza en la información política digital.]_num"
+    ),
+    (
+        "Percepción sobre el uso de IA en campañas políticas "
+        "[La inteligencia artificial puede mejorar la transparencia "
+        "del proceso electoral.]"
+    ),
+    (
+        "Percepción sobre el uso de IA en campañas políticas "
+        "[La inteligencia artificial puede mejorar la transparencia "
+        "del proceso electoral.]_num"
+    ),
+    (
+        "¿Ha cambiado su confianza en el proceso electoral al saber que "
+        "existen bots, deepfakes o manipulación mediante IA?"
+    ),
+]
+
 DROP_COLS = [
     "confianza_idx", "confianza_idx_round",
     "limpieza_num", "fraude_num", "fraude_rev",
     "confianza_limpieza", "confianza_fraude",
 ]
+
+if SENSITIVITY_ANALYSIS:
+    overlap_present = [
+        col for col in CONCEPTUAL_OVERLAP_COLS if col in df.columns
+    ]
+
+    overlap_missing = [
+        col for col in CONCEPTUAL_OVERLAP_COLS if col not in df.columns
+    ]
+
+    DROP_COLS.extend(overlap_present)
+
+    print("\nANÁLISIS DE SENSIBILIDAD ACTIVADO")
+    print("Predictores conceptualmente solapados que serán excluidos:")
+
+    for col in overlap_present:
+        print(f" - {col}")
+
+    if overlap_missing:
+        print("\nPredictores definidos pero no encontrados en el dataset:")
+
+        for col in overlap_missing:
+            print(f" - {col}")
+else:
+    print("\nMODELO COMPLETO: se conservan los predictores perceptuales.")
+
 if "confianza_3" in df.columns:
     DROP_COLS.append("confianza_3")
 if "Marca temporal" in df.columns:
@@ -299,6 +384,28 @@ for c in df.columns:
 
 X = df.drop(columns=[c for c in DROP_COLS if c in df.columns], errors="ignore")
 y = df[target_col].copy()
+
+excluded_overlap_df = pd.DataFrame(
+    {
+        "variable": [
+            col for col in CONCEPTUAL_OVERLAP_COLS if col in df.columns
+        ],
+        "excluded_in_this_run": [
+            bool(SENSITIVITY_ANALYSIS)
+            for col in CONCEPTUAL_OVERLAP_COLS
+            if col in df.columns
+        ],
+        "reason": (
+            "Solapamiento conceptual con confianza o transparencia electoral"
+        ),
+    }
+)
+
+excluded_overlap_df.to_csv(
+    DIR_TABLES / "conceptual_overlap_variables.csv",
+    index=False,
+    encoding="utf-8-sig",
+)
 
 num_cols = X.select_dtypes(include=[np.number]).columns.tolist()
 cat_cols = [c for c in X.columns.tolist() if c not in num_cols]
@@ -723,6 +830,17 @@ for model_name, cfg in models.items():
         "auc_ovr_std": agg["auc_ovr"]["std"],
         "time_seconds_mean": agg["time_seconds"]["mean"],
         "time_seconds_std": agg["time_seconds"]["std"],
+        "analysis_mode": (
+            "sensitivity_without_overlap"
+            if SENSITIVITY_ANALYSIS
+            else "complete_model"
+        ),
+        "conceptual_overlap_excluded": bool(SENSITIVITY_ANALYSIS),
+        "n_overlap_variables_excluded": int(
+            sum(col in df.columns for col in CONCEPTUAL_OVERLAP_COLS)
+            if SENSITIVITY_ANALYSIS
+            else 0
+        ),
     })
 
 

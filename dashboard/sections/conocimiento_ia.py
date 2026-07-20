@@ -6,6 +6,10 @@ import plotly.express as px
 import pandas as pd
 import streamlit as st
 
+from dashboard.data_loader import (
+    load_h1_spearman_sensitivity,
+)
+
 from dashboard.components import topbar, kpi_card
 from dashboard.common import (
     PLOTLY_CONFIG,

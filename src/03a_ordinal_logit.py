@@ -41,42 +41,102 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 warnings.filterwarnings("ignore", message=".*Maximum Likelihood optimization.*")
 
 
-# =========================
-# OUTPUTS: usar el último run de sklearn
-# =========================
-RUNS_DIR = Path("outputs") / "runs"
-runs = sorted(RUNS_DIR.glob("run_*"))
-if not runs:
-    raise FileNotFoundError(
-        "No hay runs en outputs/runs. Primero ejecuta src/03_modeling.py"
-    )
-last_run = runs[-1].name
-
-OUT_DIR = RUNS_DIR / last_run / "ordinal"
-OUT_DIR.mkdir(parents=True, exist_ok=True)
-
-FIG_DIR = RUNS_DIR / last_run / "figures" / "ordinal"
-FIG_DIR.mkdir(parents=True, exist_ok=True)
-
-TABLES_DIR = RUNS_DIR / last_run / "tables"
-
-
-set_paper_style()
-
-print("Guardando ordinal en:", OUT_DIR)
-print("Guardando figuras ordinal en:", FIG_DIR)
-
 
 # =========================
 # CONFIG (alineado con 03_modeling.py y tesis)
 # =========================
 parser = argparse.ArgumentParser()
-parser.add_argument("--target", choices=["5", "3"], default="5")
-parser.add_argument("--input", default="data/processed/encuestas/model_ready_no_text.csv")
+
+parser.add_argument(
+    "--sensitivity",
+    action="store_true",
+    help=(
+        "Excluye predictores conceptualmente relacionados "
+        "con confianza o transparencia electoral."
+    ),
+)
+
+parser.add_argument(
+    "--target",
+    choices=["5", "3"],
+    default="5",
+)
+
+parser.add_argument(
+    "--input",
+    default="data/processed/encuestas/model_ready_no_text.csv",
+)
+
+parser.add_argument(
+    "--run-dir",
+    default=None,
+    help=(
+        "Nombre de la carpeta de outputs/runs donde se guardarán "
+        "los resultados ordinales."
+    ),
+)
+
 args = parser.parse_args()
 
+SENSITIVITY_ANALYSIS = bool(args.sensitivity)
 INPUT_PATH = args.input
 RUN_TARGET = args.target
+
+
+# =========================
+# OUTPUTS
+# =========================
+RUNS_DIR = Path("outputs") / "runs"
+
+if args.run_dir is not None:
+    selected_run = RUNS_DIR / args.run_dir
+
+    if not selected_run.exists():
+        raise FileNotFoundError(
+            f"No existe la carpeta indicada: {selected_run}"
+        )
+else:
+    expected_suffix = (
+        "_sensitivity"
+        if SENSITIVITY_ANALYSIS
+        else "_complete"
+    )
+
+    matching_runs = sorted(
+        run
+        for run in RUNS_DIR.glob("run_*")
+        if run.name.endswith(expected_suffix)
+    )
+
+    if not matching_runs:
+        raise FileNotFoundError(
+            "No se encontró una corrida compatible con el modo "
+            f"seleccionado: {expected_suffix}"
+        )
+
+    selected_run = matching_runs[-1]
+
+last_run = selected_run.name
+
+OUT_DIR = selected_run / "ordinal"
+OUT_DIR.mkdir(parents=True, exist_ok=True)
+
+FIG_DIR = selected_run / "figures" / "ordinal"
+FIG_DIR.mkdir(parents=True, exist_ok=True)
+
+TABLES_DIR = selected_run / "tables"
+
+set_paper_style()
+
+print(
+    "Modo ordinal:",
+    "sensibilidad" if SENSITIVITY_ANALYSIS else "completo",
+)
+print("Run seleccionado:", selected_run)
+print("Guardando ordinal en:", OUT_DIR)
+print("Guardando figuras ordinal en:", FIG_DIR)
+
+
 
 TARGET_5 = "confianza_idx_round"  # 1..5
 TEST_SIZE = 0.30  # Tesis: 70% train / 30% validación
@@ -192,6 +252,33 @@ def check_proportional_odds_exploratory(X_train, y_train, n_classes, out_path):
     return coef_df
 
 
+
+CONCEPTUAL_OVERLAP_COLS = [
+    (
+        "Percepción sobre el uso de IA en campañas políticas "
+        "[La presencia de bots o cuentas falsas en redes sociales "
+        "reduce mi confianza en la información política digital.]"
+    ),
+    (
+        "Percepción sobre el uso de IA en campañas políticas "
+        "[La presencia de bots o cuentas falsas en redes sociales "
+        "reduce mi confianza en la información política digital.]_num"
+    ),
+    (
+        "Percepción sobre el uso de IA en campañas políticas "
+        "[La inteligencia artificial puede mejorar la transparencia "
+        "del proceso electoral.]"
+    ),
+    (
+        "Percepción sobre el uso de IA en campañas políticas "
+        "[La inteligencia artificial puede mejorar la transparencia "
+        "del proceso electoral.]_num"
+    ),
+    (
+        "¿Ha cambiado su confianza en el proceso electoral al saber que "
+        "existen bots, deepfakes o manipulación mediante IA?"
+    ),
+]
 # =========================
 # Feature building
 # =========================
@@ -207,6 +294,20 @@ def build_x_y(df, target_col):
         "Marca temporal",
         "confianza_3",
     ]
+
+    if SENSITIVITY_ANALYSIS:
+        overlap_present = [
+            col for col in CONCEPTUAL_OVERLAP_COLS if col in df.columns
+        ]
+
+        DROP_COLS.extend(overlap_present)
+
+        print(
+            "\nRegresión ordinal: análisis de sensibilidad activado."
+        )
+
+        for col in overlap_present:
+            print(f" - Excluida: {col}")
 
     TEXT_COL = (
         "¿Qué recomendaciones haría para garantizar un uso responsable y "
@@ -244,9 +345,20 @@ def build_x_y(df, target_col):
         "digitales en el país?",
     ]
 
+    if SENSITIVITY_ANALYSIS:
+        base_keep = [
+            col for col in base_keep
+            if col not in CONCEPTUAL_OVERLAP_COLS
+        ]
+
     likert_num_cols = [
-        c for c in X.columns if isinstance(c, str) and c.endswith("_num")
+        c
+        for c in X.columns
+        if isinstance(c, str)
+        and c.endswith("_num")
+        and c not in CONCEPTUAL_OVERLAP_COLS
     ]
+
     keep_cols = [c for c in base_keep if c in X.columns] + likert_num_cols
     X = X[keep_cols].copy()
 

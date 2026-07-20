@@ -475,18 +475,20 @@ def render_resumen_general(
 
                 <div class="hypothesis-grid">
                     <div class="hypothesis-box h1-box">
-                        <div class="hypothesis-label">H1 · Exposición y confianza</div>
+                        <div class="hypothesis-label">H1 · Uso percibido de IA y confianza</div>
                         <div class="hypothesis-text">
-                            A mayor exposición percibida a contenidos generados o potenciados por IA,
-                            menor nivel de confianza electoral en la comunidad universitaria UCE.
+                            Existe una relación significativa entre el uso de herramientas de
+                            inteligencia artificial en campañas políticas digitales y el nivel
+                            de confianza electoral manifestado por la comunidad universitaria UCE.    
                         </div>
                     </div>
 
                     <div class="hypothesis-box h2-box">
                         <div class="hypothesis-label">H2 · Verificación informativa</div>
                         <div class="hypothesis-text">
-                            La alfabetización mediática modera esta relación: quienes verifican más información
-                            presentan menor reducción de confianza frente a bots, deepfakes o microsegmentación.
+                            La verificación informativa puede amortiguar la relación entre el
+                            riesgo percibido por IA y la confianza electoral; esta hipótesis se
+                            evalúa con alcance complementario y exploratorio.    
                         </div>
                     </div>
                 </div>
@@ -501,7 +503,7 @@ def render_resumen_general(
                 </div>
                 <div class="method-card">
                     <div class="method-title">Variables independientes</div>
-                    <div class="method-text">Exposición percibida a IA, automatización, percepción de bots, alfabetización mediática y perfil sociodemográfico.</div>
+                    <div class="method-text">Percepción del uso de IA, exposición digital, riesgo percibido, automatización, verificación informativa y perfil sociodemográfico.</div>
                 </div>
                 <div class="method-card">
                     <div class="method-title">Metodología</div>

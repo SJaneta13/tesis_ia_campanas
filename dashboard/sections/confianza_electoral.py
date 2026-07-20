@@ -4,6 +4,10 @@ import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
 
+from dashboard.data_loader import (
+    load_h1_spearman_sensitivity,
+)
+
 from dashboard.components import topbar, kpi_card
 from dashboard.common import (
     PLOTLY_CONFIG,
@@ -205,6 +209,14 @@ def _prepare_columns(df: pd.DataFrame) -> dict[str, str | None]:
                 "información política digital antes de compartirla",
             ],
         ),
+        "identifica_ia": find_first_existing_column(
+            df,
+            [
+                "identifica_ia",
+                "identificar si un contenido político fue generado con IA",
+                "distinguir contenido generado con IA",
+            ],
+        ),
         "participacion": find_first_existing_column(
             df,
             [
@@ -306,49 +318,120 @@ def build_exposure_score(df: pd.DataFrame, cols: dict[str, str | None] | None = 
 
     return pd.concat(components, axis=1).mean(axis=1).clip(1, 5)
 
-
-def build_ai_risk_score(df: pd.DataFrame, cols: dict[str, str | None] | None = None) -> pd.Series:
+def build_ai_identification_score(
+    df: pd.DataFrame,
+    cols: dict[str, str | None] | None = None,
+) -> pd.Series:
     """
-    Índice 1-5 de exposición/riesgo percibido por IA para contrastar H1 y H2.
-    Operacionaliza bots, deepfakes y microsegmentación política mediante tres ítems Likert:
-    manipulación personalizada, bots/cuentas falsas y deepfakes/contenido manipulado.
-    """
-    if cols is None:
-        cols = _prepare_columns(df)
-
-    components = []
-    for key in ["manipulacion_personalizada", "bots_reduce_confianza", "deepfake_desconfianza"]:
-        col = cols.get(key)
-        if col and col in df.columns:
-            values = likert_to_numeric(df[col])
-            if values.notna().sum() > 0:
-                components.append(values)
-
-    if not components:
-        return build_exposure_score(df, cols)
-
-    return pd.concat(components, axis=1).mean(axis=1).clip(1, 5)
-
-
-def build_media_literacy_score(df: pd.DataFrame, cols: dict[str, str | None] | None = None) -> pd.Series:
-    """
-    Proxy 1-5 de alfabetización mediática usando verificación informativa antes de compartir.
-    Se interpreta como capacidad/práctica de contraste de fuentes, no como medición integral de alfabetización.
+    Indicador ordinal de identificación declarada de contenido con IA.
+    Conserva las tres categorías observadas en la encuesta.
     """
     if cols is None:
         cols = _prepare_columns(df)
 
-    col = cols.get("verificacion")
-    if not col or col not in df.columns:
-        return pd.Series([np.nan] * len(df), index=df.index)
+    column = cols.get("identifica_ia")
+
+    if not column or column not in df.columns:
+        return pd.Series(
+            np.nan,
+            index=df.index,
+            dtype=float,
+        )
 
     return _map_by_dictionary(
-        df[col],
+        df[column],
+        {
+            "No, me resulta difícil distinguirlo": 1,
+            "A veces": 2,
+            "Sí, fácilmente": 3,
+        },
+    )
+def build_ai_risk_score(
+    df: pd.DataFrame,
+    cols: dict[str, str | None] | None = None,
+) -> pd.Series:
+    """
+    Índice 1-5 de riesgo percibido por IA utilizado en H1 y H2.
+
+    Se calcula con tres ítems:
+    1. manipulación mediante mensajes personalizados;
+    2. bots o cuentas falsas que reducen la confianza;
+    3. desconfianza frente a deepfakes o contenido manipulado.
+
+    No mide frecuencia de exposición ni incluye un indicador
+    independiente de microsegmentación.
+    """
+    if cols is None:
+        cols = _prepare_columns(df)
+
+    required_keys = [
+        "manipulacion_personalizada",
+        "bots_reduce_confianza",
+        "deepfake_desconfianza",
+    ]
+
+    components = []
+
+    for key in required_keys:
+        column = cols.get(key)
+
+        if not column or column not in df.columns:
+            return pd.Series(
+                np.nan,
+                index=df.index,
+                dtype=float,
+            )
+
+        values = likert_to_numeric(df[column])
+
+        if values.notna().sum() == 0:
+            return pd.Series(
+                np.nan,
+                index=df.index,
+                dtype=float,
+            )
+
+        components.append(values)
+
+    return (
+        pd.concat(components, axis=1)
+        .mean(axis=1)
+        .clip(1, 5)
+    )
+
+
+def build_verification_score(
+    df: pd.DataFrame,
+    cols: dict[str, str | None] | None = None,
+) -> pd.Series:
+    """
+    Indicador ordinal de verificación informativa.
+
+    Conserva las cuatro categorías reales de la encuesta:
+    Nunca, Rara vez, A veces y Siempre.
+
+    No constituye por sí solo una escala integral de
+    alfabetización mediática.
+    """
+    if cols is None:
+        cols = _prepare_columns(df)
+
+    column = cols.get("verificacion")
+
+    if not column or column not in df.columns:
+        return pd.Series(
+            np.nan,
+            index=df.index,
+            dtype=float,
+        )
+
+    return _map_by_dictionary(
+        df[column],
         {
             "Nunca": 1,
             "Rara vez": 2,
             "A veces": 3,
-            "Siempre": 5,
+            "Siempre": 4,
         },
     )
 
@@ -389,7 +472,8 @@ def _analysis_frame(df: pd.DataFrame, cols: dict[str, str | None]) -> pd.DataFra
     out["Edad_num"] = _age_numeric(out["Rango de edad"])
     out["Exposición digital"] = build_exposure_score(out, cols)
     out["Riesgo IA"] = build_ai_risk_score(out, cols)
-    out["Alfabetización mediática"] = build_media_literacy_score(out, cols)
+    out["Verificación informativa"] = build_verification_score(out, cols)
+    out["Identificación de IA"] = build_ai_identification_score(out, cols)
     out["Nivel de verificación"] = _verification_group_series(out, cols)
     out["Confianza electoral"] = build_confidence_index(out, cols)
     out["Exposición Likert"] = out["Exposición digital"].round().clip(1, 5)
@@ -876,8 +960,15 @@ def make_spearman_chart(analysis_df: pd.DataFrame, cols: dict[str, str | None], 
     data["Exposición digital"] = analysis_df["Exposición digital"]
     if "Riesgo IA" in analysis_df.columns:
         data["Riesgo percibido por IA"] = analysis_df["Riesgo IA"]
-    if "Alfabetización mediática" in analysis_df.columns:
-        data["Alfabetización mediática"] = analysis_df["Alfabetización mediática"]
+    if "Verificación informativa" in analysis_df.columns:
+        data["Verificación informativa"] = (
+            analysis_df["Verificación informativa"]
+        )
+
+    if "Identificación de IA" in analysis_df.columns:
+        data["Identificación de IA"] = (
+            analysis_df["Identificación de IA"]
+        )        
     data["Edad"] = analysis_df["Edad_num"]
 
     if cols.get("falso"):
@@ -911,12 +1002,6 @@ def make_spearman_chart(analysis_df: pd.DataFrame, cols: dict[str, str | None], 
     for label, col in likert_candidates.items():
         if col and col in analysis_df.columns:
             data[label] = likert_to_numeric(analysis_df[col])
-
-    if cols.get("verificacion"):
-        data["Verificación informativa"] = _map_by_dictionary(
-            analysis_df[cols["verificacion"]],
-            {"Nunca": 1, "Rara vez": 2, "A veces": 3, "Siempre": 5},
-        )
 
     if cols.get("participacion"):
         data["Participación digital"] = _map_by_dictionary(
@@ -1076,7 +1161,7 @@ def make_moderation_line_chart(analysis_df: pd.DataFrame, height: int = 410):
         plot_bgcolor="#ffffff",
         margin=dict(l=56, r=42, t=14, b=70),
         xaxis=dict(
-            title="Riesgo/exposición percibida por IA",
+            title="Riesgo percibido por IA",
             gridcolor="#e5e7eb",
             automargin=True,
         ),
@@ -1151,57 +1236,198 @@ def compute_moderation_group_stats(analysis_df: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def compute_interaction_model(analysis_df: pd.DataFrame) -> dict:
+def compute_interaction_model(
+    analysis_df: pd.DataFrame,
+) -> dict:
+    """
+    Regresión lineal exploratoria para H2.
+
+    X = riesgo percibido por IA.
+    M = nivel ordinal de verificación:
+        baja = 1, media = 2, alta = 3.
+    Y = confianza electoral.
+    """
     data = analysis_df.dropna(
-        subset=["Riesgo IA", "Alfabetización mediática", "Confianza electoral"]
+        subset=[
+            "Riesgo IA",
+            "Nivel de verificación",
+            "Confianza electoral",
+        ]
     ).copy()
 
-    if len(data) < 30 or data["Riesgo IA"].nunique() < 2 or data["Alfabetización mediática"].nunique() < 2:
+    verification_map = {
+        "Baja verificación": 1,
+        "Verificación media": 2,
+        "Alta verificación": 3,
+    }
+
+    data["Verificacion_num"] = (
+        data["Nivel de verificación"]
+        .map(verification_map)
+    )
+
+    data = data.dropna(
+        subset=["Verificacion_num"]
+    ).copy()
+
+    if (
+        len(data) < 30
+        or data["Riesgo IA"].nunique() < 2
+        or data["Verificacion_num"].nunique() < 2
+    ):
         return {}
 
-    data["Xc"] = data["Riesgo IA"] - data["Riesgo IA"].mean()
-    data["Mc"] = data["Alfabetización mediática"] - data["Alfabetización mediática"].mean()
-    data["Interacción"] = data["Xc"] * data["Mc"]
+    # Centrado para facilitar la interpretación.
+    data["Xc"] = (
+        data["Riesgo IA"]
+        - data["Riesgo IA"].mean()
+    )
+
+    data["Mc"] = (
+        data["Verificacion_num"]
+        - data["Verificacion_num"].mean()
+    )
+
+    data["Interacción"] = (
+        data["Xc"] * data["Mc"]
+    )
 
     xmat = np.column_stack(
-        [np.ones(len(data)), data["Xc"].to_numpy(), data["Mc"].to_numpy(), data["Interacción"].to_numpy()]
+        [
+            np.ones(len(data)),
+            data["Xc"].to_numpy(),
+            data["Mc"].to_numpy(),
+            data["Interacción"].to_numpy(),
+        ]
     )
+
     y = data["Confianza electoral"].to_numpy()
 
     try:
-        beta = np.linalg.lstsq(xmat, y, rcond=None)[0]
-        pred = xmat @ beta
-        resid = y - pred
+        beta = np.linalg.lstsq(
+            xmat,
+            y,
+            rcond=None,
+        )[0]
+
+        prediction = xmat @ beta
+        residuals = y - prediction
+
         n, k = xmat.shape
-        s2 = float(resid @ resid) / max(n - k, 1)
-        inv = np.linalg.inv(xmat.T @ xmat)
-        se = np.sqrt(np.diag(s2 * inv))
-        t_vals = beta / se
-        p_vals = [np.nan] * len(beta)
+
+        residual_variance = (
+            float(residuals @ residuals)
+            / max(n - k, 1)
+        )
+
+        covariance_matrix = (
+            residual_variance
+            * np.linalg.pinv(
+                xmat.T @ xmat
+            )
+        )
+
+        standard_errors = np.sqrt(
+            np.diag(covariance_matrix)
+        )
+
+        t_values = np.divide(
+            beta,
+            standard_errors,
+            out=np.full_like(
+                beta,
+                np.nan,
+                dtype=float,
+            ),
+            where=standard_errors > 0,
+        )
+
+        degrees_freedom = max(
+            n - k,
+            1,
+        )
 
         try:
             from scipy.stats import t as student_t
-            p_vals = [2 * (1 - student_t.cdf(abs(t), df=n-k)) for t in t_vals]
-        except Exception:
-            pass
 
-        ss_res = float(np.sum(resid ** 2))
-        ss_tot = float(np.sum((y - y.mean()) ** 2))
-        r2 = 1 - ss_res / ss_tot if ss_tot else np.nan
+            p_values = [
+                (
+                    2
+                    * student_t.sf(
+                        abs(value),
+                        df=degrees_freedom,
+                    )
+                    if pd.notna(value)
+                    else np.nan
+                )
+                for value in t_values
+            ]
+
+            critical_value = float(
+                student_t.ppf(
+                    0.975,
+                    df=degrees_freedom,
+                )
+            )
+
+        except Exception:
+            p_values = [np.nan] * len(beta)
+            critical_value = 1.96
+
+        ci_low = (
+            beta
+            - critical_value
+            * standard_errors
+        )
+
+        ci_high = (
+            beta
+            + critical_value
+            * standard_errors
+        )
+
+        ss_residual = float(
+            np.sum(residuals ** 2)
+        )
+
+        ss_total = float(
+            np.sum((y - y.mean()) ** 2)
+        )
+
+        r_squared = (
+            1 - ss_residual / ss_total
+            if ss_total
+            else np.nan
+        )
 
         return {
             "n": int(n),
             "beta_riesgo": float(beta[1]),
-            "p_riesgo": float(p_vals[1]) if pd.notna(p_vals[1]) else np.nan,
+            "p_riesgo": float(p_values[1]),
             "beta_verificacion": float(beta[2]),
-            "p_verificacion": float(p_vals[2]) if pd.notna(p_vals[2]) else np.nan,
+            "p_verificacion": float(p_values[2]),
             "beta_interaccion": float(beta[3]),
-            "p_interaccion": float(p_vals[3]) if pd.notna(p_vals[3]) else np.nan,
-            "r2": float(r2) if pd.notna(r2) else np.nan,
+            "se_interaccion": float(
+                standard_errors[3]
+            ),
+            "ci95_interaccion_low": float(
+                ci_low[3]
+            ),
+            "ci95_interaccion_high": float(
+                ci_high[3]
+            ),
+            "p_interaccion": float(
+                p_values[3]
+            ),
+            "r2": float(r_squared),
         }
-    except Exception:
-        return {}
 
+    except (
+        np.linalg.LinAlgError,
+        ValueError,
+        TypeError,
+    ):
+        return {}
 
 def _format_p(value) -> str:
     if pd.isna(value):
@@ -1211,47 +1437,190 @@ def _format_p(value) -> str:
     return f"{value:.3f}"
 
 
-def _h2_summary_html(group_stats: pd.DataFrame, model: dict) -> str:
+def _h2_summary_html(
+    group_stats: pd.DataFrame,
+    model: dict,
+) -> str:
     if group_stats.empty:
         return ""
 
-    def get_slope(group: str):
-        row = group_stats[group_stats["Nivel de verificación"] == group]
+    def get_slope(
+        group: str,
+    ) -> float:
+        row = group_stats[
+            group_stats[
+                "Nivel de verificación"
+            ]
+            == group
+        ]
+
         if row.empty:
             return np.nan
-        return row.iloc[0]["pendiente"]
 
-    low_slope = get_slope("Baja verificación")
-    high_slope = get_slope("Alta verificación")
-    p_interaction = model.get("p_interaccion", np.nan) if model else np.nan
+        return float(
+            row.iloc[0]["pendiente"]
+        )
 
-    has_protective_pattern = pd.notna(low_slope) and pd.notna(high_slope) and abs(high_slope) < abs(low_slope)
-    reading_text = "Tendencia exploratoria compatible" if has_protective_pattern else "Evidencia no concluyente"
+    def format_slope(
+        value: float,
+    ) -> str:
+        if pd.isna(value):
+            return "N/D"
+
+        return (
+            f"{value:+.3f}"
+            .replace("-", "−")
+            .replace(".", ",")
+        )
+
+    low_slope = get_slope(
+        "Baja verificación",
+    )
+
+    high_slope = get_slope(
+        "Alta verificación",
+    )
+
+    p_interaction = (
+        model.get(
+            "p_interaccion",
+            np.nan,
+        )
+        if model
+        else np.nan
+    )
+
+    has_compatible_pattern = (
+        pd.notna(low_slope)
+        and pd.notna(high_slope)
+        and low_slope < 0
+        and abs(high_slope)
+        < abs(low_slope)
+    )
 
     if pd.isna(p_interaction):
-        technical_text = "modelo exploratorio"
-        technical_detail = "p de interacción no disponible"
+        reading_text = (
+            "Evidencia insuficiente"
+        )
+
+        technical_text = (
+            "Modelo no disponible"
+        )
+
+        technical_detail = (
+            "no se obtuvo el valor p "
+            "de la interacción"
+        )
+
     elif p_interaction < 0.05:
-        technical_text = "interacción significativa"
-        technical_detail = f"modelo lineal: p = {_format_p(p_interaction)}"
+        reading_text = (
+            "Interacción significativa"
+        )
+
+        technical_text = (
+            "H2 respaldada estadísticamente"
+        )
+
+        technical_detail = (
+            "p de interacción = "
+            + _format_decimal_es(
+                p_interaction,
+                3,
+            )
+        )
+
+    elif has_compatible_pattern:
+        reading_text = (
+            "Tendencia compatible"
+        )
+
+        technical_text = (
+            "H2 no confirmada"
+        )
+
+        technical_detail = (
+            "interacción no significativa; "
+            "p = "
+            + _format_decimal_es(
+                p_interaction,
+                3,
+            )
+        )
+
     else:
-        technical_text = "interacción no significativa"
-        technical_detail = f"modelo lineal: p = {_format_p(p_interaction)}"
+        reading_text = (
+            "Patrón no concluyente"
+        )
+
+        technical_text = (
+            "H2 no confirmada"
+        )
+
+        technical_detail = (
+            "interacción no significativa; "
+            "p = "
+            + _format_decimal_es(
+                p_interaction,
+                3,
+            )
+        )
 
     return (
         "<div class='ce-h2-grid'>"
-        "<div class='ce-h2-card red'><div class='ce-h2-label'>Baja verificación</div>"
-        f"<div class='ce-h2-value'>{low_slope:+.3f}</div>"
-        "<div class='ce-h2-text'>pendiente riesgo IA → confianza; valores más negativos indican mayor caída.</div></div>"
-        "<div class='ce-h2-card green'><div class='ce-h2-label'>Alta verificación</div>"
-        f"<div class='ce-h2-value'>{high_slope:+.3f}</div>"
-        "<div class='ce-h2-text'>si la pendiente es menos negativa, la verificación funciona como posible amortiguador.</div></div>"
-        "<div class='ce-h2-card yellow'><div class='ce-h2-label'>Lectura de H2</div>"
-        f"<div class='ce-h2-value small'>{safe_text(reading_text)}</div>"
-        "<div class='ce-h2-text'>lectura descriptiva; no implica causalidad ni confirmación fuerte.</div></div>"
-        "<div class='ce-h2-card blue'><div class='ce-h2-label'>Detalle técnico</div>"
-        f"<div class='ce-h2-value small'>{safe_text(technical_text)}</div>"
-        f"<div class='ce-h2-text'>{safe_text(technical_detail)} · usar como apoyo, no como mensaje central.</div></div>"
+
+        "<div class='ce-h2-card red'>"
+        "<div class='ce-h2-label'>"
+        "Baja verificación"
+        "</div>"
+        f"<div class='ce-h2-value'>"
+        f"{format_slope(low_slope)}"
+        "</div>"
+        "<div class='ce-h2-text'>"
+        "Pendiente riesgo IA → confianza. "
+        "Un valor más negativo representa una "
+        "mayor caída estimada de confianza."
+        "</div>"
+        "</div>"
+
+        "<div class='ce-h2-card green'>"
+        "<div class='ce-h2-label'>"
+        "Alta verificación"
+        "</div>"
+        f"<div class='ce-h2-value'>"
+        f"{format_slope(high_slope)}"
+        "</div>"
+        "<div class='ce-h2-text'>"
+        "Una pendiente menos negativa es compatible "
+        "con una posible amortiguación descriptiva, "
+        "pero no demuestra un efecto moderador."
+        "</div>"
+        "</div>"
+
+        "<div class='ce-h2-card yellow'>"
+        "<div class='ce-h2-label'>"
+        "Lectura de H2"
+        "</div>"
+        f"<div class='ce-h2-value small'>"
+        f"{safe_text(reading_text)}"
+        "</div>"
+        "<div class='ce-h2-text'>"
+        "La comparación de pendientes es exploratoria "
+        "y no implica causalidad."
+        "</div>"
+        "</div>"
+
+        "<div class='ce-h2-card blue'>"
+        "<div class='ce-h2-label'>"
+        "Resultado inferencial"
+        "</div>"
+        f"<div class='ce-h2-value small'>"
+        f"{safe_text(technical_text)}"
+        "</div>"
+        f"<div class='ce-h2-text'>"
+        f"{safe_text(technical_detail)}"
+        "</div>"
+        "</div>"
+
         "</div>"
     )
 
@@ -1343,7 +1712,7 @@ def make_moderation_heatmap(analysis_df: pd.DataFrame, height: int = 360):
         margin=dict(l=10, r=10, t=8, b=44),
         xaxis=dict(
             title=dict(
-                text="Riesgo/exposición percibida por IA",
+                text="Riesgo percibida por IA",
                 font=dict(size=12, color="#64748b"),
             ),
             tickfont=dict(size=11, color="#64748b"),
@@ -1653,20 +2022,254 @@ def _render_summary_tab(survey_df: pd.DataFrame, cols: dict[str, str | None], me
         unsafe_allow_html=True,
     )
 
+def _format_decimal_es(
+    value,
+    decimals: int = 4,
+) -> str:
+    if pd.isna(value):
+        return "—"
+
+    return (
+        f"{float(value):.{decimals}f}"
+        .replace("-", "−")
+        .replace(".", ",")
+    )
+
+def _h1_table_html(
+    display_df: pd.DataFrame,
+) -> str:
+    if display_df.empty:
+        return ""
+
+    rows = []
+
+    for _, row in display_df.iterrows():
+        rows.append(
+            "<tr>"
+            f"<td>{safe_text(row['Escenario'])}</td>"
+            f"<td>{safe_text(row['Ítems'])}</td>"
+            f"<td>{safe_text(row['ρ'])}</td>"
+            f"<td>{safe_text(row['p'])}</td>"
+            f"<td>{safe_text(row['IC 95 %'])}</td>"
+            f"<td>{safe_text(row['n'])}</td>"
+            "</tr>"
+        )
+
+    return (
+        "<div class='ce-h1-table-wrap'>"
+        "<table class='ce-h1-table'>"
+        "<thead>"
+        "<tr>"
+        "<th>Escenario H1</th>"
+        "<th>Ítems</th>"
+        "<th>ρ</th>"
+        "<th>p</th>"
+        "<th>IC 95 %</th>"
+        "<th>n</th>"
+        "</tr>"
+        "</thead>"
+        "<tbody>"
+        + "".join(rows)
+        + "</tbody>"
+        "</table>"
+        "</div>"
+    )
+
+def _render_h1_operational_contrast() -> None:
+    h1_df = load_h1_spearman_sensitivity()
+
+    with st.container(
+        key="card_ce_h1_operacional",
+    ):
+        render_card_header(
+            "Contraste operacional de H1",
+            "Comparación del índice completo de riesgo percibido "
+            "con la versión reducida que excluye el ítem sobre "
+            "bots y confianza.",
+        )
+
+        st.markdown(
+            """
+            <div class="ce-hypothesis-box">
+                <strong>Resultado de H1: respaldo parcial.</strong>
+                Se observó una asociación negativa, débil y
+                estadísticamente significativa entre el riesgo
+                percibido por IA y la confianza electoral.
+                El resultado representa una relación perceptual
+                y no causal.
+                <br><br>
+                <strong>Análisis de sensibilidad:</strong>
+                se comparó el índice completo, compuesto por
+                manipulación personalizada, bots-confianza y
+                deepfakes, con una versión reducida que excluye
+                el ítem relacionado directamente con bots y
+                reducción de confianza.
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        if h1_df.empty:
+            empty_state(
+                "No se encontró el archivo "
+                "h1_spearman_sensitivity.csv."
+            )
+            return
+
+        required_columns = {
+            "scenario",
+            "n_items",
+            "rho",
+            "p_value",
+            "ci95_low",
+            "ci95_high",
+            "n",
+            "index_concordance",
+            "delta_rho",
+        }
+
+        missing_columns = (
+            required_columns
+            - set(h1_df.columns)
+        )
+
+        if missing_columns:
+            empty_state(
+                "El archivo de sensibilidad H1 no contiene "
+                "todas las columnas requeridas: "
+                + ", ".join(sorted(missing_columns))
+            )
+            return
+
+        h1_df = (
+            h1_df
+            .sort_values(
+                "n_items",
+                ascending=False,
+            )
+            .reset_index(drop=True)
+        )
+
+        display_df = pd.DataFrame(
+            {
+                "Escenario": h1_df["scenario"],
+                "Ítems": h1_df["n_items"].astype(int),
+                "ρ": h1_df["rho"].map(
+                    lambda value: _format_decimal_es(
+                        value,
+                        4,
+                    )
+                ),
+                "p": h1_df["p_value"].map(
+                    lambda value: _format_decimal_es(
+                        value,
+                        4,
+                    )
+                ),
+                "IC 95 %": h1_df.apply(
+                    lambda row: (
+                        "["
+                        + _format_decimal_es(
+                            row["ci95_low"],
+                            4,
+                        )
+                        + "; "
+                        + _format_decimal_es(
+                            row["ci95_high"],
+                            4,
+                        )
+                        + "]"
+                    ),
+                    axis=1,
+                ),
+                "n": h1_df["n"].astype(int),
+            }
+        )
+
+        table_html = _h1_table_html(
+            display_df,
+        )
+
+        if table_html:
+            st.markdown(
+                table_html,
+                unsafe_allow_html=True,
+            )
+
+        concordance_values = (
+            pd.to_numeric(
+                h1_df["index_concordance"],
+                errors="coerce",
+            )
+            .dropna()
+        )
+
+        delta_values = (
+            pd.to_numeric(
+                h1_df["delta_rho"],
+                errors="coerce",
+            )
+            .dropna()
+        )
+
+        concordance = (
+            float(concordance_values.iloc[0])
+            if not concordance_values.empty
+            else np.nan
+        )
+
+        delta_rho = (
+            float(delta_values.iloc[0])
+            if not delta_values.empty
+            else np.nan
+        )
+
+        render_note(
+            "En ambos escenarios se observa una asociación "
+            "negativa, débil y estadísticamente significativa "
+            "entre el riesgo percibido por IA y la confianza "
+            "electoral. Los índices presentan una concordancia "
+            f"elevada (ρ = {_format_decimal_es(concordance, 4)}) "
+            "y la diferencia absoluta entre correlaciones fue "
+            f"Δρ = {_format_decimal_es(delta_rho, 6)}. "
+            "La exclusión del ítem sobre bots y confianza no "
+            "modificó la dirección ni la magnitud sustantiva "
+            "del resultado.",
+            "blue",
+        )
+
+        st.caption(
+            "El estudio analiza percepciones declaradas sobre "
+            "el uso de IA; no constituye una auditoría técnica "
+            "de las herramientas efectivamente utilizadas por "
+            "las campañas."
+        )
 
 def _render_exposure_tab(analysis_df: pd.DataFrame, cols: dict[str, str | None]):
+    _render_h1_operational_contrast()
+
+    st.markdown(
+        '<div class="ce-section-gap"></div>',
+        unsafe_allow_html=True,
+    )    
     with st.container(key="card_ce_heatmap"):
         render_card_header(
-            "Contraste H1: exposición digital vs confianza electoral",
-            "Densidad de encuestados por combinación Likert. Valores más oscuros indican mayor concentración de respuestas.",
+            "Exposición digital y confianza electoral",
+            "Análisis complementario de la frecuencia de contacto con "
+            "contenido político, automatización percibida y contenido "
+            "falso o manipulado.",
         )
         fig = make_heatmap_exposure_confidence(analysis_df, height=400)
         if fig:
             st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
             render_note(
-                "Lectura de H1: la exposición digital general se concentra en niveles medios y altos. El sustento negativo se observa con mayor claridad cuando la exposición se interpreta como riesgo percibido por IA —bots, deepfakes y manipulación personalizada—. Por ello, H1 se reporta como sustento parcial y descriptivo, no como causalidad.",
+                "Este gráfico describe la relación entre exposición digital "
+                "general y confianza electoral. No corresponde al contraste "
+                "inferencial principal de H1, el cual se presenta mediante el "
+                "índice de riesgo percibido en la tabla anterior.",
                 "blue",
             )
+            
         else:
             empty_state("No hay datos suficientes para construir el heatmap exposición-confianza.")
 
@@ -1742,102 +2345,362 @@ def _h2_detail_table_html(group_stats: pd.DataFrame) -> str:
         "</tbody></table></div>"
     )
 
+def _render_h2_tab(
+    analysis_df: pd.DataFrame,
+):
+    group_stats = (
+        compute_moderation_group_stats(
+            analysis_df,
+        )
+    )
 
-def _render_h2_tab(analysis_df: pd.DataFrame):
-    with st.container(key="card_ce_h2_definicion"):
+    model = compute_interaction_model(
+        analysis_df,
+    )
+
+    p_interaction = (
+        model.get(
+            "p_interaccion",
+            np.nan,
+        )
+        if model
+        else np.nan
+    )
+
+    beta_interaction = (
+        model.get(
+            "beta_interaccion",
+            np.nan,
+        )
+        if model
+        else np.nan
+    )
+
+    se_interaction = (
+        model.get(
+            "se_interaccion",
+            np.nan,
+        )
+        if model
+        else np.nan
+    )
+
+    ci_low = (
+        model.get(
+            "ci95_interaccion_low",
+            np.nan,
+        )
+        if model
+        else np.nan
+    )
+
+    ci_high = (
+        model.get(
+            "ci95_interaccion_high",
+            np.nan,
+        )
+        if model
+        else np.nan
+    )
+
+    with st.container(
+        key="card_ce_h2_definicion",
+    ):
         render_card_header(
             "H2: verificación informativa y confianza electoral",
-            "Se analiza si la práctica de verificar información política digital reduce la pérdida de confianza frente al riesgo percibido por bots, deepfakes y microsegmentación política.",
+            "Se analiza si la práctica de verificar información "
+            "política digital modifica la relación entre el riesgo "
+            "percibido por IA y la confianza electoral.",
         )
+
         st.markdown(
-            "<div class='ce-hypothesis-box'>"
-            "<strong>Operacionalización:</strong> X = riesgo/exposición percibida por IA; "
-            "M = verificación informativa antes de compartir; Y = índice de confianza electoral. "
-            "La evidencia esperada para H2 es que la caída de confianza sea menor entre quienes verifican con mayor frecuencia."
-            "</div>",
+            """
+            <div class="ce-hypothesis-box">
+                <strong>Operacionalización:</strong>
+                X = riesgo percibido por IA;
+                M = verificación informativa antes de compartir;
+                Y = índice de confianza electoral.
+                <br><br>
+                <strong>Evidencia esperada para H2:</strong>
+                la caída de la confianza debería ser menor entre
+                quienes verifican información con mayor frecuencia.
+                La confirmación estadística requiere que el término
+                de interacción alcance significación.
+            </div>
+            """,
             unsafe_allow_html=True,
         )
 
-    st.markdown('<div class="ce-section-gap"></div>', unsafe_allow_html=True)
-
-    col1, col2 = st.columns([1.35, 1], gap="large")
-
-    with col1:
-        with st.container(key="card_ce_h2_lineas"):
-            render_card_header(
-                "Riesgo percibido por IA y confianza según verificación",
-                "Gráfico de interacción: si la línea de alta verificación cae menos que la de baja verificación, se observa un posible efecto amortiguador.",
-            )
-            fig, grouped = make_moderation_line_chart(analysis_df, height=420)
-            if fig:
-                st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
+        if model and pd.notna(
+            p_interaction
+        ):
+            if p_interaction < 0.05:
                 render_note(
-                    "El eje X resume bots, deepfakes y mensajes personalizados con IA. El eje Y muestra la confianza electoral promedio. Los tamaños de grupo y valores exactos se reportan en la tabla técnica inferior.",
-                    "blue",
-                )
-            else:
-                empty_state("No hay datos suficientes para graficar la interacción H2.")
-
-    with col2:
-        with st.container(key="card_ce_h2_heatmap"):
-            render_card_header(
-                "Matriz de confianza promedio",
-                "Cruce entre nivel de verificación y riesgo percibido por IA.",
-            )
-            fig = make_moderation_heatmap(analysis_df, height=365)
-            if fig:
-                st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CONFIG)
-                render_note(
-                    "Lectura: valores más altos indican mayor confianza promedio. Cada celda muestra el promedio de confianza y el tamaño del grupo.",
-                    "blue",
-                )         
-            else:
-                empty_state("No hay datos suficientes para construir la matriz H2.")
-
-    st.markdown('<div class="ce-section-gap"></div>', unsafe_allow_html=True)
-
-    group_stats = compute_moderation_group_stats(analysis_df)
-    model = compute_interaction_model(analysis_df)
-
-    with st.container(key="card_ce_h2_resumen"):
-        render_card_header(
-            "Lectura interpretativa de H2",
-            "Resumen de la tendencia observada por nivel de verificación. Los indicadores técnicos se usan como apoyo y no como afirmación causal.",
-        )
-        html = _h2_summary_html(group_stats, model)
-        if html:
-            st.markdown(html, unsafe_allow_html=True)
-            if model and pd.notna(model.get("p_interaccion", np.nan)) and model.get("p_interaccion", np.nan) >= 0.05:
-                render_note(
-                    "Lectura: la dirección de las pendientes es compatible con H2 porque la caída de confianza es más débil en alta verificación. Sin embargo, la interacción estadística no alcanza significancia, por lo que se presenta como tendencia exploratoria compatible y no como confirmación fuerte.",
-                    "yellow",
-                )
-            else:
-                render_note(
-                    "Lectura: el patrón sugiere que la verificación informativa puede amortiguar la relación entre riesgo percibido por IA y confianza electoral.",
+                    "Resultado de H2: interacción estadísticamente "
+                    "significativa. "
+                    "β = "
+                    f"{_format_decimal_es(beta_interaction, 3)}; "
+                    "EE = "
+                    f"{_format_decimal_es(se_interaction, 3)}; "
+                    "IC 95 % ["
+                    f"{_format_decimal_es(ci_low, 3)}; "
+                    f"{_format_decimal_es(ci_high, 3)}]; "
+                    "p = "
+                    f"{_format_decimal_es(p_interaction, 3)}. "
+                    "El resultado representa moderación estadística, "
+                    "pero no demuestra causalidad.",
                     "green",
                 )
+
+            else:
+                render_note(
+                    "Resultado de H2: no confirmada "
+                    "estadísticamente. "
+                    "β = "
+                    f"{_format_decimal_es(beta_interaction, 3)}; "
+                    "EE = "
+                    f"{_format_decimal_es(se_interaction, 3)}; "
+                    "IC 95 % ["
+                    f"{_format_decimal_es(ci_low, 3)}; "
+                    f"{_format_decimal_es(ci_high, 3)}]; "
+                    "p = "
+                    f"{_format_decimal_es(p_interaction, 3)}. "
+                    "Las diferencias entre pendientes se interpretan "
+                    "únicamente como una tendencia exploratoria.",
+                    "yellow",
+                )
+
         else:
-            empty_state("No hay datos suficientes para calcular el resumen de moderación.")
+            render_note(
+                "No fue posible estimar el término de interacción "
+                "de H2 con los datos disponibles.",
+                "yellow",
+            )
 
-    st.markdown('<div class="ce-section-gap"></div>', unsafe_allow_html=True)
+    # No agregues ce-section-gap aquí.
+    # El espaciado natural de Streamlit es suficiente.
 
+    col1, col2 = st.columns(
+        [1.35, 1],
+        gap="large",
+    )
 
-    with st.expander("Ver detalle técnico de H2"):
-        with st.container(key="card_ce_h2_tabla"):
+    with col1:
+        with st.container(
+            key="card_ce_h2_lineas",
+        ):
+            render_card_header(
+                "Riesgo percibido por IA y confianza según verificación",
+                "Comparación descriptiva de las pendientes por nivel "
+                "de verificación. Una línea menos descendente en alta "
+                "verificación sería compatible con amortiguación, "
+                "pero debe evaluarse mediante el término de interacción.",
+            )
+
+            fig, _ = (
+                make_moderation_line_chart(
+                    analysis_df,
+                    height=420,
+                )
+            )
+
+            if fig:
+                st.plotly_chart(
+                    fig,
+                    use_container_width=True,
+                    config=PLOTLY_CONFIG,
+                )
+
+                render_note(
+                    "El eje X resume el riesgo percibido por "
+                    "mensajes personalizados, bots y deepfakes. "
+                    "El eje Y muestra la confianza electoral "
+                    "promedio. La separación de las líneas es "
+                    "descriptiva y no sustituye el contraste "
+                    "estadístico de interacción.",
+                    "blue",
+                )
+
+            else:
+                empty_state(
+                    "No hay datos suficientes para "
+                    "graficar la interacción H2."
+                )
+
+    with col2:
+        with st.container(
+            key="card_ce_h2_heatmap",
+        ):
+            render_card_header(
+                "Matriz de confianza promedio",
+                "Cruce descriptivo entre nivel de verificación "
+                "y riesgo percibido por IA.",
+            )
+
+            fig = make_moderation_heatmap(
+                analysis_df,
+                height=365,
+            )
+
+            if fig:
+                st.plotly_chart(
+                    fig,
+                    use_container_width=True,
+                    config=PLOTLY_CONFIG,
+                )
+
+                render_note(
+                    "Valores más altos representan mayor confianza "
+                    "electoral promedio. Cada celda muestra el "
+                    "promedio observado y el tamaño del grupo.",
+                    "blue",
+                )
+
+            else:
+                empty_state(
+                    "No hay datos suficientes para "
+                    "construir la matriz H2."
+                )
+
+    st.markdown(
+        '<div class="ce-section-gap"></div>',
+        unsafe_allow_html=True,
+    )
+
+    with st.container(
+        key="card_ce_h2_resumen",
+    ):
+        render_card_header(
+            "Lectura interpretativa de H2",
+            "Resumen de las pendientes descriptivas y del "
+            "contraste inferencial de interacción.",
+        )
+
+        html = _h2_summary_html(
+            group_stats,
+            model,
+        )
+
+        if html:
+            st.markdown(
+                html,
+                unsafe_allow_html=True,
+            )
+
+            if pd.isna(p_interaction):
+                render_note(
+                    "No se dispone de evidencia inferencial "
+                    "suficiente para evaluar H2.",
+                    "yellow",
+                )
+
+            elif p_interaction < 0.05:
+                render_note(
+                    "El término de interacción alcanzó significación "
+                    "estadística. El resultado respalda una diferencia "
+                    "entre pendientes, aunque el diseño transversal "
+                    "no permite establecer causalidad.",
+                    "green",
+                )
+
+            else:
+                render_note(
+                    "La caída de confianza puede ser descriptivamente "
+                    "menor en los grupos con mayor verificación; sin "
+                    "embargo, la interacción no es estadísticamente "
+                    "significativa. Por ello, H2 no se confirma y el "
+                    "patrón se conserva únicamente como tendencia "
+                    "exploratoria compatible.",
+                    "yellow",
+                )
+
+        else:
+            empty_state(
+                "No hay datos suficientes para calcular "
+                "el resumen de moderación."
+            )
+
+    st.markdown(
+        '<div class="ce-section-gap"></div>',
+        unsafe_allow_html=True,
+    )
+
+    with st.expander(
+        "Ver detalle técnico de H2",
+    ):
+        with st.container(
+            key="card_ce_h2_tabla",
+        ):
             render_card_header(
                 "Detalle técnico de H2",
-                "Tabla de apoyo: Spearman y pendiente lineal dentro de cada grupo de verificación.",
+                "Correlación de Spearman y pendiente lineal "
+                "dentro de cada nivel de verificación.",
             )
 
             if not group_stats.empty:
-                st.markdown(_h2_detail_table_html(group_stats), unsafe_allow_html=True)
-                render_note(
-                    "Criterio de lectura: la pendiente es menos negativa en alta verificación (-0.079) que en baja verificación (-0.139), lo que sugiere un posible efecto amortiguador. Este resultado se reporta como evidencia exploratoria, no como confirmación causal.",
-                    "green",
+                st.markdown(
+                    _h2_detail_table_html(
+                        group_stats,
+                    ),
+                    unsafe_allow_html=True,
                 )
+
+                low_row = group_stats[
+                    group_stats[
+                        "Nivel de verificación"
+                    ]
+                    == "Baja verificación"
+                ]
+
+                high_row = group_stats[
+                    group_stats[
+                        "Nivel de verificación"
+                    ]
+                    == "Alta verificación"
+                ]
+
+                low_slope = (
+                    float(
+                        low_row.iloc[0][
+                            "pendiente"
+                        ]
+                    )
+                    if not low_row.empty
+                    else np.nan
+                )
+
+                high_slope = (
+                    float(
+                        high_row.iloc[0][
+                            "pendiente"
+                        ]
+                    )
+                    if not high_row.empty
+                    else np.nan
+                )
+
+                if (
+                    pd.notna(low_slope)
+                    and pd.notna(high_slope)
+                ):
+                    render_note(
+                        "La pendiente estimada fue "
+                        f"{_format_decimal_es(low_slope, 3)} "
+                        "en baja verificación y "
+                        f"{_format_decimal_es(high_slope, 3)} "
+                        "en alta verificación. Una pendiente "
+                        "menos negativa en alta verificación "
+                        "es compatible con amortiguación "
+                        "descriptiva; su confirmación depende "
+                        "del valor p de la interacción global.",
+                        "blue",
+                    )
+
             else:
-                empty_state("No se pudieron calcular pendientes por grupo de verificación.")        
+                empty_state(
+                    "No se pudieron calcular pendientes "
+                    "por nivel de verificación."
+                )      
 
 def _render_association_tab(analysis_df: pd.DataFrame, cols: dict[str, str | None]):
     col1, col2 = st.columns(2, gap="large")
@@ -1875,23 +2738,53 @@ def _render_association_tab(analysis_df: pd.DataFrame, cols: dict[str, str | Non
 
     st.markdown('<div class="ce-section-gap"></div>', unsafe_allow_html=True)
 
+
     with st.container(key="card_ce_metodologia"):
         st.markdown(
             "<div class='ce-method-panel'>"
             "<div class='ce-method-title'>Lectura metodológica</div>"
             "<div class='ce-method-grid'>"
-            "<div class='ce-method-item'><strong>1. Variable dependiente</strong><br>"
-            "La confianza electoral se resume en un índice 1–5 que combina confianza en limpieza/transparencia y percepción inversa de fraude.</div>"
-            "<div class='ce-method-item'><strong>2. Exposición Digital</strong><br>"
-            "La exposición digital integra frecuencia de contenido político, percepción de automatización y exposición a contenido falso/manipulado.</div>"
-            "<div class='ce-method-item'><strong>3. Edad</strong><br>"
-            "El módulo conserva los rangos 18–24, 25–34, 35–44, 45–54 y 55–64 para mantener coherencia con la muestra final.</div>"
-            "<div class='ce-method-item'><strong>4. Alcance</strong><br>"
-            "Los gráficos muestran asociaciones descriptivas; no reemplazan inferencia causal ni generalizan fuera de la muestra UCE encuestada.</div>"
+
+            "<div class='ce-method-item'>"
+            "<strong>1. Variable dependiente</strong><br>"
+            "La confianza electoral se resume en un índice de 1 a 5 "
+            "que combina confianza en limpieza o transparencia y "
+            "percepción inversa de fraude."
+            "</div>"
+
+            "<div class='ce-method-item'>"
+            "<strong>2. Exposición y riesgo</strong><br>"
+            "La exposición digital resume frecuencia de contacto con "
+            "contenido político, automatización percibida y contenido "
+            "falso o manipulado. El riesgo percibido se calcula por "
+            "separado mediante mensajes personalizados, bots-confianza "
+            "y deepfakes."
+            "</div>"
+
+            "<div class='ce-method-item'>"
+            "<strong>3. Verificación informativa</strong><br>"
+            "La verificación conserva cuatro categorías originales: "
+            "Nunca, Rara vez, A veces y Siempre. Para H2 se agrupa en "
+            "niveles bajo, medio y alto."
+            "</div>"
+
+            "<div class='ce-method-item'>"
+            "<strong>4. Identificación de IA</strong><br>"
+            "La capacidad declarada para identificar contenido generado "
+            "con IA conserva tres categorías y se analiza como indicador "
+            "complementario, no como parte de una escala consolidada."
+            "</div>"
+
+            "<div class='ce-method-item'>"
+            "<strong>5. Alcance</strong><br>"
+            "Los resultados muestran asociaciones descriptivas y "
+            "exploratorias; no establecen causalidad ni permiten "
+            "generalización fuera de la muestra UCE."
+            "</div>"
+
             "</div></div>",
             unsafe_allow_html=True,
         )
-
 
 # =========================================================
 # Render principal
@@ -1924,7 +2817,7 @@ def render_confianza_electoral(survey_df: pd.DataFrame):
     tab1, tab2, tab3, tab4 = st.tabs(
         [
             "Resumen de confianza",
-            "H1: exposición y confianza",
+            "H1: contraste operacional",
             "H2: verificación informativa",
             "Validación complementaria",
         ]

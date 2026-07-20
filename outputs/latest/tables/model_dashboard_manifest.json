@@ -1,0 +1,8 @@
+{
+  "mode": "sensitivity",
+  "run_5": "run_20260710_014706_sensitivity",
+  "run_3": "run_20260719_234125_sensitivity",
+  "main_model_5": "random_forest",
+  "best_model_3": "random_forest",
+  "data": "data\\processed\\encuestas\\model_ready_no_text.csv"
+}

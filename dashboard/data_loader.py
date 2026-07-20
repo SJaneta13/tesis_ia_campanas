@@ -1,4 +1,4 @@
-from pathlib import Path
+﻿from pathlib import Path
 import pandas as pd
 import streamlit as st
 import sys
@@ -28,7 +28,9 @@ DEEPFAKE_DISTRUST_BY_AGE = SURVEY_PUBLIC / "tables" / "deepfake_distrust_by_age.
 EXPOSURE_INDEX_BY_AGE = SURVEY_PUBLIC / "tables" / "exposure_index_by_age.csv"
 EXPOSURE_INDEX_BY_AGE_ROBUST = SURVEY_PUBLIC / "tables" / "exposure_index_by_age_robust.csv"
 
-
+H1_SPEARMAN_SENSITIVITY = (
+    METRICS_DIR / "h1_spearman_sensitivity.csv"
+)
 # =========================================================
 # Artefactos técnicos para trazabilidad del dashboard
 # =========================================================
@@ -181,6 +183,58 @@ def load_survey() -> pd.DataFrame:
     return read_csv_safe(DATA_SURVEY)
 
 
+@st.cache_data(ttl=600, show_spinner=False)
+def load_h1_spearman_sensitivity() -> pd.DataFrame:
+    """
+    Carga la comparación entre el índice completo y reducido de H1.
+    """
+    df = read_csv_safe(H1_SPEARMAN_SENSITIVITY)
+
+    if df.empty:
+        return pd.DataFrame()
+
+    required_columns = {
+        "scenario",
+        "n_items",
+        "n",
+        "rho",
+        "p_value",
+        "ci95_low",
+        "ci95_high",
+        "index_concordance",
+        "delta_rho",
+    }
+
+    if not required_columns.issubset(df.columns):
+        return pd.DataFrame()
+
+    numeric_columns = [
+        "n_items",
+        "n",
+        "rho",
+        "p_value",
+        "ci95_low",
+        "ci95_high",
+        "index_concordance",
+        "delta_rho",
+    ]
+
+    for column in numeric_columns:
+        df[column] = pd.to_numeric(
+            df[column],
+            errors="coerce",
+        )
+
+    return df.dropna(
+        subset=[
+            "scenario",
+            "n",
+            "rho",
+            "p_value",
+            "ci95_low",
+            "ci95_high",
+        ]
+    )
 # =========================================================
 # Evidencia digital / GDELT
 # =========================================================

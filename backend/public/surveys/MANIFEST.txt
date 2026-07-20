@@ -1,0 +1,10 @@
+Artefactos de encuestas publicados
+----------------------------------
+tables/risk_index_by_age.csv
+tables/deepfake_distrust_by_age.csv
+tables/exposure_index_by_age.csv
+tables/exposure_index_by_age_robust.csv
+figures/risk_index_by_age.html
+figures/risk_index_by_age.png
+figures/deepfake_distrust_by_age.html
+figures/deepfake_distrust_by_age.png

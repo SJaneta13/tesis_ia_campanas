@@ -1,0 +1,19 @@
+﻿case_id,ai_group,sentiment_label,pct
+case1_es,IA,negativo,20.0
+case1_es,No IA,negativo,34.7
+case2_en,IA,negativo,66.7
+case2_en,No IA,negativo,50.8
+case3_ec_media,IA,negativo,13.3
+case3_ec_media,No IA,negativo,9.3
+case1_es,IA,neutral,80.0
+case1_es,No IA,neutral,64.8
+case2_en,IA,neutral,33.3
+case2_en,No IA,neutral,47.9
+case3_ec_media,IA,neutral,86.7
+case3_ec_media,No IA,neutral,90.7
+case1_es,IA,positivo,0.0
+case1_es,No IA,positivo,0.5
+case2_en,IA,positivo,0.0
+case2_en,No IA,positivo,1.3
+case3_ec_media,IA,positivo,0.0
+case3_ec_media,No IA,positivo,0.0

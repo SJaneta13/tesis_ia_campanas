@@ -289,6 +289,78 @@ section[data-testid="stSidebar"] {
     border: 1px solid #ddd6fe;
 }
 
+/* =========================================================
+   H1 · tabla de contraste operacional
+   ========================================================= */
+
+.st-key-card_ce_h1_operacional .ce-hypothesis-box {
+    margin-top: 4px !important;
+    margin-bottom: 12px !important;
+}
+
+.ce-h1-table-wrap {
+    width: 100% !important;
+    overflow-x: auto !important;
+    margin: 0 0 12px 0 !important;
+    border-radius: 12px !important;
+}
+
+.ce-h1-table {
+    width: 100% !important;
+    table-layout: fixed !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    background: #ffffff !important;
+    font-size: 0.86rem !important;
+}
+
+.ce-h1-table th {
+    padding: 11px 12px !important;
+    background: #f8fafc !important;
+    color: #64748b !important;
+    font-weight: 850 !important;
+    text-align: left !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    border-right: 1px solid #e5e7eb !important;
+    white-space: nowrap !important;
+}
+
+.ce-h1-table td {
+    padding: 12px !important;
+    color: #0f172a !important;
+    border-bottom: 1px solid #eef2f7 !important;
+    border-right: 1px solid #eef2f7 !important;
+    vertical-align: middle !important;
+}
+
+.ce-h1-table tr:last-child td {
+    border-bottom: none !important;
+}
+
+.ce-h1-table th:last-child,
+.ce-h1-table td:last-child {
+    border-right: none !important;
+}
+
+.ce-h1-table th:nth-child(1),
+.ce-h1-table td:nth-child(1) {
+    width: 30% !important;
+}
+
+.ce-h1-table th:nth-child(5),
+.ce-h1-table td:nth-child(5) {
+    width: 22% !important;
+}
+
+.ce-h1-table th:not(:first-child),
+.ce-h1-table td:not(:first-child) {
+    text-align: center !important;
+}
+                
+
 .hypothesis-label {
     font-size: 0.76rem;
     font-weight: 900;
@@ -1494,6 +1566,15 @@ div[data-testid="stElementContainer"]:has(.ce-section-gap) {
     justify-content: center !important;
 }
 
+.st-key-card_ce_edad_boxplot {
+    padding-bottom: 30px !important;
+}
+
+.st-key-card_ce_edad_boxplot .ce-age-grid {
+    margin-top: 14px !important;
+    margin-bottom: 6px !important;
+}
+                                
 .ce-age-title {
     color: #334155 !important;
     font-size: 0.78rem !important;
@@ -3729,6 +3810,8 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has([class*="st-key-card_"]) {
         white-space: normal !important;
     }
 }
+                
+
                              
 </style>
 """, unsafe_allow_html=True)

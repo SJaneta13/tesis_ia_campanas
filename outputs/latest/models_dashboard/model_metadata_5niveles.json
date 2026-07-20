@@ -3,12 +3,17 @@
   "configuracion": "5 niveles",
   "variable_objetivo": "confianza_idx_round",
   "n_registros": 575,
-  "features": 23,
-  "metricas_holdout": {
-    "AUC_OvR": 0.6441989099892456,
-    "Accuracy": 0.4583333333333333,
-    "F1_ponderado": 0.44141389432485323,
-    "QWK": 0.24650332308302758
+  "features": 27,
+  "run_origen": "run_20260710_014706_sensitivity",
+  "analysis_mode": "sensitivity_without_overlap",
+  "conceptual_overlap_excluded": true,
+  "metricas_multisemilla": {
+    "accuracy": 0.4520231213872832,
+    "f1_weighted": 0.4410299254392736,
+    "f1_macro": 0.3664259569605054,
+    "qwk": 0.2497788084221123,
+    "auc_ovr": 0.6727958266428999
   },
+  "refit_full_sample_for_simulator": true,
   "proposito": "simulacion_exploratoria_no_causal"
 }
