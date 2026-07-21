@@ -77,7 +77,10 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-INPUT_PATH = args.input
+INPUT_PATH = Path(args.input)
+if not INPUT_PATH.is_absolute():
+    INPUT_PATH = ROOT / INPUT_PATH
+
 USE_TARGET_3 = (args.target == "3")
 SENSITIVITY_ANALYSIS = bool(args.sensitivity)
 
@@ -110,12 +113,17 @@ SCORING_DICT = {
 # Feature selection por modelo (evitar dañar SVM)
 USE_FS_MODELS = {"random_forest"}  # puedes añadir "voting_ensemble" si quieres
 
-# Guardado por run
+# Guardado por corrida
 RUN_ID = datetime.now().strftime("%Y%m%d_%H%M%S")
+ANALYSIS_MODE = "sensitivity" if SENSITIVITY_ANALYSIS else "complete"
+TARGET_TAG = f"target{args.target}"
 
-RUN_SUFFIX = "_sensitivity" if SENSITIVITY_ANALYSIS else "_complete"
-
-RUN_DIR = Path("outputs") / "runs" / f"run_{RUN_ID}{RUN_SUFFIX}"
+RUN_DIR = (
+    ROOT
+    / "outputs"
+    / "runs"
+    / f"run_{RUN_ID}_{TARGET_TAG}_{ANALYSIS_MODE}"
+)
 
 DIR_FIGURES = RUN_DIR / "figures"
 DIR_TABLES  = RUN_DIR / "tables"
@@ -340,6 +348,45 @@ DROP_COLS = [
     "confianza_limpieza", "confianza_fraude",
 ]
 
+# =========================================================
+# ELIMINAR REPRESENTACIONES LIKERT DUPLICADAS
+# =========================================================
+LIKERT_TEXT_DUPLICATES = sorted(
+    [
+        col[:-4]
+        for col in df.columns
+        if isinstance(col, str)
+        and col.endswith("_num")
+        and col[:-4] in df.columns
+    ]
+)
+
+DROP_COLS.extend(LIKERT_TEXT_DUPLICATES)
+
+likert_duplicate_manifest = pd.DataFrame(
+    {
+        "variable_textual_excluida": LIKERT_TEXT_DUPLICATES,
+        "variable_numerica_conservada": [
+            f"{col}_num" for col in LIKERT_TEXT_DUPLICATES
+        ],
+        "motivo": (
+            "Representación determinística duplicada; "
+            "se conserva la codificación ordinal de 1 a 5."
+        ),
+    }
+)
+
+likert_duplicate_manifest.to_csv(
+    DIR_TABLES / "likert_duplicate_columns.csv",
+    index=False,
+    encoding="utf-8-sig",
+)
+
+print(
+    "\nColumnas Likert textuales excluidas por duplicación:",
+    len(LIKERT_TEXT_DUPLICATES),
+)
+
 if SENSITIVITY_ANALYSIS:
     overlap_present = [
         col for col in CONCEPTUAL_OVERLAP_COLS if col in df.columns
@@ -384,6 +431,22 @@ for c in df.columns:
 
 X = df.drop(columns=[c for c in DROP_COLS if c in df.columns], errors="ignore")
 y = df[target_col].copy()
+
+remaining_duplicate_pairs = [
+    col
+    for col in X.columns
+    if isinstance(col, str)
+    and not col.endswith("_num")
+    and f"{col}_num" in X.columns
+]
+
+if remaining_duplicate_pairs:
+    raise RuntimeError(
+        "Persisten representaciones Likert duplicadas:\n- "
+        + "\n- ".join(remaining_duplicate_pairs)
+    )
+
+print("Validación de duplicados Likert: OK")
 
 excluded_overlap_df = pd.DataFrame(
     {
@@ -858,10 +921,24 @@ df_run.to_csv(run_csv, index=False, encoding="utf-8-sig")
 df_seed.to_csv(seed_csv, index=False, encoding="utf-8-sig")
 run_json.write_text(df_run.to_json(orient="records", force_ascii=False, indent=2), encoding="utf-8")
 
-latest_dir = Path("outputs") / "latest"
-if latest_dir.exists():
-    shutil.rmtree(latest_dir)
-shutil.copytree(RUN_DIR, latest_dir)
+# No se copia la corrida a outputs/latest.
+# Ese directorio queda reservado para los artefactos consolidados del dashboard.
+# La corrida más reciente por configuración se registra sin destruir resultados previos.
+registry_path = ROOT / "outputs" / "run_registry.json"
+registry_path.parent.mkdir(parents=True, exist_ok=True)
+
+try:
+    run_registry = json.loads(registry_path.read_text(encoding="utf-8"))
+except (FileNotFoundError, json.JSONDecodeError):
+    run_registry = {}
+
+registry_key = f"{TARGET_TAG}_{ANALYSIS_MODE}"
+run_registry[registry_key] = RUN_DIR.name
+
+registry_path.write_text(
+    json.dumps(run_registry, ensure_ascii=False, indent=2),
+    encoding="utf-8",
+)
 
 # =========================
 # RESUMEN METODOLÓGICO
@@ -890,10 +967,68 @@ methodology_summary = {
     encoding="utf-8"
 )
 
+# =========================
+# MANIFIESTO DE TRAZABILIDAD
+# =========================
+def file_sha256(path: Path) -> str | None:
+    try:
+        import hashlib
+
+        digest = hashlib.sha256()
+        with path.open("rb") as file_obj:
+            for chunk in iter(lambda: file_obj.read(1024 * 1024), b""):
+                digest.update(chunk)
+        return digest.hexdigest()
+    except OSError:
+        return None
+
+
+run_manifest = {
+    "run_name": RUN_DIR.name,
+    "run_id": RUN_ID,
+    "created_at": datetime.now().isoformat(timespec="seconds"),
+    "target_levels": int(args.target),
+    "target_column": target_col,
+    "configuration_role": (
+        "principal_5_niveles"
+        if args.target == "5"
+        else "complementaria_3_niveles"
+    ),
+    "analysis_mode": ANALYSIS_MODE,
+    "sensitivity": bool(SENSITIVITY_ANALYSIS),
+    "conceptual_overlap_excluded": bool(SENSITIVITY_ANALYSIS),
+    "input_path": str(INPUT_PATH),
+    "input_sha256": file_sha256(INPUT_PATH),
+    "dataset_rows": int(len(df)),
+    "dataset_columns_original": int(df.shape[1]),
+    "model_features": int(X.shape[1]),
+    "numeric_features": int(len(num_cols)),
+    "categorical_features": int(len(cat_cols)),
+    "likert_text_duplicates_excluded": LIKERT_TEXT_DUPLICATES,
+    "conceptual_overlap_variables_excluded": (
+        [col for col in CONCEPTUAL_OVERLAP_COLS if col in df.columns]
+        if SENSITIVITY_ANALYSIS
+        else []
+    ),
+    "seeds": SEEDS,
+    "test_size": TEST_SIZE,
+    "cv_splits": N_SPLITS,
+    "refit_metric": REFIT_METRIC,
+    "models_executed": list(models.keys()),
+    "fast_debug": bool(FAST_DEBUG),
+    "metrics_summary": str(run_csv.relative_to(RUN_DIR)),
+    "metrics_by_seed": str(seed_csv.relative_to(RUN_DIR)),
+}
+
+(RUN_DIR / "run_manifest.json").write_text(
+    json.dumps(run_manifest, ensure_ascii=False, indent=2),
+    encoding="utf-8",
+)
+
 print("\n====================================")
 print("Listo. Archivos generados:")
 print(" - Run dir:", RUN_DIR)
-print(" - Latest:", latest_dir)
+print(" - Registro de corridas:", registry_path)
 print(" - Métricas (resumen):", run_csv)
 print(" - Métricas por seed:", seed_csv)
 print(" - JSON resumen:", run_json)

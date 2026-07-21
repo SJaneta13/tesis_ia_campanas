@@ -55,6 +55,14 @@ CONFIG_ORDER = ["3 niveles", "5 niveles"]
 LEVELS_3 = ["Baja", "Media", "Alta"]
 LEVELS_5 = ["Muy baja", "Baja", "Media", "Alta", "Muy alta"]
 
+LIKERT_OPTION_LABELS = {
+    1: "Totalmente en desacuerdo",
+    2: "En desacuerdo",
+    3: "Ni de acuerdo ni en desacuerdo",
+    4: "De acuerdo",
+    5: "Totalmente de acuerdo",
+}
+
 MAIN_CONFIG = "5 niveles"
 SECONDARY_CONFIG = "3 niveles"
 
@@ -1383,30 +1391,105 @@ def _score_simulator(values: dict, schema_df: pd.DataFrame) -> tuple[str, float,
     return "Muy alta confianza electoral", probability, "#047857"
 
 
-def _schema_options(row: pd.Series) -> list[str]:
-    options = [x.strip() for x in str(row.get("Opciones", "")).split("|") if x.strip()]
-    default = str(row.get("Valor_por_defecto", "")).strip()
-    if not options and default:
-        options = [default]
-    return options or ["No disponible"]
+def _schema_options(row: pd.Series) -> list:
+    raw_options = [
+        x.strip()
+        for x in str(row.get("Opciones", "")).split("|")
+        if x.strip()
+    ]
+    feature_type = str(row.get("Tipo", "")).strip().lower()
+
+    if feature_type in {"ordinal", "escala", "scale"}:
+        numeric_options = []
+        for option in raw_options:
+            try:
+                value = float(option)
+                numeric_options.append(
+                    int(value) if value.is_integer() else value
+                )
+            except (TypeError, ValueError):
+                numeric_options = []
+                break
+        if numeric_options:
+            return numeric_options
+
+    default = row.get("Valor_por_defecto", "")
+    if not raw_options and str(default).strip():
+        raw_options = [str(default).strip()]
+    return raw_options or ["No disponible"]
 
 
-def _pick_option(options: list[str], preferred: list[str], default: str | None = None) -> str:
+def _pick_option(options: list, preferred: list, default=None):
     normalized = {str(opt).strip().lower(): opt for opt in options}
     for item in preferred:
         key = str(item).strip().lower()
         if key in normalized:
             return normalized[key]
-    if default and str(default) in options:
-        return str(default)
+
+    if default is not None:
+        default_key = str(default).strip().lower()
+        if default_key in normalized:
+            return normalized[default_key]
+
     return options[0]
 
 
-def _scenario_value(row: pd.Series, scenario: str) -> str:
+def _format_schema_option(row: pd.Series, value) -> str:
+    feature_type = str(row.get("Tipo", "")).strip().lower()
+    if feature_type in {"ordinal", "escala", "scale"}:
+        try:
+            numeric = int(float(value))
+            if numeric in LIKERT_OPTION_LABELS:
+                return f"{numeric} · {LIKERT_OPTION_LABELS[numeric]}"
+        except (TypeError, ValueError):
+            pass
+    return str(value)
+
+
+def _scenario_value(row: pd.Series, scenario: str):
     options = _schema_options(row)
     label = str(row.get("Etiqueta", row.get("Variable", ""))).lower()
-    default = str(row.get("Valor_por_defecto", options[0]))
+    default = row.get("Valor_por_defecto", options[0])
     scenario = str(scenario).lower()
+    feature_type = str(row.get("Tipo", "")).strip().lower()
+
+    if feature_type in {"ordinal", "escala", "scale"}:
+        numeric_options = [
+            int(float(option))
+            for option in options
+            if str(option).replace(".", "", 1).isdigit()
+        ]
+        if numeric_options:
+            low = min(numeric_options)
+            high = max(numeric_options)
+            middle = min(numeric_options, key=lambda value: abs(value - 3))
+
+            if "neutral" in scenario:
+                return middle
+
+            if "preocupación" in scenario or "preocupacion" in scenario:
+                if any(term in label for term in ["manipulación", "manipulacion", "riesgo", "bots", "regulación", "regulacion", "deepfake"]):
+                    return high
+                if any(term in label for term in ["transparencia", "comunicación", "comunicacion"]):
+                    return max(low, 2)
+
+            if "confianza" in scenario or "transparencia" in scenario:
+                if any(term in label for term in ["manipulación", "manipulacion", "riesgo", "bots", "deepfake"]):
+                    return max(low, 2)
+                if any(term in label for term in ["regulación", "regulacion", "transparencia", "comunicación", "comunicacion"]):
+                    return min(high, 4)
+
+            if "baja transparencia" in scenario:
+                if any(term in label for term in ["manipulación", "manipulacion", "riesgo", "bots", "regulación", "regulacion", "deepfake"]):
+                    return high
+                if any(term in label for term in ["transparencia", "comunicación", "comunicacion"]):
+                    return low
+
+            if "verificación" in scenario or "verificacion" in scenario:
+                if any(term in label for term in ["regulación", "regulacion"]):
+                    return min(high, 4)
+
+            return _pick_option(options, [default], default)
 
     if "neutral" in scenario:
         return _pick_option(options, [default, "Ni de acuerdo ni en desacuerdo", "A veces", "Poco"], default)
@@ -1540,6 +1623,9 @@ def _render_simulator_base(schema_df: pd.DataFrame, feature_df: pd.DataFrame) ->
                         label,
                         options,
                         index=default_idx,
+                        format_func=lambda value, current_row=row: _format_schema_option(
+                            current_row, value
+                        ),
                         help=desc if desc and desc.lower() != "nan" else None,
                         key=f"mp_sim_{scenario_key}_{i}",
                     )
@@ -1561,12 +1647,12 @@ def _render_simulator_base(schema_df: pd.DataFrame, feature_df: pd.DataFrame) ->
         else:
             st.session_state["mp_sim_result_rf5"] = result
             st.session_state["mp_sim_values_rf5"] = values
-            st.session_state["mp_sim_schema_rf5"] = df[["Variable", "Etiqueta", "Grupo", "Peso"]].to_dict("records")
+            st.session_state["mp_sim_schema_rf5"] = df[["Variable", "Etiqueta", "Tipo", "Grupo", "Peso"]].to_dict("records")
 
 
     result = st.session_state.get("mp_sim_result_rf5")
     saved_values = st.session_state.get("mp_sim_values_rf5", values)
-    saved_schema = st.session_state.get("mp_sim_schema_rf5", df[["Variable", "Etiqueta", "Grupo", "Peso"]].to_dict("records"))
+    saved_schema = st.session_state.get("mp_sim_schema_rf5", df[["Variable", "Etiqueta", "Tipo", "Grupo", "Peso"]].to_dict("records"))
 
     with right:
         if result:
@@ -1626,10 +1712,11 @@ def _render_simulator_base(schema_df: pd.DataFrame, feature_df: pd.DataFrame) ->
         for var, value in list(saved_values.items())[:6]:
             row = schema_lookup.get(str(var), {})
             label = row.get("Etiqueta", str(var).replace("_", " ").capitalize())
+            display_value = _format_schema_option(pd.Series(row), value)
             profile_html += (
                 f"<div style='display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.75rem;font-size:.76rem;margin:.45rem 0;'>"
                 f"<span style='color:#94a3b8;line-height:1.25;'>{_esc(label)}</span>"
-                f"<strong style='color:#334155;text-align:right;'>{_esc(value)}</strong></div>"
+                f"<strong style='color:#334155;text-align:right;'>{_esc(display_value)}</strong></div>"
             )
 
         _render_html(

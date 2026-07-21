@@ -92,12 +92,12 @@ PREFERRED_SIMULATOR_FEATURES = [
     (
         "Percepción sobre el uso de IA en campañas políticas "
         "[Los partidos pueden manipular mi opinión mediante mensajes "
-        "personalizados creados con IA.]"
+        "personalizados creados con IA.]_num"
     ),
     (
         "Percepción sobre el uso de IA en campañas políticas "
         "[Considero que el uso de inteligencia artificial en campañas políticas "
-        "debería estar regulado por la ley.]"
+        "debería estar regulado por la ley.]_num"
     ),
     (
         "¿Considera que el uso de IA en campañas digitales influyó en su "
@@ -526,16 +526,53 @@ def build_simulator_schema(
             feature,
             (pretty_label(feature), "Predictor", "Variable incluida en el modelo."),
         )
-        options = ordered_options(X[feature])
-        mode = X[feature].dropna().astype(str).mode()
-        default = str(mode.iloc[0]) if not mode.empty else options[0]
+
+        series = X[feature]
+        numeric = pd.to_numeric(series, errors="coerce")
+        numeric_ratio = float(numeric.notna().mean()) if len(series) else 0.0
+        unique_numeric = sorted(numeric.dropna().unique().tolist())
+
+        is_ordinal_numeric = (
+            numeric_ratio >= 0.80
+            and 2 <= len(unique_numeric) <= 10
+        )
+
+        if is_ordinal_numeric:
+            clean_options = [
+                int(value) if float(value).is_integer() else float(value)
+                for value in unique_numeric
+            ]
+            mode = numeric.dropna().mode()
+            default = (
+                int(mode.iloc[0])
+                if not mode.empty and float(mode.iloc[0]).is_integer()
+                else float(mode.iloc[0])
+                if not mode.empty
+                else clean_options[0]
+            )
+            feature_type = "ordinal"
+            min_value = min(clean_options)
+            max_value = max(clean_options)
+            step = 1
+        else:
+            clean_options = ordered_options(series)
+            mode = series.dropna().astype(str).mode()
+            default = str(mode.iloc[0]) if not mode.empty else clean_options[0]
+            feature_type = "categórica"
+            min_value = ""
+            max_value = ""
+            step = ""
+
         rows.append(
             {
                 "Variable": feature,
                 "Etiqueta": label,
-                "Tipo": "categórica",
-                "Opciones": "|".join(options),
+                "Tipo": feature_type,
+                "Opciones": "|".join(str(option) for option in clean_options),
                 "Valor_por_defecto": default,
+                "Min": min_value,
+                "Max": max_value,
+                "Paso": step,
                 "Grupo": group,
                 "Descripcion": description,
                 "Peso": float(weight_map.get(feature, 0.0)),

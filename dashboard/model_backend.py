@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import json
 from pathlib import Path
@@ -40,6 +40,29 @@ def _read_json(path: Path, default: Any) -> Any:
         return json.loads(path.read_text(encoding="utf-8"))
     except Exception:
         return default
+
+
+def _coerce_like_default(value: Any, default: Any) -> Any:
+    """Convierte valores del frontend al tipo usado al entrenar el pipeline."""
+    if value is None:
+        return default
+
+    if isinstance(default, bool):
+        return str(value).strip().lower() in {"1", "true", "sí", "si", "yes"}
+
+    if isinstance(default, int) and not isinstance(default, bool):
+        try:
+            return int(float(value))
+        except (TypeError, ValueError):
+            return default
+
+    if isinstance(default, float):
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return default
+
+    return str(value)
 
 
 def _pretty_label(label: Any) -> str:
@@ -109,7 +132,7 @@ def predict_simulator(values: dict) -> dict[str, Any] | None:
     row = dict(defaults)
     for key, value in values.items():
         if key in row:
-            row[key] = value
+            row[key] = _coerce_like_default(value, row[key])
 
     X = pd.DataFrame([row])
     pred = model.predict(X)[0]

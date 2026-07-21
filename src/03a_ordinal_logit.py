@@ -69,10 +69,10 @@ parser.add_argument(
 
 parser.add_argument(
     "--run-dir",
-    default=None,
+    required=True,
     help=(
-        "Nombre de la carpeta de outputs/runs donde se guardarán "
-        "los resultados ordinales."
+        "Nombre exacto de la carpeta de outputs/runs creada por "
+        "03_modeling.py para el mismo target y modo."
     ),
 )
 
@@ -86,35 +86,50 @@ RUN_TARGET = args.target
 # =========================
 # OUTPUTS
 # =========================
-RUNS_DIR = Path("outputs") / "runs"
+RUNS_DIR = ROOT / "outputs" / "runs"
+selected_run = RUNS_DIR / args.run_dir
 
-if args.run_dir is not None:
-    selected_run = RUNS_DIR / args.run_dir
-
-    if not selected_run.exists():
-        raise FileNotFoundError(
-            f"No existe la carpeta indicada: {selected_run}"
-        )
-else:
-    expected_suffix = (
-        "_sensitivity"
-        if SENSITIVITY_ANALYSIS
-        else "_complete"
+if not selected_run.exists():
+    raise FileNotFoundError(
+        f"No existe la carpeta indicada: {selected_run}"
     )
 
-    matching_runs = sorted(
-        run
-        for run in RUNS_DIR.glob("run_*")
-        if run.name.endswith(expected_suffix)
+expected_mode = "sensitivity" if SENSITIVITY_ANALYSIS else "complete"
+expected_target_token = f"_target{RUN_TARGET}_"
+expected_mode_suffix = f"_{expected_mode}"
+
+if expected_target_token not in selected_run.name:
+    raise ValueError(
+        f"La corrida {selected_run.name} no corresponde al target "
+        f"{RUN_TARGET} niveles."
     )
 
-    if not matching_runs:
-        raise FileNotFoundError(
-            "No se encontró una corrida compatible con el modo "
-            f"seleccionado: {expected_suffix}"
-        )
+if not selected_run.name.endswith(expected_mode_suffix):
+    raise ValueError(
+        f"La corrida {selected_run.name} no corresponde al modo "
+        f"{expected_mode}."
+    )
 
-    selected_run = matching_runs[-1]
+manifest_path = selected_run / "run_manifest.json"
+if not manifest_path.exists():
+    raise FileNotFoundError(
+        "La corrida no contiene run_manifest.json. "
+        "Debe generarse nuevamente con 03_modeling.py."
+    )
+
+run_manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+
+if str(run_manifest.get("target_levels")) != RUN_TARGET:
+    raise ValueError(
+        "El target registrado en run_manifest.json no coincide con "
+        f"--target {RUN_TARGET}."
+    )
+
+if run_manifest.get("analysis_mode") != expected_mode:
+    raise ValueError(
+        "El modo registrado en run_manifest.json no coincide con "
+        f"{expected_mode}."
+    )
 
 last_run = selected_run.name
 
@@ -279,6 +294,7 @@ CONCEPTUAL_OVERLAP_COLS = [
         "existen bots, deepfakes o manipulación mediante IA?"
     ),
 ]
+
 # =========================
 # Feature building
 # =========================
@@ -360,8 +376,29 @@ def build_x_y(df, target_col):
     ]
 
     keep_cols = [c for c in base_keep if c in X.columns] + likert_num_cols
-    X = X[keep_cols].copy()
 
+    # Comprobar que no se conserven simultáneamente
+    duplicate_pairs = [
+        col
+        for col in keep_cols
+        if isinstance(col, str)
+        and col.endswith("_num")
+        and col[:-4] in keep_cols
+    ]
+
+    if duplicate_pairs:
+        raise RuntimeError(
+            "El modelo ordinal conserva representaciones duplicadas:\n- "
+            + "\n- ".join(
+                f"{col[:-4]} / {col}"
+                for col in duplicate_pairs
+            )
+        )
+
+    X = X[keep_cols].copy()
+    
+
+    
     # One-hot encoding
     x_enc = pd.get_dummies(X, drop_first=True)
 
